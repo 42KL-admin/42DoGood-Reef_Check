@@ -14,7 +14,7 @@ const RoundedButton = styled(Button)<RoundedButtonProps>(
     borderRadius: "20px",
     fontSize: "16px",
     fontWeight: 400,
-    px: 6,
+    padding: "8px 24px",
     textTransform: "capitalize",
     ...(itemType === "secondary"
       ? { color: "black", borderColor: "black" }
@@ -23,6 +23,5 @@ const RoundedButton = styled(Button)<RoundedButtonProps>(
   })
 );
 
-export { RoundedButton }; 
+export { RoundedButton };
 export type { RoundedButtonProps };
-
