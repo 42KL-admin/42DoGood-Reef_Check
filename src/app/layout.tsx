@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/theme";
+import { GlobalStyles } from "@mui/material";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,6 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <GlobalStyles
+        styles={{
+          html: { height: "100%" },
+          body: { margin: 0, height: "100%" },
+        }}
+      />
       <body>
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>{children}</ThemeProvider>
