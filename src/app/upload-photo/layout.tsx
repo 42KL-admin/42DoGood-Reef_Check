@@ -9,8 +9,8 @@ export default function UploadPhotoLayout({
 }) {
   return (
     <Box>
-      {hero}
-      {children}
+      <Box sx={{ backgroundColor: "primary.light" }}>{hero}</Box>
+      <Box>{children}</Box>
     </Box>
   );
 }
