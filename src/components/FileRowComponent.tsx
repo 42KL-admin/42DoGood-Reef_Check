@@ -1,9 +1,18 @@
 import Box from "@mui/material/Box";
-import InputFileUpload from "./FileActionButton";
+import InputFileUpload from "./InputFileUpload";
 import IconButton from "@mui/material/IconButton";
 import Delete from "@mui/icons-material/Delete";
+import { Row } from "@/hooks/upload/types";
 
-export default function FileRowComponent() {
+interface FileRowComponentProps {
+  row: Row;
+  onRemove: () => void;
+}
+
+export default function FileRowComponent({
+  row,
+  onRemove,
+}: FileRowComponentProps) {
   return (
     <Box
       display="flex"
@@ -17,10 +26,10 @@ export default function FileRowComponent() {
         columnGap={2.5}
         justifyContent="space-between"
       >
-        <InputFileUpload />
-        <InputFileUpload />
+        <InputFileUpload {...row.substrate} />
+        <InputFileUpload {...row.fishInverts} />
       </Box>
-      <IconButton aria-label="delete">
+      <IconButton aria-label="delete" onClick={onRemove}>
         <Delete />
       </IconButton>
     </Box>

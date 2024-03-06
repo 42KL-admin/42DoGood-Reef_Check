@@ -4,6 +4,7 @@ import { styled } from "@mui/material/styles";
 import Button, { ButtonProps } from "@mui/material/Button";
 import { Box, Typography } from "@mui/material";
 import Add from "@mui/icons-material/Add";
+import { FileUploadState } from "@/hooks/upload/types";
 
 const FileActionButton = styled(Button)<ButtonProps>(({ theme }) => ({
   boxShadow: "none",
@@ -28,9 +29,9 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export default function InputFileUpload() {
+export default function InputFileUpload(fileState: FileUploadState) {
   return (
-    <Box display="grid" rowGap={1.5} sx={{ width: "100%"}}>
+    <Box display="grid" rowGap={1.5} sx={{ width: "100%" }}>
       <Box
         display="flex"
         alignItems="center"
@@ -48,11 +49,15 @@ export default function InputFileUpload() {
           startIcon={<Add />}
           color="secondary"
         >
-          Fish & Inverts Slate
-          <VisuallyHiddenInput type="file" />
+          {fileState.type === "substrate"
+            ? "substrate slate"
+            : fileState.type === "fishInverts"
+            ? "fish & inverts slate"
+            : "slate"}
+          <VisuallyHiddenInput type="file" accept="image/*" />
         </FileActionButton>
         <Typography noWrap fontSize="14px">
-          subslate1.jpg
+          Add files here...
         </Typography>
       </Box>
       <Typography fontSize="14px"></Typography>

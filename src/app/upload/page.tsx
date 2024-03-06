@@ -1,9 +1,12 @@
+"use client";
+
 import FileRowComponent from "@/components/FileRowComponent";
 import Delete from "@mui/icons-material/Delete";
 import Add from "@mui/icons-material/Add";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
+import useRowControls from "@/hooks/upload/useRowControls";
 
 type FileState = "upload" | "delete";
 
@@ -19,16 +22,27 @@ const statusIcon = (status: FileState) => {
 };
 
 export default function UploadPhotoSection() {
-  let status: FileState = "upload";
+  const { rows, addRow, removeRow } = useRowControls();
+
+  const handleRowRemoval = (index: number) => {
+    console.log(index);
+    removeRow(index);
+  };
 
   return (
     <Box pt={12}>
       <Container maxWidth="xl" disableGutters sx={{ display: "grid" }}>
         <Box display="grid" rowGap={2.5} maxHeight={400} overflow="scroll">
-          <FileRowComponent />
-          <FileRowComponent />
+          {rows.map((row, index) => (
+            <FileRowComponent
+              key={index}
+              row={row}
+              onRemove={() => handleRowRemoval(index)}
+            />
+          ))}
         </Box>
         <Button
+          type="button"
           startIcon={<Add />}
           variant="text"
           size="large"
@@ -41,6 +55,7 @@ export default function UploadPhotoSection() {
             mt: 9,
             width: "fit-content",
           }}
+          onClick={addRow}
         >
           Add more files
         </Button>
