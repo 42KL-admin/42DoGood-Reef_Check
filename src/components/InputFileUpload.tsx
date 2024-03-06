@@ -2,9 +2,11 @@
 
 import { styled } from "@mui/material/styles";
 import Button, { ButtonProps } from "@mui/material/Button";
-import { Box, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import Add from "@mui/icons-material/Add";
-import { FileUploadState } from "@/hooks/upload/types";
+import { FileUploadState, SlateType } from "@/hooks/upload/types";
+import Delete from "@mui/icons-material/Delete";
 
 const FileActionButton = styled(Button)<ButtonProps>(({ theme }) => ({
   boxShadow: "none",
@@ -29,7 +31,27 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-export default function InputFileUpload(fileState: FileUploadState) {
+interface InputFileUploadProps {
+  index: number;
+  slate: FileUploadState;
+  setSlateFile: (
+    index: number,
+    type: SlateType
+  ) => (event: React.ChangeEvent<HTMLInputElement>) => void;
+  unsetSlateFile: (index: number, type: SlateType) => void;
+}
+
+const getButtonText = (type: SlateType) => {
+  return type === "substrate"
+    ? "substrate slate"
+    : type === "fishInverts"
+    ? "fish & inverts slate"
+    : "slate";
+};
+
+export default function InputFileUpload(props: InputFileUploadProps) {
+  const { index, slate, setSlateFile, unsetSlateFile } = props;
+
   return (
     <Box display="grid" rowGap={1.5} sx={{ width: "100%" }}>
       <Box
@@ -46,18 +68,21 @@ export default function InputFileUpload(fileState: FileUploadState) {
           role={undefined}
           variant="contained"
           tabIndex={-1}
-          startIcon={<Add />}
-          color="secondary"
+          startIcon={slate.file ? <Delete /> : <Add />}
+          color={slate.file ? "warning" : "secondary"}
+          onClick={() => {
+            slate.file !== null && unsetSlateFile(index, slate.type);
+          }}
         >
-          {fileState.type === "substrate"
-            ? "substrate slate"
-            : fileState.type === "fishInverts"
-            ? "fish & inverts slate"
-            : "slate"}
-          <VisuallyHiddenInput type="file" accept="image/*" />
+          {slate.file !== null ? "remove" : getButtonText(slate.type)}
+          <VisuallyHiddenInput
+            type="hidden"
+            accept="image/*"
+            onChange={setSlateFile(index, slate.type)}
+          />
         </FileActionButton>
         <Typography noWrap fontSize="14px">
-          Add files here...
+          {slate.file !== null ? slate.file.name : "Add files here..."}
         </Typography>
       </Box>
       <Typography fontSize="14px"></Typography>
