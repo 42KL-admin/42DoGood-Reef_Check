@@ -86,4 +86,4 @@ export default function DropdownMenu() {
   );
 }
 
-export { DropdownButton };
+export { DropdownButton, StyledMenu };

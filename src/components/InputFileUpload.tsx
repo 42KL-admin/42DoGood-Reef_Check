@@ -76,7 +76,7 @@ export default function InputFileUpload(props: InputFileUploadProps) {
         >
           {slate.file !== null ? "remove" : getButtonText(slate.type)}
           <VisuallyHiddenInput
-            type="hidden"
+            type="file"
             accept="image/*"
             onChange={setSlateFile(index, slate.type)}
           />
