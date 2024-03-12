@@ -5,7 +5,7 @@ const createSlate = (type: SlateType): SlateState => {
   return {
     type,
     file: null,
-    error: null,
+    status: "unknown",
   };
 };
 
@@ -76,6 +76,7 @@ const useRowControls = () => {
     setSlateFile,
     unsetSlateFile,
   };
-};``
+};
+``;
 
 export default useRowControls;
