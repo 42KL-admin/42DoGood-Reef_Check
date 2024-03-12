@@ -17,13 +17,10 @@ export default function Home() {
           method: "POST",
           body: JSON.stringify({email}),
         });
-        let payload = await response.json();
+        const payload = await response.json();
+        alert(payload.message);
         if (response.status == 200) {
-          alert(`Proceeding with email: ${email}`);
           router.push("/upload");
-        }
-        if (response.status === 400) {
-          alert(payload.error);
         }
       } catch (error) {
         console.error("Error:", error);

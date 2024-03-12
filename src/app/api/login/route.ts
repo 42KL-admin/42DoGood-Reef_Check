@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
             .collection("users")
             .countDocuments({ email: data.email });
         if (!emailExist)
-            return NextResponse.json({ error: "Invalid email" }, { status: 400 });
-        return NextResponse.json({ message: "success" }, { status: 200 });
+            return NextResponse.json({ message: "Invalid email" }, { status: 400 });
+        return NextResponse.json({ message: "Proceeding with email: " + data.email }, { status: 200 });
     } catch (e) {
         console.error(e);
     }
