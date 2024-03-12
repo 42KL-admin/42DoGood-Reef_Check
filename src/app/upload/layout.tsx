@@ -1,3 +1,4 @@
+import { SlateProvider } from "@/contexts";
 import Box from "@mui/material/Box";
 
 export default function UploadPhotoLayout({
@@ -8,9 +9,11 @@ export default function UploadPhotoLayout({
   hero: React.ReactNode;
 }) {
   return (
-    <Box>
-      <Box sx={{ backgroundColor: "primary.light" }}>{hero}</Box>
-      <Box>{children}</Box>
-    </Box>
+    <SlateProvider>
+      <Box>
+        <Box sx={{ backgroundColor: "primary.light" }}>{hero}</Box>
+        <Box>{children}</Box>
+      </Box>
+    </SlateProvider>
   );
 }
