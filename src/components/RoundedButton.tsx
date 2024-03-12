@@ -4,12 +4,12 @@ import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 
 interface RoundedButtonProps extends ButtonProps {
-  itemType: string;
+  itemType?: string;
   variant: "text" | "outlined" | "contained";
 }
 
 const RoundedButton = styled(Button)<RoundedButtonProps>(
-  ({ theme, itemType, variant }) => ({
+  ({ theme, itemType = "", variant }) => ({
     boxShadow: "none",
     borderRadius: "20px",
     fontSize: "16px",

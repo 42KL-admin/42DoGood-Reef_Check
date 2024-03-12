@@ -5,8 +5,10 @@ import Button, { ButtonProps } from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Add from "@mui/icons-material/Add";
-import { FileUploadState, SlateType } from "@/hooks/upload/types";
+import { SlateState, SlateType } from "@/hooks/upload/types";
 import Delete from "@mui/icons-material/Delete";
+import { useContext } from "react";
+import { SlateContext } from "@/contexts";
 
 const FileActionButton = styled(Button)<ButtonProps>(({ theme }) => ({
   boxShadow: "none",
@@ -33,12 +35,7 @@ const VisuallyHiddenInput = styled("input")({
 
 interface InputFileUploadProps {
   index: number;
-  slate: FileUploadState;
-  setSlateFile: (
-    index: number,
-    type: SlateType
-  ) => (event: React.ChangeEvent<HTMLInputElement>) => void;
-  unsetSlateFile: (index: number, type: SlateType) => void;
+  slate: SlateState;
 }
 
 const getButtonText = (type: SlateType) => {
@@ -50,7 +47,8 @@ const getButtonText = (type: SlateType) => {
 };
 
 export default function InputFileUpload(props: InputFileUploadProps) {
-  const { index, slate, setSlateFile, unsetSlateFile } = props;
+  const { index, slate } = props;
+  const { setSlateFile, unsetSlateFile } = useContext(SlateContext);
 
   return (
     <Box display="grid" rowGap={1.5} sx={{ width: "100%" }}>

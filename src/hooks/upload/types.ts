@@ -1,14 +1,18 @@
 export type SlateType = "substrate" | "fishInverts";
 
-export interface FileUploadState {
+export type SlateRecognitionStatus =
+  | "recognized"
+  | "failed"
+  | "unknown"
+  | "processing";
+
+export interface SlateState {
   type: SlateType;
   file: File | null;
-  error: string | null;
-  setFile: (file: File) => void;
-  clearFile: () => void;
+  status: SlateRecognitionStatus;
 }
 
 export interface Row {
-  substrate: FileUploadState;
-  fishInverts: FileUploadState;
+  substrate: SlateState;
+  fishInverts: SlateState;
 }

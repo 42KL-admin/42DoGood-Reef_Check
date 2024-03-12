@@ -1,36 +1,17 @@
+"use client";
+
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import CheckmarkChip from "@/components/CheckmarkChip";
-import { RoundedButton, RoundedButtonProps } from "@/components/RoundedButton";
+import { RoundedButton } from "@/components/RoundedButton";
 import DropdownMenu from "@/components/DropdownMenu";
 import Container from "@mui/material/Container";
+import { useRouter } from "next/navigation";
 
 const ChipLabels = ["Not blurry", "Bright enough", "Pencil writing is clear"];
 
-interface ButtonData {
-  label: string;
-  props: RoundedButtonProps;
-}
-
-// please extend this when implementing the logic
-const Buttons: ButtonData[] = [
-  {
-    label: "convert files now",
-    props: {
-      itemType: "",
-      variant: "contained",
-    },
-  },
-  {
-    label: "view results",
-    props: {
-      itemType: "secondary",
-      variant: "outlined",
-    },
-  },
-];
-
 export default function UploadPhotoHeroSection() {
+  const router = useRouter();
   return (
     <Container maxWidth="xl">
       <Box
@@ -60,11 +41,17 @@ export default function UploadPhotoHeroSection() {
           </Box>
         </Box>
         <Box display="flex" columnGap={2.5}>
-          {Buttons.map((btn) => (
-            <RoundedButton {...btn.props} size="large" key={btn.label}>
-              {btn.label}
-            </RoundedButton>
-          ))}
+          <RoundedButton variant="contained" size="large">
+            convert files now
+          </RoundedButton>
+          <RoundedButton
+            itemType="secondary"
+            variant="outlined"
+            size="large"
+            onClick={() => router.push("/results")}
+          >
+            view results
+          </RoundedButton>
         </Box>
       </Box>
     </Container>
