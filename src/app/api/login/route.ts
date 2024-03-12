@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
             .countDocuments({ email: data.email });
         if (!emailExist)
             return NextResponse.json({ error: "Invalid email" }, { status: 400 });
-        return NextResponse.redirect(new URL('/upload', request.url));
+        return NextResponse.json({ message: "success" }, { status: 200 });
     } catch (e) {
         console.error(e);
     }
