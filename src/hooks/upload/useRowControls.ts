@@ -54,21 +54,13 @@ const useRowControls = () => {
   };
 
   // handle upload file
-const setSlateFile =
+  const setSlateFile =
     (index: number, type: SlateType) =>
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFile = event.target.files && event.target.files[0];
 
       if (!selectedFile) return;
 
-      try {
-        const res = fetch("/api/upload", {
-          method: "POST",
-          body: selectedFile,
-        })
-      } catch (e: any) {
-        console.error(e);
-      }
       updateSlateFile(index, type, selectedFile);
     };
 
