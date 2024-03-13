@@ -61,24 +61,32 @@ export default function InputFileUpload(props: InputFileUploadProps) {
         borderRadius={3}
         sx={{ backgroundColor: "white" }}
       >
-        <FileActionButton
-          component="label"
-          role={undefined}
-          variant="contained"
-          tabIndex={-1}
-          startIcon={slate.file ? <Delete /> : <Add />}
-          color={slate.file ? "warning" : "secondary"}
-          onClick={() => {
-            slate.file !== null && unsetSlateFile(index, slate.type);
-          }}
-        >
-          {slate.file !== null ? "remove" : getButtonText(slate.type)}
-          <VisuallyHiddenInput
-            type="file"
-            accept="image/*"
-            onChange={setSlateFile(index, slate.type)}
-          />
-        </FileActionButton>
+        {slate.file !== null ? (
+          <FileActionButton
+            variant="contained"
+            color="warning"
+            startIcon={<Delete />}
+            onClick={() => unsetSlateFile(index, slate.type)}
+          >
+            remove
+          </FileActionButton>
+        ) : (
+          <FileActionButton
+            component="label"
+            role={undefined}
+            variant="contained"
+            tabIndex={-1}
+            startIcon={<Add />}
+            color="secondary"
+          >
+            {getButtonText(slate.type)}
+            <VisuallyHiddenInput
+              type="file"
+              accept="image/*"
+              onChange={setSlateFile(index, slate.type)}
+            />
+          </FileActionButton>
+        )}
         <Typography noWrap fontSize="14px">
           {slate.file !== null ? slate.file.name : "Add files here..."}
         </Typography>
