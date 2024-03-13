@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Row, SlateState, SlateType } from "./types";
+import { v4 as uuidv4 } from "uuid";
 
 const createSlate = (type: SlateType): SlateState => {
   return {
+    id: "",
     type,
     file: null,
     status: "unknown",
@@ -44,6 +46,7 @@ const useRowControls = () => {
         // deep copy the target Slate to ensure immutability
         const targetSlate = { ...targetRow[targetSlateKey] };
         targetSlate.file = file;
+        targetSlate.id = file === null ? "" : uuidv4();
 
         // update the targetRow with the modified slate
         const updatedRow = { ...targetRow, [targetSlateKey]: targetSlate };

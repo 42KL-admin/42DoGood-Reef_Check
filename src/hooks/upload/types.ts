@@ -7,6 +7,7 @@ export type SlateRecognitionStatus =
   | "processing";
 
 export interface SlateState {
+  id: string;
   type: SlateType;
   file: File | null;
   status: SlateRecognitionStatus;

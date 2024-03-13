@@ -7,11 +7,24 @@ import { RoundedButton } from "@/components/RoundedButton";
 import DropdownMenu from "@/components/DropdownMenu";
 import Container from "@mui/material/Container";
 import { useRouter } from "next/navigation";
+import { useContext } from "react";
+import { SlateContext } from "@/contexts";
 
 const ChipLabels = ["Not blurry", "Bright enough", "Pencil writing is clear"];
 
+/**
+ * 1. Remove those row with no values (substrate & fistInverts === null)
+ * 2. Rows with values (either one), convert them. Set status to processing.
+ * 3. Those that can be converted successfully, set status to success else failed.
+ * 
+ * convert again:
+ * 1. those that are success, move to "view results", make it hidden from list? (both success)
+ * 2. those that has one slate success, stay in the list
+ */
+
 export default function UploadPhotoHeroSection() {
   const router = useRouter();
+  const { rows } = useContext(SlateContext);
   return (
     <Container maxWidth="xl">
       <Box
@@ -41,7 +54,11 @@ export default function UploadPhotoHeroSection() {
           </Box>
         </Box>
         <Box display="flex" columnGap={2.5}>
-          <RoundedButton variant="contained" size="large">
+          <RoundedButton
+            variant="contained"
+            size="large"
+            onClick={() => console.log(rows)}
+          >
             convert files now
           </RoundedButton>
           <RoundedButton
