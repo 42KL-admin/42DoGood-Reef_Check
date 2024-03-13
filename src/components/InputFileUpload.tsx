@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import Add from "@mui/icons-material/Add";
 import { SlateState, SlateType } from "@/hooks/upload/types";
 import Delete from "@mui/icons-material/Delete";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { SlateContext } from "@/contexts";
 
 const FileActionButton = styled(Button)<ButtonProps>(({ theme }) => ({

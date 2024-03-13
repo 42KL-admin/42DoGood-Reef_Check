@@ -7,17 +7,9 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import { useContext } from "react";
 import { SlateContext } from "@/contexts";
-// import React, { useState } from 'react'
 
 export default function UploadPhotoSection() {
-  const { rows, addRow, removeRow, setSlateFile, unsetSlateFile } =
-    useRowControls();
-  // const [file, setFile] = useState<File>()
-
-  const handleRowRemoval = (index: number) => {
-    console.log(index);
-    removeRow(index);
-  };
+  const { rows, addRow } = useContext(SlateContext);
 
   // const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   //   e.preventDefault()
