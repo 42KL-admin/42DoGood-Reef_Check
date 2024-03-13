@@ -6,7 +6,7 @@ import IconButton from "@mui/material/IconButton";
 import { StyledMenu } from "./DropdownMenu";
 import { MenuItem } from "@mui/material";
 
-export default function MoreActionButton() {
+export default function MoreActionButton({ id }: { id: string }) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -19,20 +19,19 @@ export default function MoreActionButton() {
   return (
     <div>
       <IconButton
-        id="moreaction-icon-1"
-        aria-controls={open ? "moreaction-menu-1" : undefined}
+        id={`moreaction-icon-${id}`}
+        aria-controls={open ? `moreaction-menu-${id}` : undefined}
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
-        sx={{ mr: 4 }}
+        sx={{ mr: 2 }}
         onClick={handleClick}
       >
         <MoreVert sx={{ color: "black" }} />
       </IconButton>
-      {/** Warning: id need to dynamically create */}
       <StyledMenu
-        id="moreaction-menu-1"
+        id={`moreaction-menu-${id}`}
         MenuListProps={{
-          "aria-labelledby": "moreaction-icon-1",
+          "aria-labelledby": `moreaction-icon-${id}`,
         }}
         anchorEl={anchorEl}
         open={open}
