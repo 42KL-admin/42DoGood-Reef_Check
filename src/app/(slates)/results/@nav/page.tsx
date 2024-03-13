@@ -26,9 +26,6 @@ export default function ResultListNavBar() {
             My reef slates
           </Typography>
         </Box>
-        {/* <RoundedButton itemType="" variant="contained">
-          Export
-        </RoundedButton> */}
       </Box>
     </Container>
   );
