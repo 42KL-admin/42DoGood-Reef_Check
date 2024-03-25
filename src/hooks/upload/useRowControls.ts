@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Row, SlateState, SlateType } from "./types";
 import { v4 as uuidv4 } from "uuid";
+import { fileToBase64 } from "@/utils";
 
 const createSlate = (type: SlateType): SlateState => {
   return {
     id: "",
     type,
     file: null,
+    base64: "",
     status: "unknown",
   };
 };
@@ -47,6 +49,16 @@ const useRowControls = () => {
         const targetSlate = { ...targetRow[targetSlateKey] };
         targetSlate.file = file;
         targetSlate.id = file === null ? "" : uuidv4();
+
+        if (file) {
+          fileToBase64(file)
+            .then((base64String) => {
+              targetSlate.base64 = base64String;
+            })
+            .catch((error) => {
+              targetSlate.base64 = "";
+            });
+        }
 
         // update the targetRow with the modified slate
         const updatedRow = { ...targetRow, [targetSlateKey]: targetSlate };

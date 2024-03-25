@@ -10,6 +10,7 @@ export interface SlateState {
   id: string;
   type: SlateType;
   file: File | null;
+  base64: string;
   status: SlateRecognitionStatus;
 }
 
