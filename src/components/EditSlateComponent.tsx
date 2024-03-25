@@ -3,6 +3,7 @@
 import { SelectedSlateContext } from "@/contexts";
 import { Add, Remove, ZoomIn } from "@mui/icons-material";
 import { Box, IconButton } from "@mui/material";
+import Image from "next/image";
 import { useContext, useEffect } from "react";
 import {
   TransformComponent,
@@ -68,7 +69,6 @@ function EditImagePreview() {
           <img
             src={`data:image/png;base64,${slate?.base64}`}
             alt=""
-            width="100%"
             style={{ objectFit: "cover" }}
           />
         </TransformComponent>

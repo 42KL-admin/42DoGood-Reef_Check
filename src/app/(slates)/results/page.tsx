@@ -27,7 +27,7 @@ function ResultListEmptyState() {
     >
       <Box display="grid" gap={2} justifyItems="center">
         <Typography fontSize={28}>
-          You don't have any slates at the moment
+          You don&apos;t have any slates at the moment
         </Typography>
         <Typography fontSize={24}>
           Convert your photo into excel sheets to find them here
@@ -54,10 +54,6 @@ export default function ResultList() {
       rows.filter((row) => row.fishInverts.id !== "" || row.substrate.id !== "")
     );
   }, [rows]);
-
-  useEffect(() => {
-    console.log(slate, rows);
-  }, [slate]);
 
   return (
     <Fragment>

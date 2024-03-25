@@ -10,6 +10,7 @@ const defaultSlateStateValue: SlateState = {
   id: "",
   type: "substrate",
   file: null,
+  base64: "",
   status: "unknown",
 };
 
