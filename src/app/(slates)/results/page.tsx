@@ -7,7 +7,15 @@ import ResultComponent from "@/components/ResultComponent";
 import ResultListNavBar from "@/components/ResultListNavBar";
 import { SelectedSlateContext, SlateContext } from "@/contexts";
 import { Fragment, useContext } from "react";
-import { Typography } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { RoundedButton } from "@/components/RoundedButton";
 import { Row } from "@/hooks/upload/types";
 import { useRouter } from "next/navigation";
@@ -46,6 +54,7 @@ function ResultListEmptyState() {
 
 export default function ResultList() {
   const [filteredRows, setFilteredRows] = useState<Row[]>([]);
+  const [open, setOpen] = useState<boolean>(false);
   const { rows } = useContext(SlateContext);
   const { slate, setSlate } = useContext(SelectedSlateContext);
 
@@ -54,6 +63,14 @@ export default function ResultList() {
       rows.filter((row) => row.fishInverts.id !== "" || row.substrate.id !== "")
     );
   }, [rows]);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   return (
     <Fragment>
@@ -73,7 +90,9 @@ export default function ResultList() {
             !slate ? (
               <></>
             ) : (
-              <RoundedButton variant="contained">Export</RoundedButton>
+              <RoundedButton variant="contained" onClick={handleClickOpen}>
+                Export
+              </RoundedButton>
             )
           }
         />
@@ -98,6 +117,34 @@ export default function ResultList() {
       ) : (
         <EditSlateComponent />
       )}
+
+      {/** Compulsory rename before export */}
+      <Dialog open={open} onClose={handleClose} fullWidth>
+        <DialogTitle>Rename before export</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            required
+            margin="dense"
+            id="filename"
+            name="text"
+            label="eg. Tomok 8 July substrate 8.8m 2024"
+            type="text"
+            fullWidth
+            variant="outlined"
+            sx={{ borderRadius: 1 }}
+            helperText="Site name, date, slate type, depth, year"
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 6 }}>
+          <RoundedButton variant="outlined" onClick={handleClose}>
+            Cancel
+          </RoundedButton>
+          <RoundedButton variant="contained" onClick={() => {}}>
+            Confirm
+          </RoundedButton>
+        </DialogActions>
+      </Dialog>
     </Fragment>
   );
 }

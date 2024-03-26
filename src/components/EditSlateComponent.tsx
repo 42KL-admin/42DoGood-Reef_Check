@@ -70,6 +70,7 @@ function EditImagePreview() {
             src={`data:image/png;base64,${slate?.base64}`}
             alt=""
             style={{ objectFit: "cover" }}
+            width={"100%"}
           />
         </TransformComponent>
         <EditControls />
