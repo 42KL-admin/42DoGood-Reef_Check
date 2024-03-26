@@ -11,23 +11,6 @@ import { SlateContext } from "@/contexts";
 export default function UploadPhotoSection() {
   const { rows, addRow } = useContext(SlateContext);
 
-  // const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault()
-  //   if (!file) return
-
-  //   try {
-  //     const data = new FormData()
-  //     data.set('file', file)
-
-  //     const res = await fetch('../api/upload', {
-  //       method: 'POST',
-  //       body: data
-  //     })
-  //   } catch (e: any) {
-  //     console.error(e)
-  //   }
-  // };
-
   return (
     <Box pt={12}>
       <Container maxWidth="xl" disableGutters sx={{ display: "grid" }}>

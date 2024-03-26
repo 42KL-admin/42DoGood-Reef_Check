@@ -20,7 +20,10 @@ export default function Home() {
         const payload = await response.json();
         alert(payload.message);
         if (response.status == 200) {
-          router.push("/upload");
+          if (payload.user.role === "admin")
+            router.push("/admin");
+          else
+            router.push("/upload");
         }
       } catch (error) {
         console.error("Error:", error);
