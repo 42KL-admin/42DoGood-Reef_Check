@@ -8,7 +8,8 @@ import Container from "@mui/material/Container";
 import { useContext } from "react";
 import { SlateContext } from "@/contexts";
 import { TransitionGroup } from "react-transition-group";
-import { Collapse } from "@mui/material";
+import { Collapse, Drawer } from "@mui/material";
+import { RoundedButton } from "@/components/RoundedButton";
 
 export default function UploadPhotoSection() {
   const { rows, addRow } = useContext(SlateContext);
@@ -16,7 +17,13 @@ export default function UploadPhotoSection() {
   return (
     <Box pt={12}>
       <Container maxWidth="xl" disableGutters sx={{ display: "grid" }}>
-        <Box display="grid" rowGap={2.5} maxHeight={400} overflow="scroll">
+        <Box
+          display="grid"
+          rowGap={2.5}
+          maxHeight={{ md: 400 }}
+          overflow="scroll"
+          sx={{ mb: { xs: 50, md: 0 } }}
+        >
           <TransitionGroup>
             {rows.map((row, index) => (
               <Collapse key={index}>
@@ -38,11 +45,42 @@ export default function UploadPhotoSection() {
             margin: "0 auto",
             mt: 9,
             width: "fit-content",
+            display: { xs: "none", md: "flex" },
           }}
           onClick={addRow}
         >
           Add more files
         </Button>
+        {/** Drawer here (mobile) */}
+        <Drawer
+          variant="permanent"
+          anchor="bottom"
+          sx={{
+            display: { xs: "block", md: "none", flexShrink: 0 },
+          }}
+        >
+          <Box
+            display={"flex"}
+            flexDirection={"column"}
+            alignItems={"center"}
+            rowGap={2}
+            pt={2}
+            pb={8}
+          >
+            <RoundedButton
+              variant="outlined"
+              itemType="secondary"
+              startIcon={<Add />}
+              sx={{ width: "256px" }}
+              onClick={addRow}
+            >
+              Add more set
+            </RoundedButton>
+            <RoundedButton variant="contained" sx={{ width: "256px" }}>
+              Process
+            </RoundedButton>
+          </Box>
+        </Drawer>
       </Container>
     </Box>
   );

@@ -61,6 +61,7 @@ export default function InputFileUpload(props: InputFileUploadProps) {
         borderRadius={3}
         sx={{ backgroundColor: "white" }}
       >
+        {/** Desktop view */}
         {slate.file !== null ? (
           <FileActionButton
             variant="contained"
@@ -87,7 +88,11 @@ export default function InputFileUpload(props: InputFileUploadProps) {
             />
           </FileActionButton>
         )}
-        <Typography noWrap fontSize="14px">
+        <Typography
+          noWrap
+          fontSize="14px"
+          width={{ xs: "90px", sm: "100px", md: "150px", lg: "full" }}
+        >
           {slate.file !== null ? slate.file.name : "Add files here..."}
         </Typography>
       </Box>
