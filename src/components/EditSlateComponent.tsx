@@ -66,11 +66,19 @@ function EditImagePreview() {
     >
       <TransformWrapper>
         <TransformComponent>
-          <img
+          {/* <img
             src={`data:image/png;base64,${slate?.base64}`}
             alt=""
             style={{ objectFit: "cover" }}
             width={"100%"}
+          /> */}
+          <Image
+            src={`data:image/png;base64,${slate?.base64}`}
+            alt={"image preview"}
+            width={0}
+            height={0}
+            sizes="100vw"
+            style={{ width: "100%", height: "auto", objectFit: "cover" }}
           />
         </TransformComponent>
         <EditControls />
