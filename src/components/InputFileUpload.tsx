@@ -15,10 +15,18 @@ const FileActionButton = styled(Button)<ButtonProps>(({ theme }) => ({
   borderRadius: "8px",
   fontWeight: 400,
   color: "black",
-  padding: "4px 24px",
   textTransform: "capitalize",
-  width: 200,
   textAlign: "left",
+  [theme.breakpoints.up("xs")]: {
+    width: 160,
+    fontSize: "12px",
+    padding: "8px 10px",
+  },
+  [theme.breakpoints.up("sm")]: {
+    width: 200,
+    fontSize: "0.875rem",
+    padding: "4px 24px",
+  },
 }));
 
 const VisuallyHiddenInput = styled("input")({
@@ -89,9 +97,16 @@ export default function InputFileUpload(props: InputFileUploadProps) {
           </FileActionButton>
         )}
         <Typography
-          noWrap
           fontSize="14px"
-          width={{ xs: "90px", sm: "100px", md: "150px", lg: "full" }}
+          sx={{
+            flex: 1,
+            width: {
+              xs: "80px",
+            },
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
         >
           {slate.file !== null ? slate.file.name : "Add files here..."}
         </Typography>
