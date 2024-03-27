@@ -34,7 +34,7 @@ const StyledMenu = styled((props: MenuProps) => (
   />
 ))(({ theme }) => ({
   "& .MuiMenu-list": {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "white",
     borderRadius: "4px",
     width: "200px",
   },
