@@ -44,13 +44,14 @@ export default function Home() {
         </Box>
         <Box component="form" onSubmit={handleSubmit} marginTop={2} width="70%">
           <TextField
-            label="Enter your email"
+            label="Enter 2FA Code"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             fullWidth
             sx={{
               marginTop: "16px",
+              marginBottom: "16px",
               "& fieldset": {
                 borderColor: "primary.main",
                 borderWidth: "1px",
@@ -62,22 +63,6 @@ export default function Home() {
               },
             }}
           />
-          <Typography
-            variant="subtitle1"
-            align="left"
-            fontSize="8px"
-            color="#006878"
-            sx={{
-              marginTop: "4px",
-              marginBottom: "16px",
-              marginLeft: "16px",
-              "@media (min-width: 300px)": {
-                fontSize: "12px",
-              },
-            }}
-          >
-            eg. example@gmail.com
-          </Typography>
           <Button
             type="submit"
             variant="contained"
