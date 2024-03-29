@@ -10,9 +10,9 @@ import { MenuItem } from "@mui/material";
 const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
   borderRadius: "12px",
   padding: "0 20px",
-  // borderColor: "default",
+  borderColor: "#C3C3C3",
   backgroundColor: 'white',
-  // color: "black",
+  color: "#494949",
   fontWeight: 500,
   textTransform: "initial",
   height: '56px',
