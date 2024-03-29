@@ -7,16 +7,22 @@ import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
 
-// TODO: Improve this component, not done yet.
-
 const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
   borderRadius: "12px",
-  padding: "10px 12px",
-  borderColor: "#6C797D",
-  backgroundColor: "#FFFFFF",
-  color: "black",
+  padding: "0 20px",
+  // borderColor: "default",
+  backgroundColor: 'white',
+  // color: "black",
   fontWeight: 500,
   textTransform: "initial",
+  height: '56px',
+  width: "120px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  "& .MuiButton-startIcon": {
+    marginRight: "8px",
+  },
 }));
 
 const StyledMenu = styled((props: MenuProps) => (
@@ -36,7 +42,7 @@ const StyledMenu = styled((props: MenuProps) => (
   "& .MuiMenu-list": {
     backgroundColor: "white",
     borderRadius: "4px",
-    width: "200px",
+    width: "120px",
   },
   "& .MuiMenuItem-root": {
     fontSize: "14px",
@@ -64,7 +70,7 @@ export default function Dropdownpermisson() {
   };
 
   return (
-    <div>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
       <DropdownButton
         id="dropdown-btn"
         aria-controls={open ? "dropdown-menu" : undefined}
@@ -72,11 +78,12 @@ export default function Dropdownpermisson() {
         aria-expanded={open ? "true" : undefined}
         variant="outlined"
         disableElevation
-        startIcon={<ArrowDropDown />}
+        endIcon={<ArrowDropDown />}
         size="small"
         onClick={handleClick}
       >
-            {selectedOption || 'Select an option'}      </DropdownButton>
+            {selectedOption || 'Select an option'}
+      </DropdownButton>
       <StyledMenu
         id="dropdown-menu"
         MenuListProps={{
@@ -92,5 +99,3 @@ export default function Dropdownpermisson() {
     </div>
   );
 }
-
-export { DropdownButton, StyledMenu };

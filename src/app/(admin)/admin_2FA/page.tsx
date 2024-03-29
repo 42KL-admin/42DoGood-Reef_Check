@@ -6,16 +6,16 @@ import Image from "next/image";
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (email) {
+    if (token) {    // #TODO Was copied from login page, convert fetch for 2fa token
       try {
         const response = await fetch("/api/login", {
           method: "POST",
-          body: JSON.stringify({email}),
+          body: JSON.stringify({token}),
         });
         const payload = await response.json();
         alert(payload.message);
@@ -45,9 +45,9 @@ export default function Home() {
         <Box component="form" onSubmit={handleSubmit} marginTop={2} width="70%">
           <TextField
             label="Enter 2FA Code"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="token"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
             fullWidth
             sx={{
               marginTop: "16px",
@@ -72,7 +72,7 @@ export default function Home() {
               borderRadius: "100px",
               "&:hover": { backgroundColor: "#107888" },
             }}
-            onClick={() => router.push("/upload")}
+            onClick={() => router.push("/admin_dashboard")}
           >
             Next
           </Button>
