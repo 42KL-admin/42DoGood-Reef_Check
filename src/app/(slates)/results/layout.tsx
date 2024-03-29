@@ -1,28 +1,19 @@
-import Box from "@mui/material/Box";
+"use client";
+
 import React from "react";
+import Box from "@mui/material/Box";
+import { SelectedSlateProvider } from "@/contexts";
 
 export default function ResultListLayout({
   children,
-  nav,
-  resultList,
 }: {
   children: React.ReactNode;
-  nav: React.ReactNode;
-  resultList: React.ReactNode;
 }) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <Box
-        sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: 1,
-          backgroundColor: "primary.light",
-        }}
-      >
-        {nav}
+    <SelectedSlateProvider>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+        {children}
       </Box>
-      <Box sx={{ overflow: "auto", flex: 1 }}>{resultList}</Box>
-    </Box>
+    </SelectedSlateProvider>
   );
 }

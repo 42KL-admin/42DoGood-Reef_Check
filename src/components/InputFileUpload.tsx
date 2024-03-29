@@ -15,10 +15,18 @@ const FileActionButton = styled(Button)<ButtonProps>(({ theme }) => ({
   borderRadius: "8px",
   fontWeight: 400,
   color: "black",
-  padding: "4px 24px",
   textTransform: "capitalize",
-  width: 200,
   textAlign: "left",
+  [theme.breakpoints.up("xs")]: {
+    width: 160,
+    fontSize: "12px",
+    padding: "8px 10px",
+  },
+  [theme.breakpoints.up("sm")]: {
+    width: 200,
+    fontSize: "0.875rem",
+    padding: "4px 24px",
+  },
 }));
 
 const VisuallyHiddenInput = styled("input")({
@@ -61,25 +69,45 @@ export default function InputFileUpload(props: InputFileUploadProps) {
         borderRadius={3}
         sx={{ backgroundColor: "white" }}
       >
-        <FileActionButton
-          component="label"
-          role={undefined}
-          variant="contained"
-          tabIndex={-1}
-          startIcon={slate.file ? <Delete /> : <Add />}
-          color={slate.file ? "warning" : "secondary"}
-          onClick={() => {
-            slate.file !== null && unsetSlateFile(index, slate.type);
+        {/** Desktop view */}
+        {slate.file !== null ? (
+          <FileActionButton
+            variant="contained"
+            color="warning"
+            startIcon={<Delete />}
+            onClick={() => unsetSlateFile(index, slate.type)}
+          >
+            remove
+          </FileActionButton>
+        ) : (
+          <FileActionButton
+            component="label"
+            role={undefined}
+            variant="contained"
+            tabIndex={-1}
+            startIcon={<Add />}
+            color="secondary"
+          >
+            {getButtonText(slate.type)}
+            <VisuallyHiddenInput
+              type="file"
+              accept="image/*"
+              onChange={setSlateFile(index, slate.type)}
+            />
+          </FileActionButton>
+        )}
+        <Typography
+          fontSize="14px"
+          sx={{
+            flex: 1,
+            width: {
+              xs: "80px",
+            },
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           }}
         >
-          {slate.file !== null ? "remove" : getButtonText(slate.type)}
-          <VisuallyHiddenInput
-            type="file"
-            accept="image/*"
-            onChange={setSlateFile(index, slate.type)}
-          />
-        </FileActionButton>
-        <Typography noWrap fontSize="14px">
           {slate.file !== null ? slate.file.name : "Add files here..."}
         </Typography>
       </Box>

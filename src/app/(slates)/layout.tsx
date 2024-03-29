@@ -5,9 +5,5 @@ export default function SlatesRouteGroupLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <SlateProvider>
-      {children}
-    </SlateProvider>
-  );
+  return <SlateProvider>{children}</SlateProvider>;
 }

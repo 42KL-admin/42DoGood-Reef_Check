@@ -1,6 +1,6 @@
 "use client";
 
-import { Row, SlateType } from "@/hooks/upload/types";
+import { SlateType } from "@/hooks/upload/types";
 import useRowControls from "@/hooks/upload/useRowControls";
 import React, { createContext } from "react";
 
