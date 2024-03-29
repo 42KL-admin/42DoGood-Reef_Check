@@ -1,13 +1,12 @@
 "use client";
 
 import useSlate from "@/hooks/results/useSlate";
-import { SlateState } from "@/hooks/upload/types";
+import { SlateState } from "@/stores/fileRowStore";
 import { createContext } from "react";
 
 interface SelectedSlateContextValue extends ReturnType<typeof useSlate> {}
 
 const defaultSlateStateValue: SlateState = {
-  id: "",
   type: "substrate",
   file: null,
   base64: "",

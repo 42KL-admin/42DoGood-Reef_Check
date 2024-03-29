@@ -5,10 +5,9 @@ import Button, { ButtonProps } from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Add from "@mui/icons-material/Add";
-import { SlateState, SlateType } from "@/hooks/upload/types";
 import Delete from "@mui/icons-material/Delete";
-import { useContext } from "react";
-import { SlateContext } from "@/contexts";
+import { ChangeEvent } from "react";
+import { SlateState, SlateType, useFileRowStore } from "@/stores/fileRowStore";
 
 const FileActionButton = styled(Button)<ButtonProps>(({ theme }) => ({
   boxShadow: "none",
@@ -42,7 +41,7 @@ const VisuallyHiddenInput = styled("input")({
 });
 
 interface InputFileUploadProps {
-  index: number;
+  rowId: string;
   slate: SlateState;
 }
 
@@ -55,8 +54,18 @@ const getButtonText = (type: SlateType) => {
 };
 
 export default function InputFileUpload(props: InputFileUploadProps) {
-  const { index, slate } = props;
-  const { setSlateFile, unsetSlateFile } = useContext(SlateContext);
+  const { rowId, slate } = props;
+  const setSlateFile = useFileRowStore((state) => state.setSlateFile);
+
+  const handleFileChange =
+    (rowId: string, type: SlateType) =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const selectedFile = event.target.files && event.target.files[0];
+
+      if (!selectedFile) return;
+
+      setSlateFile(rowId, type, selectedFile);
+    };
 
   return (
     <Box display="grid" rowGap={1.5} sx={{ width: "100%" }}>
@@ -75,7 +84,7 @@ export default function InputFileUpload(props: InputFileUploadProps) {
             variant="contained"
             color="warning"
             startIcon={<Delete />}
-            onClick={() => unsetSlateFile(index, slate.type)}
+            onClick={() => setSlateFile(rowId, slate.type, null)}
           >
             remove
           </FileActionButton>
@@ -92,7 +101,7 @@ export default function InputFileUpload(props: InputFileUploadProps) {
             <VisuallyHiddenInput
               type="file"
               accept="image/*"
-              onChange={setSlateFile(index, slate.type)}
+              onChange={handleFileChange(rowId, slate.type)}
             />
           </FileActionButton>
         )}

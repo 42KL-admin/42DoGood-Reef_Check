@@ -5,14 +5,14 @@ import Add from "@mui/icons-material/Add";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import { useContext } from "react";
-import { SlateContext } from "@/contexts";
 import { TransitionGroup } from "react-transition-group";
 import { Collapse, Drawer } from "@mui/material";
 import { RoundedButton } from "@/components/RoundedButton";
+import { useFileRowStore } from "@/stores/fileRowStore";
 
 export default function UploadPhotoSection() {
-  const { rows, addRow } = useContext(SlateContext);
+  const rows = useFileRowStore((state) => state.rows); // useMemo here
+  const addRow = useFileRowStore((state) => state.addRow);
 
   return (
     <Box pt={12}>
@@ -26,7 +26,7 @@ export default function UploadPhotoSection() {
         >
           <TransitionGroup>
             {rows.map((row, index) => (
-              <Collapse key={index}>
+              <Collapse key={row.id}>
                 <FileRowComponent index={index} row={row} />
               </Collapse>
             ))}

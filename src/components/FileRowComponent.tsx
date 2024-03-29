@@ -2,28 +2,29 @@ import Box from "@mui/material/Box";
 import InputFileUpload from "./InputFileUpload";
 import IconButton from "@mui/material/IconButton";
 import Delete from "@mui/icons-material/Delete";
-import { Row } from "@/hooks/upload/types";
-import { Fragment, useContext, useState } from "react";
-import { SlateContext } from "@/contexts";
+import { Fragment, useState } from "react";
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import { Divider, Typography, useMediaQuery } from "@mui/material";
 import theme from "@/theme";
+import { FileRow, useFileRowStore } from "@/stores/fileRowStore";
 
 interface FileRowComponentProps {
   index: number;
-  row: Row;
+  row: FileRow;
 }
 
 function FileRowCollapsibleControl({
   index,
   open,
+  rowId,
   setOpen,
 }: {
   index: number;
   open: boolean;
+  rowId: string;
   setOpen: (state: boolean) => void;
 }) {
-  const { removeRow } = useContext(SlateContext);
+  const removeRow = useFileRowStore((state) => state.removeRow);
   return (
     <Box
       onClick={() => setOpen(!open)}
@@ -51,7 +52,7 @@ function FileRowCollapsibleControl({
       />
       <IconButton
         aria-label="delete"
-        onClick={() => removeRow(index)}
+        onClick={() => removeRow(rowId)}
         sx={{ ml: -2.5 }}
       >
         <Delete />
@@ -62,13 +63,18 @@ function FileRowCollapsibleControl({
 
 export default function FileRowComponent(props: FileRowComponentProps) {
   const { index, row } = props;
-  const { removeRow } = useContext(SlateContext);
+  const removeRow = useFileRowStore((state) => state.removeRow);
   const [open, setOpen] = useState<boolean>(true);
   const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <Fragment>
-      <FileRowCollapsibleControl index={index} open={open} setOpen={setOpen} />
+      <FileRowCollapsibleControl
+        index={index}
+        open={open}
+        rowId={row.id}
+        setOpen={setOpen}
+      />
       {/** IF is not on mobile, always show this box
        * IF it's not, meaning on mobile, check if it's open */}
       {isLargerScreen || open ? (
@@ -84,12 +90,12 @@ export default function FileRowComponent(props: FileRowComponentProps) {
             columnGap={2.5}
             justifyContent="space-between"
           >
-            <InputFileUpload index={index} slate={row.substrate} />
-            <InputFileUpload index={index} slate={row.fishInverts} />
+            <InputFileUpload rowId={row.id} slate={row.substrate} />
+            <InputFileUpload rowId={row.id} slate={row.fishInverts} />
           </Box>
           <IconButton
             aria-label="delete"
-            onClick={() => removeRow(index)}
+            onClick={() => removeRow(row.id)}
             sx={{ display: { xs: "none", md: "block" } }}
           >
             <Delete />

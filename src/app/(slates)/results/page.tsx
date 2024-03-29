@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import ResultComponent from "@/components/ResultComponent";
 import ResultListNavBar from "@/components/ResultListNavBar";
-import { SelectedSlateContext, SlateContext } from "@/contexts";
+import { SelectedSlateContext } from "@/contexts";
 import { Fragment, useContext } from "react";
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -17,9 +16,9 @@ import {
   Typography,
 } from "@mui/material";
 import { RoundedButton } from "@/components/RoundedButton";
-import { Row } from "@/hooks/upload/types";
 import { useRouter } from "next/navigation";
 import EditSlateComponent from "@/components/EditSlateComponent";
+import { useFileRowStore } from "@/stores/fileRowStore";
 
 function ResultListEmptyState() {
   const router = useRouter();
@@ -53,16 +52,10 @@ function ResultListEmptyState() {
 }
 
 export default function ResultList() {
-  const [filteredRows, setFilteredRows] = useState<Row[]>([]);
+  const rows = useFileRowStore((state) => state.rows);
+  const filteredRows = rows; // fix this
   const [open, setOpen] = useState<boolean>(false);
-  const { rows } = useContext(SlateContext);
   const { slate, setSlate } = useContext(SelectedSlateContext);
-
-  useEffect(() => {
-    setFilteredRows(
-      rows.filter((row) => row.fishInverts.id !== "" || row.substrate.id !== "")
-    );
-  }, [rows]);
 
   const handleClickOpen = () => {
     setOpen(true);
