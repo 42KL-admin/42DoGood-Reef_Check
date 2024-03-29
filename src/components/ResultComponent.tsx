@@ -4,12 +4,13 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import MoreActionButton from "./MoreActionButton";
 import { Card, CardActionArea, CardActions } from "@mui/material";
-import { useContext } from "react";
-import { SelectedSlateContext } from "@/contexts";
-import { SlateState } from "@/stores/fileRowStore";
+import { SlateState } from "@/stores/types";
+import { useSelectedSlateStore } from "@/stores/slateStore";
 
 export default function ResultComponent({ slate }: { slate: SlateState }) {
-  const { setSlate } = useContext(SelectedSlateContext);
+  const setSelectedSlate = useSelectedSlateStore(
+    (state) => state.setSelectedSlate
+  );
 
   return slate.file === null ? (
     <></>

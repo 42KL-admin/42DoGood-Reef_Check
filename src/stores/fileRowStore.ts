@@ -3,12 +3,12 @@ import { v4 as uuidv4 } from "uuid";
 import { FileRow, SlateState, SlateType } from "./types";
 
 // All the rows (the main state)
-export type FileRowSet = {
+type FileRowSet = {
   rows: FileRow[];
 };
 
 // Actions that can be performed on the rows
-export type FileRowActions = {
+type FileRowActions = {
   addRow: () => void;
   removeRow: (id: string) => void;
   setSlateFile: (id: string, type: SlateType, file: File | null) => void;

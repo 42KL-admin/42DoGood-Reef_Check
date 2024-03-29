@@ -5,8 +5,7 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import ResultComponent from "@/components/ResultComponent";
 import ResultListNavBar from "@/components/ResultListNavBar";
-import { SelectedSlateContext } from "@/contexts";
-import { Fragment, useContext } from "react";
+import { Fragment } from "react";
 import {
   Dialog,
   DialogActions,
@@ -19,6 +18,7 @@ import { RoundedButton } from "@/components/RoundedButton";
 import { useRouter } from "next/navigation";
 import EditSlateComponent from "@/components/EditSlateComponent";
 import { useFileRowStore } from "@/stores/fileRowStore";
+import { useSelectedSlateStore } from "@/stores/slateStore";
 
 function ResultListEmptyState() {
   const router = useRouter();
@@ -52,10 +52,13 @@ function ResultListEmptyState() {
 }
 
 export default function ResultList() {
+  const [open, setOpen] = useState<boolean>(false);
   const rows = useFileRowStore((state) => state.rows);
   const filteredRows = rows; // fix this
-  const [open, setOpen] = useState<boolean>(false);
-  const { slate, setSlate } = useContext(SelectedSlateContext);
+  const slate = useSelectedSlateStore((state) => state.slate);
+  const setSelectedSlate = useSelectedSlateStore(
+    (state) => state.setSelectedSlate
+  );
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -77,7 +80,7 @@ export default function ResultList() {
       >
         <ResultListNavBar
           backToPath={!slate ? "/upload" : "/results"}
-          backAction={!slate ? () => {} : () => setSlate(null)}
+          backAction={!slate ? () => {} : () => setSelectedSlate(null)}
           title={slate ? slate.file!.name : "My reef slates"}
           ctaButton={
             !slate ? (

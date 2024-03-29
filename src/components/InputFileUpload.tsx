@@ -7,7 +7,8 @@ import Typography from "@mui/material/Typography";
 import Add from "@mui/icons-material/Add";
 import Delete from "@mui/icons-material/Delete";
 import { ChangeEvent } from "react";
-import { SlateState, SlateType, useFileRowStore } from "@/stores/fileRowStore";
+import { SlateState, SlateType } from "@/stores/types";
+import { useFileRowStore } from "@/stores/fileRowStore";
 
 const FileActionButton = styled(Button)<ButtonProps>(({ theme }) => ({
   boxShadow: "none",

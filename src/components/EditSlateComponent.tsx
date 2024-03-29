@@ -1,10 +1,9 @@
 "use client";
 
-import { SelectedSlateContext } from "@/contexts";
+import { useSelectedSlateStore } from "@/stores/slateStore";
 import { Add, Remove, ZoomIn } from "@mui/icons-material";
 import { Box, IconButton } from "@mui/material";
 import Image from "next/image";
-import { useContext, useEffect } from "react";
 import {
   TransformComponent,
   TransformWrapper,
@@ -55,7 +54,7 @@ function EditControls() {
 }
 
 function EditImagePreview() {
-  const { slate } = useContext(SelectedSlateContext);
+  const slate = useSelectedSlateStore((state) => state.slate);
 
   return (
     <Box
@@ -88,11 +87,7 @@ function EditImagePreview() {
 }
 
 export default function EditSlateComponent() {
-  const { slate } = useContext(SelectedSlateContext);
-
-  useEffect(() => {
-    console.log("edit", slate);
-  }, [slate]);
+  const slate = useSelectedSlateStore((state) => state.slate);
 
   return slate ? (
     <Box display="flex" height={"100vh"}>

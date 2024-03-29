@@ -6,7 +6,8 @@ import { Fragment, useState } from "react";
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import { Divider, Typography, useMediaQuery } from "@mui/material";
 import theme from "@/theme";
-import { FileRow, useFileRowStore } from "@/stores/fileRowStore";
+import { FileRow } from "@/stores/types";
+import { useFileRowStore } from "@/stores/fileRowStore";
 
 interface FileRowComponentProps {
   index: number;

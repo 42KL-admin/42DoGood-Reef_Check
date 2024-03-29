@@ -1,4 +1,5 @@
-import { SlateState } from "@/stores/fileRowStore";
+
+import { SlateState } from "@/stores/types";
 import { useState } from "react";
 
 const useSlate = () => {
