@@ -1,36 +1,6 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-
-/**
- * Idea: add id for FileRow, remove id in SlateState.
- *
- * <id>_<slatetype>
- */
-
-// Type of the slate
-export type SlateType = "substrate" | "fishInverts";
-
-// Recognition Status (OCR)
-export type SlateRecognitionStatus =
-  | "recognized"
-  | "failed"
-  | "unknown"
-  | "processing";
-
-// Each individual slate's state
-export interface SlateState {
-  type: SlateType;
-  file: File | null;
-  base64: string;
-  status: SlateRecognitionStatus;
-}
-
-// Each individual row
-export type FileRow = {
-  id: string;
-  substrate: SlateState;
-  fishInverts: SlateState;
-};
+import { FileRow, SlateState, SlateType } from "./types";
 
 // All the rows (the main state)
 export type FileRowSet = {
