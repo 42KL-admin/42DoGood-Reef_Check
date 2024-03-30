@@ -1,5 +1,6 @@
 import { NextRequest ,NextResponse } from 'next/server';
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
+const mongoose = require('mongoose');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -16,7 +17,7 @@ async function sendEmail(to: string, subject: string, text: string) {
 
     try {
         await transporter.sendMail({
-            from: "mailtrap@demomailtrap.com",
+            from: process.env.EMAIL,
             to,
             subject,
             text,
