@@ -1,11 +1,7 @@
-// export default function SlatesRouteGroupLayout({
-//   children,
-// }: {
-//   children: React.ReactNode;
-// }) {
-//   return (
-//     <SlateProvider>
-//       {children}
-//     </SlateProvider>
-//   );
-// }
+export default function SlatesRouteGroupLayout({
+    children,
+  }: {
+    children: React.ReactNode;
+  }) {
+    return <>{children}</>;
+  }

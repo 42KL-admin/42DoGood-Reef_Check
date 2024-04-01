@@ -3,12 +3,19 @@
 import { Button, Typography, Container, Box, TextField } from "@mui/material";
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 export default function admin_2FA() {
   const [token, setToken] = useState("");
-  const router = useRouter();
 
+  const router = useRouter();
+  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   if (token) {
+  //     alert(`Proceeding with token: ${token}`);
+  //     // settoken("");
+  //   }
+  // };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (token) {    // #TODO Was copied from login page, convert fetch for 2fa token
