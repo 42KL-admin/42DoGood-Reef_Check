@@ -8,7 +8,7 @@ export type SlateRecognitionStatus =
   | "unknown"
   | "processing";
 
-  export type EmailPermission =
+  export type EmailPermission = 
   | "can edit"
   | "admin";
 

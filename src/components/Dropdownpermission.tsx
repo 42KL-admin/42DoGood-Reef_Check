@@ -6,6 +6,8 @@ import Menu, { MenuProps } from "@mui/material/Menu";
 import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
+import { useEmailRowStore, usePermissionStore } from '@/stores/emailRowStore';
+import { EmailPermission } from '@/stores/types';
 
 const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
   borderRadius: "12px",
@@ -51,9 +53,10 @@ const StyledMenu = styled((props: MenuProps) => (
   },
 }));
 
-export default function Dropdownpermisson() {
+export default function Dropdownpermission() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [selectedOption, setSelectedOption] = useState<string>('Can edit');
+  const selectedPermission = usePermissionStore((state) => state.selectedPermission);
+  const setSelectedPermission = usePermissionStore((state) => state.setSelectedPermission);
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -61,11 +64,11 @@ export default function Dropdownpermisson() {
   };
 
   const handleClose = () => {
-    setAnchorEl(null);
+    setAnchorEl(null); 
   };
 
-  const handleOptionSelect = (option: string) => {
-    setSelectedOption(option);
+  const handlePermissionSelect = (permission : EmailPermission) => {
+    setSelectedPermission(permission);
     handleClose();
   };
 
@@ -82,7 +85,7 @@ export default function Dropdownpermisson() {
         size="small"
         onClick={handleClick}
       >
-            {selectedOption || 'Select an option'}
+            {selectedPermission || 'Select permission'}
       </DropdownButton>
       <StyledMenu
         id="dropdown-menu"
@@ -93,8 +96,8 @@ export default function Dropdownpermisson() {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={() => handleOptionSelect('Can edit')}>Can edit</MenuItem>
-        <MenuItem onClick={() => handleOptionSelect('Admin')}>Admin</MenuItem>
+        <MenuItem onClick={() => handlePermissionSelect("can edit")}>Can edit</MenuItem>
+        <MenuItem onClick={() => handlePermissionSelect("admin")}>Admin</MenuItem>
       </StyledMenu>
     </div>
   );

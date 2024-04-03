@@ -6,13 +6,23 @@ import { RoundedButton } from "@/components/RoundedButton";
 import DropdownMenu from "@/components/DropdownMenu";
 import { useRouter } from "next/navigation";
 import Dropdownpermission from "@/components/Dropdownpermission";
-import { useEmailRowStore } from "@/stores/emailRowStore";
+import { useEmailRowStore, usePermissionStore } from "@/stores/emailRowStore";
 
 export default function UploadUserSection() {
   const [email, setEmail] = useState("");
   const router = useRouter();
   const rows = useEmailRowStore((state) => state.rows); // useMemo here
   const addRow = useEmailRowStore((state) => state.addRow);
+  const selectedPermission = usePermissionStore((state) => state.selectedPermission);
+  const setSelectedPermission = usePermissionStore((state) => state.setSelectedPermission);
+
+  const handleInviteClick = () => {
+    const permission = selectedPermission;
+    if (email.trim() !== '') {
+      addRow(email, permission);
+      setEmail('');
+    }
+  };
 
   return (
     <Container maxWidth="xl">
@@ -61,7 +71,11 @@ export default function UploadUserSection() {
               }}
             />
             <Dropdownpermission />
-            <RoundedButton variant="contained" onClick={() => addRow(email, "can edit")}>
+            <RoundedButton 
+              variant="contained"
+              disabled={email.trim() === ''}
+              onClick={handleInviteClick}
+            >
               Invite
             </RoundedButton>
           </Box>

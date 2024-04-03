@@ -22,9 +22,24 @@ const createEmailRow = (): EmailRow => {
   };
 };
 
+
+// To store and fetch permission from the admin_dashboard @hero
+interface PermissionStore {
+  selectedPermission: EmailPermission;
+  setSelectedPermission: (permission: EmailPermission) => void;
+}
+
+
+export const usePermissionStore = create<PermissionStore>((set) => ({
+  selectedPermission: 'can edit'as EmailPermission,
+  setSelectedPermission: (permission : EmailPermission) => set({ selectedPermission: permission }),
+}));
+
+
 export const useEmailRowStore = create<EmailRowSet & EmailRowActions>()((set) => ({
   // One row as test
   rows: [createEmailRow()],
+
   addRow: (email: string, permission: EmailPermission) =>
     set((state) => ({
       rows: [...state.rows, { email, permission }],
