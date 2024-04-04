@@ -12,11 +12,7 @@ import { EmailPermission } from "@/stores/types";
 export default function UploadUserSection() {
   const [selectedPermission, setSelectedPermission] = useState<EmailPermission>("can edit");
   const [email, setEmail] = useState("");
-  const router = useRouter();
-  const rows = useEmailRowStore((state) => state.rows); // useMemo here
   const addRow = useEmailRowStore((state) => state.addRow);
-
-  console.log("selectedper", selectedPermission);
 
   const handleInviteClick = () => {
     if (email.trim() !== '') {
