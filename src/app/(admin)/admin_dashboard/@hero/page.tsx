@@ -6,22 +6,27 @@ import { RoundedButton } from "@/components/RoundedButton";
 import DropdownMenu from "@/components/DropdownMenu";
 import { useRouter } from "next/navigation";
 import Dropdownpermission from "@/components/Dropdownpermission";
-import { useEmailRowStore, usePermissionStore } from "@/stores/emailRowStore";
+import { useEmailRowStore } from "@/stores/emailRowStore";
+import { EmailPermission } from "@/stores/types";
 
 export default function UploadUserSection() {
+  const [selectedPermission, setSelectedPermission] = useState<EmailPermission>("can edit");
   const [email, setEmail] = useState("");
   const router = useRouter();
   const rows = useEmailRowStore((state) => state.rows); // useMemo here
   const addRow = useEmailRowStore((state) => state.addRow);
-  const selectedPermission = usePermissionStore((state) => state.selectedPermission);
-  const setSelectedPermission = usePermissionStore((state) => state.setSelectedPermission);
+
+  console.log("selectedper", selectedPermission);
 
   const handleInviteClick = () => {
-    const permission = selectedPermission;
     if (email.trim() !== '') {
-      addRow(email, permission);
+      addRow(email, selectedPermission);
       setEmail('');
     }
+  };
+
+  const handlePermissionChange = (permission: EmailPermission) => {
+    setSelectedPermission(permission);
   };
 
   return (
@@ -70,7 +75,7 @@ export default function UploadUserSection() {
                 },
               }}
             />
-            <Dropdownpermission />
+            <Dropdownpermission initialPermission={selectedPermission} onChange={handlePermissionChange}></Dropdownpermission>
             <RoundedButton 
               variant="contained"
               disabled={email.trim() === ''}

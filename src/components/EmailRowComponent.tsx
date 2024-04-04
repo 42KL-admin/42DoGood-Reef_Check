@@ -5,8 +5,9 @@ import { Fragment, useState } from "react";
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import { Divider, TextField, Typography, useMediaQuery } from "@mui/material";
 import theme from "@/theme";
-import { EmailRow } from "@/stores/types";
+import { EmailRow, EmailPermission } from "@/stores/types";
 import { useEmailRowStore } from "@/stores/emailRowStore";
+import Dropdownpermission from "./Dropdownpermission";
 
 interface EmailRowComponentProps {
   index: number;
@@ -64,9 +65,14 @@ function EmailRowCollapsibleControl({
 
 export default function EmailRowComponent(props: EmailRowComponentProps) {
   const { index, row, email } = props;
+  const updatePermission = useEmailRowStore((state) => state.updatePermission);
   const removeRow = useEmailRowStore((state) => state.removeRow);
   const [open, setOpen] = useState<boolean>(true);
   const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
+
+  const handlePermissionChange = (permission: EmailPermission) => {
+    updatePermission( row.email, permission);
+  };
 
   return (
     <Fragment>
@@ -91,10 +97,11 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
             // columnGap={2.5}
             justifyContent="space-between"
           >
-            {email}
+            {email} , {row.permission}
             {/* <InputFileUpload rowId={row.id} slate={row.substrate} />
             <InputFileUpload rowId={row.id} slate={row.fishInverts} /> */}
           </Box>
+          <Dropdownpermission initialPermission={row.permission} onChange={handlePermissionChange}></Dropdownpermission>
           <IconButton
             aria-label="delete"
             onClick={() => removeRow(row.email)}

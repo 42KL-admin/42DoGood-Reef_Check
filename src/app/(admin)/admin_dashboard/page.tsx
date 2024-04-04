@@ -12,8 +12,6 @@ import { useEmailRowStore } from "@/stores/emailRowStore";
 
 export default function UploadEmailSection() {
   const rows = useEmailRowStore((state) => state.rows); // useMemo here
-  const addRow = useEmailRowStore((state) => state.addRow);
-  const email = useEmailRowStore((state) => state.rows);
 
   return (
     <Box pt={12}>

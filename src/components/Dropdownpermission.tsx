@@ -6,7 +6,6 @@ import Menu, { MenuProps } from "@mui/material/Menu";
 import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
-import { useEmailRowStore, usePermissionStore } from '@/stores/emailRowStore';
 import { EmailPermission } from '@/stores/types';
 
 const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
@@ -53,12 +52,14 @@ const StyledMenu = styled((props: MenuProps) => (
   },
 }));
 
-export default function Dropdownpermission() {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const selectedPermission = usePermissionStore((state) => state.selectedPermission);
-  const setSelectedPermission = usePermissionStore((state) => state.setSelectedPermission);
-  const open = Boolean(anchorEl);
+interface DropdownPermissionProps {
+  initialPermission: EmailPermission;
+  onChange: (permission: EmailPermission) => void;
+}
 
+export default function DropdownPermission({initialPermission, onChange }: DropdownPermissionProps) {
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -68,7 +69,7 @@ export default function Dropdownpermission() {
   };
 
   const handlePermissionSelect = (permission : EmailPermission) => {
-    setSelectedPermission(permission);
+    onChange(permission);
     handleClose();
   };
 
@@ -85,7 +86,7 @@ export default function Dropdownpermission() {
         size="small"
         onClick={handleClick}
       >
-            {selectedPermission || 'Select permission'}
+            {initialPermission}
       </DropdownButton>
       <StyledMenu
         id="dropdown-menu"
