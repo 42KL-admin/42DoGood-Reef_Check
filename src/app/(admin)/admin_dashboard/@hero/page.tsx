@@ -71,7 +71,11 @@ export default function UploadUserSection() {
                 },
               }}
             />
-            <Dropdownpermission initialPermission={selectedPermission} onChange={handlePermissionChange}></Dropdownpermission>
+            <Dropdownpermission 
+              initialPermission={selectedPermission} 
+              onChange={handlePermissionChange}
+              borderColor="#C3C3C3">
+            </Dropdownpermission>
             <RoundedButton 
               variant="contained"
               disabled={email.trim() === ''}

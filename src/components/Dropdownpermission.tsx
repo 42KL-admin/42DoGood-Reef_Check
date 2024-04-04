@@ -8,35 +8,36 @@ import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
 import { EmailPermission } from '@/stores/types';
 
-const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
-  borderRadius: "12px",
-  padding: "0 20px",
-  borderColor: "#C3C3C3",
-  backgroundColor: 'white',
-  color: "#494949",
-  fontWeight: 500,
-  textTransform: "initial",
-  height: '56px',
-  width: "120px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  "& .MuiButton-startIcon": {
-    marginRight: "8px",
-  },
-}));
+// const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
+//   borderRadius: "12px",
+//   padding: "0 20px",
+//   borderColor: "#C3C3C3",
+//   backgroundColor: 'white',
+//   color: "#494949",
+//   fontWeight: 500,
+//   textTransform: "initial",
+//   height: '56px',
+//   width: "120px",
+//   display: "flex",
+//   alignItems: "center",
+//   justifyContent: "space-between",
+//   "& .MuiButton-startIcon": {
+//     marginRight: "8px",
+//   },
+// }));
 
 const StyledMenu = styled((props: MenuProps) => (
   <Menu
     elevation={0}
     anchorOrigin={{
-      vertical: "bottom",
-      horizontal: "right",
+      vertical: 'bottom',
+      horizontal: 'left',
     }}
     transformOrigin={{
-      vertical: "top",
-      horizontal: "right",
+      vertical: 'top',
+      horizontal: 'left',
     }}
+    anchorReference="anchorEl"
     {...props}
   />
 ))(({ theme }) => ({
@@ -55,14 +56,33 @@ const StyledMenu = styled((props: MenuProps) => (
 interface DropdownPermissionProps {
   initialPermission: EmailPermission;
   onChange: (permission: EmailPermission) => void;
+  borderColor: string;
 }
 
-export default function DropdownPermission({initialPermission, onChange }: DropdownPermissionProps) {
+export default function DropdownPermission({initialPermission, onChange, borderColor }: DropdownPermissionProps) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
+
+  const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
+    borderRadius: "12px",
+    padding: "0 20px",
+    borderColor: borderColor,
+    backgroundColor: 'white',
+    color: "#494949",
+    fontWeight: 500,
+    textTransform: "initial",
+    height: '56px',
+    width: "120px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    "& .MuiButton-startIcon": {
+      marginRight: "8px",
+    },
+  }));
 
   const handleClose = () => {
     setAnchorEl(null); 

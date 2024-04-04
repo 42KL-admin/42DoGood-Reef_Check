@@ -86,8 +86,12 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
        * IF it's not, meaning on mobile, check if it's open */}
       {isLargerScreen || open ? (
         <Box
+          style={{ 
+          borderBottom: '1px solid #ccc',
+          marginBottom: '20px'
+          }}
           display="flex"
-          sx={{ padding: "10px 40px" }} //backgroundColor: "primary.light",
+          sx={{ padding: "4px 40px" }} //backgroundColor: "primary.light",
           alignItems="center"
           columnGap={2.5}
         >
@@ -101,7 +105,11 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
             {/* <InputFileUpload rowId={row.id} slate={row.substrate} />
             <InputFileUpload rowId={row.id} slate={row.fishInverts} /> */}
           </Box>
-          <Dropdownpermission initialPermission={row.permission} onChange={handlePermissionChange}></Dropdownpermission>
+          <Dropdownpermission 
+            initialPermission={row.permission}
+            onChange={handlePermissionChange}
+            borderColor="white">
+          </Dropdownpermission>
           <IconButton
             aria-label="delete"
             onClick={() => removeRow(row.email)}
