@@ -70,9 +70,6 @@ export default function Admin_2FA() {
               },
             }}
           />
-          <Button>
-            Didn't receive a code? Send again
-          </Button>
           <Button
             type="submit"
             variant="contained"
