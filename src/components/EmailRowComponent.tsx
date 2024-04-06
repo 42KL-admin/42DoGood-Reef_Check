@@ -88,10 +88,10 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
         <Box
           style={{ 
           borderBottom: '1px solid #ccc',
-          marginBottom: '20px'
+          // marginBottom: '20px'
           }}
           display="flex"
-          sx={{ padding: "4px 40px" }} //backgroundColor: "primary.light",
+          sx={{ padding: "12px 40px" }} //backgroundColor: "primary.light",
           alignItems="center"
           columnGap={2.5}
         >

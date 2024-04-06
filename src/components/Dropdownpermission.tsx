@@ -8,23 +8,23 @@ import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
 import { EmailPermission } from '@/stores/types';
 
-// const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
-//   borderRadius: "12px",
-//   padding: "0 20px",
-//   borderColor: "#C3C3C3",
-//   backgroundColor: 'white',
-//   color: "#494949",
-//   fontWeight: 500,
-//   textTransform: "initial",
-//   height: '56px',
-//   width: "120px",
-//   display: "flex",
-//   alignItems: "center",
-//   justifyContent: "space-between",
-//   "& .MuiButton-startIcon": {
-//     marginRight: "8px",
-//   },
-// }));
+const DropdownButton = styled(Button)<ButtonProps & { borderColor?: string }>(({ theme, borderColor }) => ({
+  borderRadius: "12px",
+  padding: "0 20px",
+  borderColor: borderColor || "#C3C3C3",
+  backgroundColor: 'white',
+  color: "#494949",
+  fontWeight: 500,
+  textTransform: "initial",
+  height: '56px',
+  width: "120px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  "& .MuiButton-startIcon": {
+    marginRight: "8px",
+  },
+}));
 
 const StyledMenu = styled((props: MenuProps) => (
   <Menu
@@ -37,7 +37,6 @@ const StyledMenu = styled((props: MenuProps) => (
       vertical: 'top',
       horizontal: 'left',
     }}
-    anchorReference="anchorEl"
     {...props}
   />
 ))(({ theme }) => ({
@@ -66,24 +65,6 @@ export default function DropdownPermission({initialPermission, onChange, borderC
     setAnchorEl(event.currentTarget);
   };
 
-  const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
-    borderRadius: "12px",
-    padding: "0 20px",
-    borderColor: borderColor,
-    backgroundColor: 'white',
-    color: "#494949",
-    fontWeight: 500,
-    textTransform: "initial",
-    height: '56px',
-    width: "120px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    "& .MuiButton-startIcon": {
-      marginRight: "8px",
-    },
-  }));
-
   const handleClose = () => {
     setAnchorEl(null); 
   };
@@ -94,7 +75,7 @@ export default function DropdownPermission({initialPermission, onChange, borderC
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center' }}>
+    <div style={{ display: 'flex', alignItems: 'center'}}>
       <DropdownButton
         id="dropdown-btn"
         aria-controls={open ? "dropdown-menu" : undefined}
@@ -105,8 +86,9 @@ export default function DropdownPermission({initialPermission, onChange, borderC
         endIcon={<ArrowDropDown />}
         size="small"
         onClick={handleClick}
+        borderColor={borderColor}
       >
-            {initialPermission}
+            {initialPermission.charAt(0).toUpperCase() + initialPermission.slice(1)}
       </DropdownButton>
       <StyledMenu
         id="dropdown-menu"

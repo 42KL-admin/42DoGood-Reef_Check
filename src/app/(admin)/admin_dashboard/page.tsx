@@ -37,12 +37,12 @@ export default function UploadEmailSection() {
           alignItems="center"
           style={{ 
           borderBottom: '1px solid #ccc',
-          marginBottom: '20px'
+          marginBottom: '0px'
           }}
           sx={{ 
             mb: { xs: 50, md: 0 },
-            padding: "12px 40px",
-            pr: "110px",
+            padding: "8px 40px",
+            pr: "94px",
             fontSize: "14px",
             fontWeight: 400
             }}>
@@ -57,7 +57,7 @@ export default function UploadEmailSection() {
           sx={{ mb: { xs: 50, md: 0 } }}
         >
           <TransitionGroup>
-            {rows.map((row, index) => (
+            {filteredRows.map((row, index) => (
               <Collapse key={row.email}>
                 <EmailRowComponent index={index} row={row} email={row.email}/>
               </Collapse>

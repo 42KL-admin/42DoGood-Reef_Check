@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-export default function admin_2FA() {
+export default function Admin_2FA() {
   const [token, setToken] = useState("");
 
   const router = useRouter();

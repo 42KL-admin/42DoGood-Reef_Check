@@ -8,34 +8,17 @@ import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
 import { EmailPermission } from "@/stores/types";
 
-// const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
-//   borderRadius: "12px",
-//   padding: "0 20px",
-//   borderColor: "#C3C3C3",
-//   backgroundColor: "white",
-//   color: "#494949",
-//   fontWeight: 500,
-//   textTransform: "initial",
-//   height: "56px",
-//   width: "120px",
-//   display: "flex",
-//   alignItems: "center",
-//   justifyContent: "space-between",
-//   "& .MuiButton-startIcon": {
-//     marginRight: "8px",
-//   },
-// }));
-
 const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
     borderRadius: "4px",
     padding: "8px 16px",
-    borderColor: "#C3C3C3",
+    borderColor: "white",
     // backgroundColor: "white",
+    // borderColor : "#C3C3C3",
     color: "#494949",
     fontWeight: 500,
     textTransform: "none",
-    height: "36px", // Adjust the height
-    width: "auto", // Remove fixed width
+    height: "36px",
+    width: "auto",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -43,32 +26,6 @@ const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
       marginRight: "8px",
     },
   }));
-
-// const StyledMenu = styled((props: MenuProps) => (
-//   <Menu
-//     elevation={0}
-//     anchorOrigin={{
-//       vertical: "bottom",
-//       horizontal: "right",
-//     }}
-//     transformOrigin={{
-//       vertical: "top",
-//       horizontal: "right",
-//     }}
-//     {...props}
-//   />
-// ))(({ theme }) => ({
-//   "& .MuiMenu-list": {
-//     backgroundColor: "white",
-//     borderRadius: "4px",
-//     width: "120px",
-//   },
-//   "& .MuiMenuItem-root": {
-//     fontSize: "14px",
-//     fontWeight: 400,
-//     padding: "16px 12px",
-//   },
-// }));
 
 const StyledMenu = styled((props: MenuProps) => (
     <Menu
@@ -87,8 +44,8 @@ const StyledMenu = styled((props: MenuProps) => (
     "& .MuiMenu-list": {
       backgroundColor: "white",
       borderRadius: "4px",
-      width: "auto", // Remove fixed width
-      boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)", // Add box shadow
+      width: "128px",
+      // boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)", // Add box shadow
     },
     "& .MuiMenuItem-root": {
       fontSize: "14px",
@@ -133,7 +90,7 @@ export default function SortByPermission({onSortByPermission}: SortByPermissionP
         size="small"
         onClick={handleClick}
       >
-        {selectedPermission ? selectedPermission : "Sort By"}
+        Permissions
       </DropdownButton>
       <StyledMenu
         id="dropdown-menu"
@@ -144,13 +101,9 @@ export default function SortByPermission({onSortByPermission}: SortByPermissionP
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={() => handlePermissionSelect("admin")}>
-          Admin
-        </MenuItem>
-        <MenuItem onClick={() => handlePermissionSelect("can edit")}>
-          Can edit
-        </MenuItem>
         <MenuItem onClick={() => handlePermissionSelect(null)}>All</MenuItem>
+        <MenuItem onClick={() => handlePermissionSelect("admin")}>Admin</MenuItem>
+        <MenuItem onClick={() => handlePermissionSelect("can edit")}>Can edit</MenuItem>
       </StyledMenu>
     </div>
   );
