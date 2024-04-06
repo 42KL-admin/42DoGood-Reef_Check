@@ -12,8 +12,6 @@ const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
     borderRadius: "4px",
     padding: "8px 16px",
     borderColor: "white",
-    // backgroundColor: "white",
-    // borderColor : "#C3C3C3",
     color: "#494949",
     fontWeight: 500,
     textTransform: "none",
@@ -45,12 +43,11 @@ const StyledMenu = styled((props: MenuProps) => (
       backgroundColor: "white",
       borderRadius: "4px",
       width: "128px",
-      // boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)", // Add box shadow
     },
     "& .MuiMenuItem-root": {
       fontSize: "14px",
       fontWeight: 400,
-      padding: "8px 16px", // Adjust padding
+      padding: "8px 16px",
     },
   }));
 

@@ -37,14 +37,15 @@ export default function UploadEmailSection() {
           alignItems="center"
           style={{ 
           borderBottom: '1px solid #ccc',
-          marginBottom: '0px'
+          marginBottom: '0px',
+          fontFamily: 'Roboto',
           }}
           sx={{ 
             mb: { xs: 50, md: 0 },
             padding: "8px 40px",
             pr: "94px",
             fontSize: "14px",
-            fontWeight: 400
+            fontWeight: "bold",
             }}>
             Email address
             <SortByPermission onSortByPermission={handleSortByPermission} />

@@ -88,22 +88,17 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
         <Box
           style={{ 
           borderBottom: '1px solid #ccc',
-          // marginBottom: '20px'
           }}
           display="flex"
-          sx={{ padding: "12px 40px" }} //backgroundColor: "primary.light",
+          sx={{ padding: "12px 40px" }}
           alignItems="center"
           columnGap={2.5}
         >
           <Box
-            // display="flex"
-            sx={{ flex: 1, flexDirection: { xs: "column", md: "row" } }}
-            // columnGap={2.5}
+            sx={{ flex: 1, flexDirection: { xs: "column", md: "row" } ,fontFamily: 'Roboto', fontSize: "16 px",}}
             justifyContent="space-between"
           >
             {email} , {row.permission}
-            {/* <InputFileUpload rowId={row.id} slate={row.substrate} />
-            <InputFileUpload rowId={row.id} slate={row.fishInverts} /> */}
           </Box>
           <Dropdownpermission 
             initialPermission={row.permission}
