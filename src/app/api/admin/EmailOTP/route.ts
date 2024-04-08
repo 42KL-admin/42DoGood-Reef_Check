@@ -18,7 +18,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-
 async function sendEmail(to: string, subject: string, html: string) {
 
     try {
@@ -62,7 +61,6 @@ export async function POST(request: NextRequest)
     const res = await request.json();
     const otp = await generateOTP();
     const salt = await generateSalt();
-    console.log(salt);
     const adminOTP = new AdminOTPVerification({
         otp: await bcrypt.hash(otp, salt),
         salt: salt,
