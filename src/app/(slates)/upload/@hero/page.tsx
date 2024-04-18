@@ -7,8 +7,7 @@ import { RoundedButton } from "@/components/RoundedButton";
 import DropdownMenu from "@/components/DropdownMenu";
 import Container from "@mui/material/Container";
 import { useRouter } from "next/navigation";
-import { Fragment, useContext } from "react";
-import { SlateContext } from "@/contexts";
+import { Fragment } from "react";
 import NavBar from "@/components/mobile/NavBar";
 
 const ChipLabels = ["Not blurry", "Bright enough", "Pencil writing is clear"];
@@ -25,7 +24,6 @@ const ChipLabels = ["Not blurry", "Bright enough", "Pencil writing is clear"];
 
 export default function UploadPhotoHeroSection() {
   const router = useRouter();
-  const { rows } = useContext(SlateContext);
   return (
     <Fragment>
       <NavBar />
@@ -82,7 +80,7 @@ export default function UploadPhotoHeroSection() {
             <RoundedButton
               variant="contained"
               size="large"
-              onClick={() => console.log(rows)}
+              onClick={() => {}}
             >
               convert files now
             </RoundedButton>
