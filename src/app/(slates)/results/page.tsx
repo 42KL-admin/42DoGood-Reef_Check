@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import ResultComponent from "@/components/ResultComponent";
@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import EditSlateComponent from "@/components/EditSlateComponent";
 import { useFileRowStore } from "@/stores/fileRowStore";
 import { useSelectedSlateStore } from "@/stores/slateStore";
+import NavBar from "@/components/mobile/NavBar";
 
 function ResultListEmptyState() {
   const router = useRouter();
@@ -52,52 +53,26 @@ function ResultListEmptyState() {
 }
 
 export default function ResultList() {
-  const [open, setOpen] = useState<boolean>(false);
   const rows = useFileRowStore((state) => state.rows);
-  const filteredRows = rows; // fix this
   const slate = useSelectedSlateStore((state) => state.slate);
-  const setSelectedSlate = useSelectedSlateStore(
-    (state) => state.setSelectedSlate
-  );
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const filteredRows = rows; // fix this
 
   return (
     <Fragment>
       <Box
-        sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: 1,
-          backgroundColor: "primary.light",
-        }}
       >
-        <ResultListNavBar
-          backToPath={!slate ? "/upload" : "/results"}
-          backAction={!slate ? () => {} : () => setSelectedSlate(null)}
-          title={slate ? slate.file!.name : "My reef slates"}
-          ctaButton={
-            !slate ? (
-              <></>
-            ) : (
-              <RoundedButton variant="contained" onClick={handleClickOpen}>
-                Export
-              </RoundedButton>
-            )
-          }
-        />
+        {/* <NavBar /> */}
       </Box>
       {!slate ? (
         <Box sx={{ overflow: "auto", flex: 1 }} display="grid">
           {filteredRows.length !== 0 ? (
             <Container maxWidth="xl" sx={{ height: "100%" }}>
-              <Box px={14} py={8} display="grid" rowGap={4}>
+              <Box
+                py={8}
+                display="grid"
+                rowGap={4}
+                sx={{ px: { xs: 2, md: 14 }, pt: { xs: 0, md: 8 }, pb: 8 }}
+              >
                 {filteredRows.map((row, index) => (
                   <Fragment key={index}>
                     <ResultComponent slate={row.substrate} />
@@ -113,34 +88,6 @@ export default function ResultList() {
       ) : (
         <EditSlateComponent />
       )}
-
-      {/** Compulsory rename before export */}
-      <Dialog open={open} onClose={handleClose} fullWidth>
-        <DialogTitle>Rename before export</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            required
-            margin="dense"
-            id="filename"
-            name="text"
-            label="eg. Tomok 8 July substrate 8.8m 2024"
-            type="text"
-            fullWidth
-            variant="outlined"
-            sx={{ borderRadius: 1 }}
-            helperText="Site name, date, slate type, depth, year"
-          />
-        </DialogContent>
-        <DialogActions sx={{ px: 6 }}>
-          <RoundedButton variant="outlined" onClick={handleClose}>
-            Cancel
-          </RoundedButton>
-          <RoundedButton variant="contained" onClick={() => {}}>
-            Confirm
-          </RoundedButton>
-        </DialogActions>
-      </Dialog>
     </Fragment>
   );
 }

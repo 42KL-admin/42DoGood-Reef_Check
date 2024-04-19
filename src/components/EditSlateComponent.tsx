@@ -57,32 +57,28 @@ function EditImagePreview() {
   const slate = useSelectedSlateStore((state) => state.slate);
 
   return (
-    <Box
-      width="100%"
-      display="grid"
-      alignContent={"center"}
-      justifyContent={"center"}
-    >
-      <TransformWrapper>
-        <TransformComponent>
-          {/* <img
-            src={`data:image/png;base64,${slate?.base64}`}
-            alt=""
-            style={{ objectFit: "cover" }}
-            width={"100%"}
-          /> */}
-          <Image
-            src={`data:image/png;base64,${slate?.base64}`}
-            alt={"image preview"}
-            width={0}
-            height={0}
-            sizes="100vw"
-            style={{ width: "100%", height: "auto", objectFit: "cover" }}
-          />
-        </TransformComponent>
-        <EditControls />
-      </TransformWrapper>
-    </Box>
+    slate && (
+      <Box
+        width="100%"
+        display="grid"
+        alignContent={"center"}
+        justifyContent={"center"}
+      >
+        <TransformWrapper>
+          <TransformComponent>
+            <Image
+              src={slate.base64}
+              alt={slate.file?.name || "image preview"}
+              width={0}
+              height={0}
+              sizes="100vw"
+              style={{ width: "100%", height: "auto", objectFit: "cover" }}
+            />
+          </TransformComponent>
+          <EditControls />
+        </TransformWrapper>
+      </Box>
+    )
   );
 }
 
