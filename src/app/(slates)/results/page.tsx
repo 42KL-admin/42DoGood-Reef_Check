@@ -62,7 +62,7 @@ export default function ResultList() {
       .flatMap((row) => [row.substrate, row.fishInverts])
       .filter((slate) => slate.file !== null);
     setFilteredSlates(filtered);
-  }, []);
+  }, [rows]);
 
   return (
     <Fragment>
