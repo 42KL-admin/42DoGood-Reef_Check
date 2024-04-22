@@ -8,6 +8,10 @@ export type SlateRecognitionStatus =
   | "unknown"
   | "processing";
 
+  export type EmailPermission = 
+  | "can edit"
+  | "admin";
+
 // Each individual slate's state
 export interface SlateState {
   type: SlateType;
@@ -21,4 +25,10 @@ export type FileRow = {
   id: string;
   substrate: SlateState;
   fishInverts: SlateState;
+};
+
+// Each individual roww
+export type EmailRow = {
+  email: string;
+  permission: EmailPermission;
 };
