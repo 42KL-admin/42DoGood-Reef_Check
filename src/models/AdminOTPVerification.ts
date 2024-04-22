@@ -6,7 +6,7 @@ export interface IAdminOTPVerification extends Document {
     otp: string;
     salt: string;
     createdAt: Date;
-    updatedAt: Date;
+    expiresAt: Date;
 }
 
 const AdminOTPVerificationSchema:Schema = new mongoose.Schema({
@@ -16,15 +16,6 @@ const AdminOTPVerificationSchema:Schema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now() },
     expiresAt: { type: Date, default: Date.now() + 3600000},
 });
-
-// AdminOTPVerificationSchema.pre<IAdminOTPVerification>('save', async function(next) {
-//     if (this.isModified('otp')) {
-//         const salt = await bcrypt.genSalt(10);
-//         this.salt = salt;
-//         this.otp = await bcrypt.hash(this.otp, salt);
-//     }
-//     next();
-// });
 
 const AdminOTPVerification = mongoose.models.AdminOTPVerification || mongoose.model<IAdminOTPVerification>('AdminOTPVerification', AdminOTPVerificationSchema);
 
