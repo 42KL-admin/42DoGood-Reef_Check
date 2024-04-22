@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import EditSlateComponent from "@/components/EditSlateComponent";
 import { useFileRowStore } from "@/stores/fileRowStore";
 import { useSelectedSlateStore } from "@/stores/slateStore";
-import NavBar from "@/components/mobile/NavBar";
 import { SlateState } from "@/stores/types";
 
 function ResultListEmptyState() {

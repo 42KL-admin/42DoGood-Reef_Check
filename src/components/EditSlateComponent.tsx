@@ -1,14 +1,18 @@
 "use client";
 
+import { useSelectedTabStore } from "@/stores/resultTabStore";
 import { useSelectedSlateStore } from "@/stores/slateStore";
+import theme from "@/theme";
 import { Add, Remove, ZoomIn } from "@mui/icons-material";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, useMediaQuery } from "@mui/material";
 import Image from "next/image";
+import { Fragment } from "react";
 import {
   TransformComponent,
   TransformWrapper,
   useControls,
 } from "react-zoom-pan-pinch";
+import TabPanel from "./TabPanel";
 
 function EditControls() {
   const { zoomIn, zoomOut, resetTransform } = useControls();
@@ -37,6 +41,7 @@ function EditControls() {
           px: 2.5,
           py: 1,
           borderRadius: 10,
+          boxShadow: 2,
         }}
       >
         <IconButton aria-label="zoom out" onClick={() => zoomOut()}>
@@ -82,9 +87,8 @@ function EditImagePreview() {
   );
 }
 
-export default function EditSlateComponent() {
+function EditSlateLargerScreen() {
   const slate = useSelectedSlateStore((state) => state.slate);
-
   return slate ? (
     <Box display="flex" height={"100vh"}>
       <Box
@@ -99,5 +103,47 @@ export default function EditSlateComponent() {
     </Box>
   ) : (
     <></>
+  );
+}
+
+function EditSlateSmallerScreen() {
+  const slate = useSelectedSlateStore((state) => state.slate);
+  const selectedTab = useSelectedTabStore((state) => state.tab);
+
+  console.log(selectedTab);
+
+  return slate ? (
+    <Box width={"100%"} height={"100%"}>
+      <TabPanel tag={"slatePicture"} value={selectedTab as string}>
+        <Box
+          display={"grid"}
+          justifyItems={"center"}
+          width={"100%"}
+          height={"100%"}
+        >
+          <EditImagePreview />
+        </Box>
+      </TabPanel>
+
+      <TabPanel tag={"excelSheet"} value={selectedTab as string}>
+        <Box
+          width={"100%"}
+          height={"100%"}
+          sx={{ backgroundColor: "teal" }}
+        ></Box>
+      </TabPanel>
+    </Box>
+  ) : (
+    <></>
+  );
+}
+
+export default function EditSlateComponent() {
+  const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
+
+  return isLargerScreen ? (
+    <EditSlateLargerScreen />
+  ) : (
+    <EditSlateSmallerScreen />
   );
 }
