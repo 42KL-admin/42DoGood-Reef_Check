@@ -80,7 +80,7 @@ export default function ResultListLayout({
           display: "block",
           top: 0,
           zIndex: 1,
-          backgroundColor: "primary.light",
+          backgroundColor: { xs: "white", md: "primary.light" },
         }}
       >
         {isLargerScreen ? (
@@ -101,7 +101,20 @@ export default function ResultListLayout({
         ) : slate === null ? (
           <NavBar />
         ) : (
-          <p>Edit slate navbar</p>
+          <ResultListNavBar
+            backToPath={!slate ? "/upload" : "/results"}
+            backAction={!slate ? () => {} : () => setSelectedSlate(null)}
+            title={slate ? slate.file!.name : "My reef slates"}
+            ctaButton={
+              !slate ? (
+                <></>
+              ) : (
+                <RoundedButton variant="contained" onClick={handleClickOpen}>
+                  Export
+                </RoundedButton>
+              )
+            }
+          />
         )}
       </Box>
       {children}
