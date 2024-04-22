@@ -9,10 +9,10 @@ export async function POST(request: NextRequest) {
 
         const emailExist = await db
             .collection("users")
-            .countDocuments({ email: data.email });
+            .findOne({ email: data.email });
         if (!emailExist)
-            return NextResponse.json({ message: "Invalid email" }, { status: 400 });
-        return NextResponse.json({ message: "Proceeding with email: " + data.email }, { status: 200 });
+            return NextResponse.json({ message: "Invalid email" }, { status: 404 });
+        return NextResponse.json({ message: "Proceeding with email: " + data.email, user: emailExist}, { status: 200 });
     } catch (e) {
         console.error(e);
     }

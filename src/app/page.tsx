@@ -20,7 +20,7 @@ export default function Home() {
         const payload = await response.json();
         alert(payload.message);
         if (response.status == 200) {
-          router.push("/upload");
+            router.push("/admin");
         }
       } catch (error) {
         console.error("Error:", error);

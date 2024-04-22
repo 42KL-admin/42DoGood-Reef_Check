@@ -17,6 +17,7 @@ export default function CheckmarkChip({ label }: { label: string }) {
       label={label}
       icon={<CheckCircleRounded color="primary" />}
       variant="outlined"
+      sx={{ fontSize: { xs: "16px" } }}
     />
   );
 }

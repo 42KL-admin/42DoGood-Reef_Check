@@ -9,7 +9,9 @@ export default function UploadPhotoLayout({
 }) {
   return (
     <Box>
-      <Box sx={{ backgroundColor: "primary.light" }}>{hero}</Box>
+      <Box sx={{ backgroundColor: { sx: "white", md: "primary.light" } }}>
+        {hero}
+      </Box>
       <Box>{children}</Box>
     </Box>
   );

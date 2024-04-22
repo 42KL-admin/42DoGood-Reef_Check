@@ -7,8 +7,21 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import IconButton from "@mui/material/IconButton";
 import { useRouter } from "next/navigation";
 
-export default function ResultListNavBar() {
+interface ResultListNavBarProps {
+  backToPath: string;
+  backAction: () => void;
+  title: string;
+  ctaButton?: React.ReactNode;
+}
+
+export default function ResultListNavBar(props: ResultListNavBarProps) {
   const router = useRouter();
+  const { backToPath, backAction, title, ctaButton } = props;
+
+  const handleBack = () => {
+    router.push(backToPath);
+    backAction();
+  };
 
   return (
     <Container maxWidth="xl">
@@ -19,16 +32,14 @@ export default function ResultListNavBar() {
           columnGap={2.5}
           alignItems="center"
         >
-          <IconButton aria-label="back" onClick={() => router.push("/upload")}>
+          <IconButton aria-label="back" onClick={handleBack}>
             <ArrowBack sx={{ color: "black" }} />
           </IconButton>
           <Typography fontSize={28} fontWeight={400}>
-            My reef slates
+            {title}
           </Typography>
         </Box>
-        {/* <RoundedButton itemType="" variant="contained">
-          Export
-        </RoundedButton> */}
+        {ctaButton}
       </Box>
     </Container>
   );
