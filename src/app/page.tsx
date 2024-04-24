@@ -3,7 +3,7 @@
 import { Button, Typography, Container, Box, TextField } from "@mui/material";
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [email, setEmail] = useState("");
@@ -15,7 +15,7 @@ export default function Home() {
       try {
         const response = await fetch("/api/login", {
           method: "POST",
-          body: JSON.stringify({email}),
+          body: JSON.stringify({ email }),
         });
         const payload = await response.json();
         alert(payload.message);

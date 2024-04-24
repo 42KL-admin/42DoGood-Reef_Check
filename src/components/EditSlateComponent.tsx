@@ -1,14 +1,18 @@
 "use client";
 
+import { useSelectedTabStore } from "@/stores/resultTabStore";
 import { useSelectedSlateStore } from "@/stores/slateStore";
+import theme from "@/theme";
 import { Add, Remove, ZoomIn } from "@mui/icons-material";
-import { Box, IconButton } from "@mui/material";
+import { Box, IconButton, useMediaQuery } from "@mui/material";
 import Image from "next/image";
+import { Fragment } from "react";
 import {
   TransformComponent,
   TransformWrapper,
   useControls,
 } from "react-zoom-pan-pinch";
+import TabPanel from "./TabPanel";
 
 function EditControls() {
   const { zoomIn, zoomOut, resetTransform } = useControls();
@@ -37,6 +41,7 @@ function EditControls() {
           px: 2.5,
           py: 1,
           borderRadius: 10,
+          boxShadow: 2,
         }}
       >
         <IconButton aria-label="zoom out" onClick={() => zoomOut()}>
@@ -57,38 +62,33 @@ function EditImagePreview() {
   const slate = useSelectedSlateStore((state) => state.slate);
 
   return (
-    <Box
-      width="100%"
-      display="grid"
-      alignContent={"center"}
-      justifyContent={"center"}
-    >
-      <TransformWrapper>
-        <TransformComponent>
-          {/* <img
-            src={`data:image/png;base64,${slate?.base64}`}
-            alt=""
-            style={{ objectFit: "cover" }}
-            width={"100%"}
-          /> */}
-          <Image
-            src={`data:image/png;base64,${slate?.base64}`}
-            alt={"image preview"}
-            width={0}
-            height={0}
-            sizes="100vw"
-            style={{ width: "100%", height: "auto", objectFit: "cover" }}
-          />
-        </TransformComponent>
-        <EditControls />
-      </TransformWrapper>
-    </Box>
+    slate && (
+      <Box
+        width="100%"
+        display="grid"
+        alignContent={"center"}
+        justifyContent={"center"}
+      >
+        <TransformWrapper>
+          <TransformComponent>
+            <Image
+              src={slate.base64}
+              alt={slate.file?.name || "image preview"}
+              width={0}
+              height={0}
+              sizes="100vw"
+              style={{ width: "100%", height: "auto", objectFit: "cover" }}
+            />
+          </TransformComponent>
+          <EditControls />
+        </TransformWrapper>
+      </Box>
+    )
   );
 }
 
-export default function EditSlateComponent() {
+function EditSlateLargerScreen() {
   const slate = useSelectedSlateStore((state) => state.slate);
-
   return slate ? (
     <Box display="flex" height={"100vh"}>
       <Box
@@ -103,5 +103,47 @@ export default function EditSlateComponent() {
     </Box>
   ) : (
     <></>
+  );
+}
+
+function EditSlateSmallerScreen() {
+  const slate = useSelectedSlateStore((state) => state.slate);
+  const selectedTab = useSelectedTabStore((state) => state.tab);
+
+  console.log(selectedTab);
+
+  return slate ? (
+    <Box width={"100%"} height={"100%"}>
+      <TabPanel tag={"slatePicture"} value={selectedTab as string}>
+        <Box
+          display={"grid"}
+          justifyItems={"center"}
+          width={"100%"}
+          height={"100%"}
+        >
+          <EditImagePreview />
+        </Box>
+      </TabPanel>
+
+      <TabPanel tag={"excelSheet"} value={selectedTab as string}>
+        <Box
+          width={"100%"}
+          height={"100%"}
+          sx={{ backgroundColor: "teal" }}
+        ></Box>
+      </TabPanel>
+    </Box>
+  ) : (
+    <></>
+  );
+}
+
+export default function EditSlateComponent() {
+  const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
+
+  return isLargerScreen ? (
+    <EditSlateLargerScreen />
+  ) : (
+    <EditSlateSmallerScreen />
   );
 }

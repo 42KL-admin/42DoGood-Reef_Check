@@ -23,14 +23,14 @@ export default function ResultComponent({ slate }: { slate: SlateState }) {
         borderRadius={3}
         sx={{ backgroundColor: "white" }}
       >
-        {/* <CardActionArea onClick={() => setSlate(slate)}>
+        <CardActionArea onClick={() => setSelectedSlate(slate)}>
           <Box py={6} px={2.5}>
             <Typography sx={{ flex: 1 }}>{slate.file.name}</Typography>
           </Box>
         </CardActionArea>
         <CardActions>
-          <MoreActionButton id={slate.id} />
-        </CardActions> */}
+          <MoreActionButton id={"1"} /> {/* fix this */}
+        </CardActions>
       </Box>
     </Card>
   );
