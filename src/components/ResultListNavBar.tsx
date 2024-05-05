@@ -6,6 +6,12 @@ import Container from "@mui/material/Container";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import IconButton from "@mui/material/IconButton";
 import { useRouter } from "next/navigation";
+import { useMediaQuery } from "@mui/material";
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
+import theme from "@/theme";
+import { ResultTab, useSelectedTabStore } from "@/stores/resultTabStore";
+import React from "react";
 
 interface ResultListNavBarProps {
   backToPath: string;
@@ -14,9 +20,34 @@ interface ResultListNavBarProps {
   ctaButton?: React.ReactNode;
 }
 
+function ResultTabList() {
+  const selectedTab = useSelectedTabStore((state) => state.tab);
+  const setSelectedTab = useSelectedTabStore((state) => state.setSelectedTab);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+    setSelectedTab(newValue as ResultTab);
+  };
+
+  return (
+    <Tabs value={selectedTab} onChange={handleChange}>
+      <Tab
+        label="Slate Picture"
+        id="slate-picture-tab"
+        value={"slatePicture" as ResultTab}
+      />
+      <Tab
+        label="Excel Sheet"
+        id="excel-sheet-tab"
+        value={"excelSheet" as ResultTab}
+      />
+    </Tabs>
+  );
+}
+
 export default function ResultListNavBar(props: ResultListNavBarProps) {
   const router = useRouter();
   const { backToPath, backAction, title, ctaButton } = props;
+  const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
 
   const handleBack = () => {
     router.push(backToPath);
@@ -24,8 +55,12 @@ export default function ResultListNavBar(props: ResultListNavBarProps) {
   };
 
   return (
-    <Container maxWidth="xl">
-      <Box display="flex" justifyContent="space-between" px={8} py={7.5}>
+    <Container maxWidth="xl" sx={{ mt: { xs: 3 } }}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        sx={{ p: { xs: 2.5, md: 7.5 } }}
+      >
         <Box
           display="flex"
           flexDirection="row"
@@ -35,10 +70,13 @@ export default function ResultListNavBar(props: ResultListNavBarProps) {
           <IconButton aria-label="back" onClick={handleBack}>
             <ArrowBack sx={{ color: "black" }} />
           </IconButton>
-          <Typography fontSize={28} fontWeight={400}>
-            {title}
-          </Typography>
+          {isLargerScreen && (
+            <Typography fontSize={28} fontWeight={400}>
+              {title}
+            </Typography>
+          )}
         </Box>
+        {!isLargerScreen && <ResultTabList />}
         {ctaButton}
       </Box>
     </Container>

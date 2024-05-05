@@ -52,13 +52,14 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
     set((state) => ({
       rows: state.rows.map((row) => {
         if (row.id === id) {
-          return {
+          const updatedRow = {
             ...row,
             [type]: {
               ...row[type],
               file: file,
             },
           };
+          return updatedRow;
         }
         return row;
       }),

@@ -9,9 +9,10 @@ import { TransitionGroup } from "react-transition-group";
 import { Collapse, Drawer } from "@mui/material";
 import { RoundedButton } from "@/components/RoundedButton";
 import { useFileRowStore } from "@/stores/fileRowStore";
+import { useEffect } from "react";
 
 export default function UploadPhotoSection() {
-  const rows = useFileRowStore((state) => state.rows); // useMemo here
+  const rows = useFileRowStore((state) => state.rows);
   const addRow = useFileRowStore((state) => state.addRow);
 
   return (
