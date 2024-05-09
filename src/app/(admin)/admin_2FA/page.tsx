@@ -6,23 +6,17 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function Admin_2FA() {
+  const [email, setEmail] = useState("");
   const [token, setToken] = useState("");
 
   const router = useRouter();
-  // const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   if (token) {
-  //     alert(`Proceeding with token: ${token}`);
-  //     // settoken("");
-  //   }
-  // };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (token) {    // #TODO Was copied from login page, convert fetch for 2fa token
       try {
-        const response = await fetch("/api/login", {
+        const response = await fetch("/api/admin/EmailOTP", {
           method: "POST",
-          body: JSON.stringify({token}),
+          body: JSON.stringify({ email, token}),
         });
         const payload = await response.json();
         alert(payload.message);
