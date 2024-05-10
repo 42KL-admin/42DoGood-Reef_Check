@@ -61,7 +61,6 @@ export async function PUT(request: NextRequest, response: NextResponse) {
         const client = await clientPromise;
         const db = client.db('42reef-check');
         
-        // Perform actions based on the 'action' parameter
         if (role === 'can edit') {
             // Removes the role from the admin
             await db.collection('users').updateOne(
@@ -91,17 +90,14 @@ export async function DELETE(request: NextRequest, response: NextResponse) {
         const client = await clientPromise;
         const db = client.db('42reef-check');
         
-        // Perform actions based on the 'action' parameter
-        if (email) {
-            // Removes the role from the admin
-            await db.collection('users').deleteMany(
-                { email: email }
-            );
-        }
-        else {
-            throw new Error("Invalid email specified");
-        }
-    return NextResponse.json({ message: "User deleted successfully" }, { status: 200 });
+		const emailExist = await db.collection('users').findOne({ email });
+		// checks if the email is present in the database
+		if (!emailExist) {
+		  return NextResponse.json({ message: 'Email does not exist' }, { status: 400 });
+		}
+		// Deletes all the user with the matching email
+		await db.collection('users').deleteMany({ email: email });
+    	return NextResponse.json({ message: "User deleted successfully" }, { status: 200 });
 	}
     catch (error) {
         return NextResponse.json({ message: "" + error }, { status: 400 });

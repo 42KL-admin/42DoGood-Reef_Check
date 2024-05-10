@@ -70,9 +70,23 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
   const [open, setOpen] = useState<boolean>(true);
   const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
 
-//   const handlePermissionChange = (role: EmailRole) => {
-//     updateRole( row.email, role);
-//   };
+  const handleRemoveRow = async (role: EmailRole) => {
+	try {
+		const response = await fetch('/api/admin/Dashboard', {
+		  method: 'DELETE',
+		  body: JSON.stringify({ email }),
+		});
+		const payload = await response.json();
+  
+		if (response.status === 200) {
+			removeRow( row.email);
+		} else {
+		  console.error('Error:', payload.message);
+		}
+	  } catch (error) {
+		console.error('Error:', error);
+	  }
+	};
 
   const handlePermissionChange = async (role: EmailRole) => {
     try {
@@ -125,7 +139,7 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
           </Dropdownpermission>
           <IconButton
             aria-label="delete"
-            onClick={() => removeRow(row.email)}
+            onClick={() => handleRemoveRow(row.email)}
             sx={{ display: { xs: "none", md: "block" } }}
           >
             <Delete />
