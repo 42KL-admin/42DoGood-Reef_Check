@@ -41,34 +41,11 @@ export const useEmailRowStore = create<EmailRowSet & EmailRowActions>()((set, ge
 		rows: state.rows.filter((row) => row.email !== email),
     })),
 
-	// updatePermission: (email: string, permission: EmailRole) =>
-	// 	set((state) => ({
-	// 	rows: state.rows.map((row) => 
-	// 	row.email === email ? { ...row, permission } : row)
-    // })),
-
-	updateRole: async (email: string, role: EmailRole) => {
-		try {
-		  const response = await fetch('/api/emails', {
-			method: 'POST',
-			headers: {
-			  'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ email, role }),
-		  });
-	
-		  if (response.ok) {
-			const { data } = await response.json();
-			set({
-			  rows: get().rows.map((row) => (row.email === email ? data : row)),
-			});
-		  } else {
-			console.error('Error updating role');
-		  }
-		} catch (error) {
-		  console.error('Error updating role:', error);
-		}
-	  },
+	updateRole: (email: string, role: EmailRole) =>
+		set((state) => ({
+		rows: state.rows.map((row) => 
+		row.email === email ? { ...row, role } : row)
+    })),
 
 	clearRows: 	() => set({ rows: [] }),
   // ...

@@ -65,34 +65,30 @@ function EmailRowCollapsibleControl({
 
 export default function EmailRowComponent(props: EmailRowComponentProps) {
   const { index, row, email } = props;
-  const updatePermission = useEmailRowStore((state) => state.updateRole);
+  const updateRole = useEmailRowStore((state) => state.updateRole);
   const removeRow = useEmailRowStore((state) => state.removeRow);
   const [open, setOpen] = useState<boolean>(true);
   const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
 
 //   const handlePermissionChange = (role: EmailRole) => {
-//     updatePermission( row.email, role);
+//     updateRole( row.email, role);
 //   };
 
   const handlePermissionChange = async (role: EmailRole) => {
     try {
       const response = await fetch('/api/admin/Dashboard', {
         method: 'PUT',
-        body: JSON.stringify({ email, role }), // Specify action as 'add'
+        body: JSON.stringify({ email, role }),
       });
       const payload = await response.json();
 
-      // Handle response based on your requirements
       if (response.status === 200) {
-        updatePermission(row.email, role);
+        updateRole(row.email, role);
       } else {
         console.error('Error:', payload.message);
-        // Handle error
       }
-	  updatePermission( row.email, role);
     } catch (error) {
       console.error('Error:', error);
-      // Handle error
     }
   };
 
