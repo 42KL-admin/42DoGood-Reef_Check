@@ -70,7 +70,7 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
   const [open, setOpen] = useState<boolean>(true);
   const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
 
-  const handleRemoveRow = async (role: EmailRole) => {
+  const handleRemoveRow = async () => {
 	try {
 		const response = await fetch('/api/admin/Dashboard', {
 		  method: 'DELETE',
@@ -139,7 +139,7 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
           </Dropdownpermission>
           <IconButton
             aria-label="delete"
-            onClick={() => handleRemoveRow(row.email)}
+            onClick={() => handleRemoveRow()}
             sx={{ display: { xs: "none", md: "block" } }}
           >
             <Delete />

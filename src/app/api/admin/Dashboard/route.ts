@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
 	  const db = client.db('42reef-check');
 	  const users = await db.collection('users').find({}, { projection: { email: 1, role: 1 } }).toArray();
   
-	  // Map the documents to the desired structure
+	  // Map the data to the desired structure
 	  const emails = users.map(({ email, role }) => ({
 		email,
 		role: role || 'can edit', // Assign 'can edit' if role is not present
@@ -35,7 +35,6 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json({ message: 'Email already exists' }, { status: 400 });
 	  }
 
-	  // Prepare the document to be inserted
 	  if (role === "admin")
 		await db.collection('users').insertOne({email, role});
 	  else
