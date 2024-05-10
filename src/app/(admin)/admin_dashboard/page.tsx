@@ -5,28 +5,54 @@ import Add from "@mui/icons-material/Add";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TransitionGroup } from "react-transition-group";
 import { Divider } from "@mui/material";
 import { Collapse, Drawer } from "@mui/material";
 import { RoundedButton } from "@/components/RoundedButton";
 import { useEmailRowStore } from "@/stores/emailRowStore";
-import {EmailPermission } from "@/stores/types";
+import { EmailRole, EmailRow } from "@/stores/types";
 import SortByPermission from "@/components/SortbyPermission";
 
 export default function UploadEmailSection() {
-  const rows = useEmailRowStore((state) => state.rows); // useMemo here
 
-  const [sortByPermission, setSortByPermission] = useState<EmailPermission | null>(null);
+	const { addRow, rows, clearRows } = useEmailRowStore();
 
-  const handleSortByPermission = (permission: EmailPermission | null) => {
-    setSortByPermission(permission);
-  };
+	const [sortByRole, setSortByRole] = useState<EmailRole | null>(null);
 
-  // Filter rows based on sortByPermission
-  const filteredRows = sortByPermission
-    ? rows.filter((row) => row.permission === sortByPermission)
-    : rows;
+	const handleSortByRole = (role: EmailRole | null) => {
+		setSortByRole(role);
+	};
+
+	// Filter rows based on sortByRole
+	const filteredRows = sortByRole
+	? rows.filter((row) => row.role === sortByRole)
+	: rows;
+  
+	useEffect(() => {
+	  const fetchEmails = async () => {
+		try {
+		  const response = await fetch('/api/admin/Dashboard', {
+			method: 'GET'
+		  });
+		  const payload = await response.json();
+  
+		  // Clear the existing rows
+		  clearRows();
+		//   alert(payload.message); // Debugging purposes
+  
+		  // Add the fetched emails to the store
+		  payload.data.forEach(({ email, role }: EmailRow) => {
+			addRow(email, role);
+		  });
+		} catch (error) {
+		  console.error('Error fetching emails:', error);
+		}
+	  };
+  
+	  fetchEmails();
+	}, [addRow, clearRows]);
+
 
   return (
     <Box pt={12}>
@@ -48,7 +74,7 @@ export default function UploadEmailSection() {
             fontWeight: "bold",
             }}>
             Email address
-            <SortByPermission onSortByPermission={handleSortByPermission} />
+            <SortByPermission onSortByPermission={handleSortByRole} />
         </Box>
         <Box
           display="grid"

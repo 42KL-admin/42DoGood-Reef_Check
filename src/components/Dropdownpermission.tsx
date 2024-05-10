@@ -6,12 +6,12 @@ import Menu, { MenuProps } from "@mui/material/Menu";
 import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
-import { EmailPermission } from '@/stores/types';
+import { EmailRole } from '@/stores/types';
 
-const DropdownButton = styled(Button)<ButtonProps & { borderColor?: string }>(({ theme, borderColor }) => ({
+const DropdownButton = styled(Button)<ButtonProps & { bordercolor?: string }>(({ theme, bordercolor }) => ({
   borderRadius: "12px",
   padding: "0 20px",
-  borderColor: borderColor || "#C3C3C3",
+  borderColor: bordercolor || "#C3C3C3",
   backgroundColor: 'white',
   color: "#494949",
   fontWeight: 500,
@@ -53,8 +53,8 @@ const StyledMenu = styled((props: MenuProps) => (
 }));
 
 interface DropdownPermissionProps {
-  initialPermission: EmailPermission;
-  onChange: (permission: EmailPermission) => void;
+  initialPermission: EmailRole;
+  onChange: (permission: EmailRole) => void;
   borderColor: string;
 }
 
@@ -69,7 +69,7 @@ export default function DropdownPermission({initialPermission, onChange, borderC
     setAnchorEl(null); 
   };
 
-  const handlePermissionSelect = (permission : EmailPermission) => {
+  const handlePermissionSelect = (permission : EmailRole) => {
     onChange(permission);
     handleClose();
   };
@@ -86,7 +86,7 @@ export default function DropdownPermission({initialPermission, onChange, borderC
         endIcon={<ArrowDropDown />}
         size="small"
         onClick={handleClick}
-        borderColor={borderColor}
+        bordercolor={borderColor}
       >
             {initialPermission.charAt(0).toUpperCase() + initialPermission.slice(1)}
       </DropdownButton>
@@ -99,8 +99,8 @@ export default function DropdownPermission({initialPermission, onChange, borderC
         open={open}
         onClose={handleClose}
       >
-        <MenuItem onClick={() => handlePermissionSelect("can edit")}>Can edit</MenuItem>
-        <MenuItem onClick={() => handlePermissionSelect("admin")}>Admin</MenuItem>
+        <MenuItem onClick={() => handlePermissionSelect('can edit')}>Can edit</MenuItem>
+        <MenuItem onClick={() => handlePermissionSelect('admin')}>Admin</MenuItem>
       </StyledMenu>
     </div>
   );

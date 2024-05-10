@@ -5,7 +5,7 @@ import { Fragment, useState } from "react";
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import { Divider, TextField, Typography, useMediaQuery } from "@mui/material";
 import theme from "@/theme";
-import { EmailRow, EmailPermission } from "@/stores/types";
+import { EmailRow, EmailRole } from "@/stores/types";
 import { useEmailRowStore } from "@/stores/emailRowStore";
 import Dropdownpermission from "./Dropdownpermission";
 
@@ -65,13 +65,35 @@ function EmailRowCollapsibleControl({
 
 export default function EmailRowComponent(props: EmailRowComponentProps) {
   const { index, row, email } = props;
-  const updatePermission = useEmailRowStore((state) => state.updatePermission);
+  const updatePermission = useEmailRowStore((state) => state.updateRole);
   const removeRow = useEmailRowStore((state) => state.removeRow);
   const [open, setOpen] = useState<boolean>(true);
   const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
 
-  const handlePermissionChange = (permission: EmailPermission) => {
-    updatePermission( row.email, permission);
+//   const handlePermissionChange = (role: EmailRole) => {
+//     updatePermission( row.email, role);
+//   };
+
+  const handlePermissionChange = async (role: EmailRole) => {
+    try {
+      const response = await fetch('/api/admin/Dashboard', {
+        method: 'PUT',
+        body: JSON.stringify({ email, role }), // Specify action as 'add'
+      });
+      const payload = await response.json();
+
+      // Handle response based on your requirements
+      if (response.status === 200) {
+        updatePermission(row.email, role);
+      } else {
+        console.error('Error:', payload.message);
+        // Handle error
+      }
+	  updatePermission( row.email, role);
+    } catch (error) {
+      console.error('Error:', error);
+      // Handle error
+    }
   };
 
   return (
@@ -98,10 +120,10 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
             sx={{ flex: 1, flexDirection: { xs: "column", md: "row" } ,fontFamily: 'Roboto', fontSize: "16 px",}}
             justifyContent="space-between"
           >
-            {email} , {row.permission}
+            {email}
           </Box>
           <Dropdownpermission 
-            initialPermission={row.permission}
+            initialPermission={row.role}
             onChange={handlePermissionChange}
             borderColor="white">
           </Dropdownpermission>
