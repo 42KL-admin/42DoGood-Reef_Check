@@ -1,13 +1,32 @@
 "use client";
 
 import { Button, Typography, Container, Box, TextField } from "@mui/material";
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
+import { getUserFromCookie } from "../../lib/cookies";
+import { LoggedUser } from "@/stores/types";
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const router = useRouter();
+  const setLoggedUserState = useLoggedUserStateStore(state => state.setLoggedUserState);
+
+  useLayoutEffect(() => {
+    const userCookie: LoggedUser = getUserFromCookie();
+
+    // NOTE: Force redirection using role
+    if (userCookie) {
+      setLoggedUserState(userCookie);
+      // NOTE: VERY VULNERABLE! USE SESSION ID INSTEAD!
+      if (userCookie.role === "admin") {
+        router.push("/admin_2FA")
+      } else {
+        router.push("/upload");
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,13 +37,27 @@ export default function Home() {
           body: JSON.stringify({ email }),
         });
         const payload = await response.json();
+        // TODO: Implement toast UI
         alert(payload.message);
-        // TODO: Set cookie here
-        if (response.status == 200) {
-          if (payload.user["role"] == "admin")
+        if (response.status === 200) {
+          if (payload.user["role"] === "admin") {
+            const user = payload.user;
+            setLoggedUserState({
+              email: user.email,
+              role: "admin",
+              isOTPVerified: false,
+            });
             router.push("/admin_2FA");
-          else
+          }
+          else {
+            const user = payload.user;
+            setLoggedUserState({
+              email: user.email,
+              role: "user",
+              isOTPVerified: false,
+            });
             router.push("/upload");
+          }
         }
       } catch (error) {
         console.error("Error:", error);

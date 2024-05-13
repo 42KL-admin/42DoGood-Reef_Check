@@ -6,8 +6,7 @@ import Menu, { MenuProps } from "@mui/material/Menu";
 import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
-
-// TODO: Improve this component, not done yet.
+import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
 
 const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
   borderRadius: "12px",
@@ -47,6 +46,9 @@ const StyledMenu = styled((props: MenuProps) => (
 export default function DropdownMenu() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const user = useLoggedUserStateStore(state => state.user);
+  const setLoggedUserState = useLoggedUserStateStore(state => state.setLoggedUserState);
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -78,9 +80,8 @@ export default function DropdownMenu() {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem>History?</MenuItem>
-        <MenuItem>Logout?</MenuItem>
-        <MenuItem>Idk</MenuItem>
+        {user && user.role === "admin" && <MenuItem>Admin Dashboard</MenuItem>}
+        <MenuItem onClick={() => setLoggedUserState(null)}>Logout</MenuItem>
       </StyledMenu>
     </div>
   );
