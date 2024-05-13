@@ -21,7 +21,7 @@ export default function Home() {
       setLoggedUserState(userCookie);
       // NOTE: VERY VULNERABLE! USE SESSION ID INSTEAD!
       if (userCookie.role === "admin") {
-        router.push("/admin_2FA")
+        router.push("/admin_dashboard")
       } else {
         router.push("/upload");
       }

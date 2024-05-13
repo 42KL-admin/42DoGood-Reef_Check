@@ -1,13 +1,16 @@
 "use client";
 
-import { Button, Typography, Container, Box, TextField } from "@mui/material";
+import { Button, Container, Box, TextField } from "@mui/material";
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
 
 export default function Admin_2FA() {
   const [email, setEmail] = useState("");
   const [token, setToken] = useState("");
+  const user = useLoggedUserStateStore(state => state.user);
+  const updateLoggedUserOTPStatus = useLoggedUserStateStore(state => state.updateLoggedUserOTPStatus);
 
   const router = useRouter();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -16,7 +19,7 @@ export default function Admin_2FA() {
       try {
         const response = await fetch("/api/admin/EmailOTP", {
           method: "POST",
-          body: JSON.stringify({ email, token}),
+          body: JSON.stringify({ email, token }),
         });
         const payload = await response.json();
         alert(payload.message);
@@ -26,6 +29,9 @@ export default function Admin_2FA() {
       } catch (error) {
         console.error("Error:", error);
       }
+      // NOTE: dummy testing. no matter what, just set OTP is verified since the OTP part is not done yet.
+      // TODO: FIX THIS!
+      user && updateLoggedUserOTPStatus(user, true);
     }
   };
 

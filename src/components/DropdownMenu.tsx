@@ -7,6 +7,7 @@ import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
 import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
+import { useRouter } from "next/navigation";
 
 const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
   borderRadius: "12px",
@@ -48,6 +49,7 @@ export default function DropdownMenu() {
   const open = Boolean(anchorEl);
   const user = useLoggedUserStateStore(state => state.user);
   const setLoggedUserState = useLoggedUserStateStore(state => state.setLoggedUserState);
+  const router = useRouter();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -80,7 +82,7 @@ export default function DropdownMenu() {
         open={open}
         onClose={handleClose}
       >
-        {user && user.role === "admin" && <MenuItem>Admin Dashboard</MenuItem>}
+        {user && user.role === "admin" && <MenuItem onClick={() => router.push("/admin_dashboard")}>Admin Dashboard</MenuItem>}
         <MenuItem onClick={() => setLoggedUserState(null)}>Logout</MenuItem>
       </StyledMenu>
     </div>
