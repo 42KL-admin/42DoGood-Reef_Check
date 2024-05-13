@@ -82,6 +82,7 @@ export default function DropdownMenu() {
         open={open}
         onClose={handleClose}
       >
+        {user && user.role === "admin" && <MenuItem onClick={() => router.push("/upload")}>Upload Slates</MenuItem>}
         {user && user.role === "admin" && <MenuItem onClick={() => router.push("/admin_dashboard")}>Admin Dashboard</MenuItem>}
         <MenuItem onClick={() => setLoggedUserState(null)}>Logout</MenuItem>
       </StyledMenu>
