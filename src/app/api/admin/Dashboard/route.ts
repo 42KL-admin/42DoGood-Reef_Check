@@ -12,8 +12,8 @@ export async function GET(req: NextRequest) {
 	  // Map the data to the desired structure
 	  const emails = users.map(({ email, role }) => ({
 		email,
-		role: role || 'can edit', // Assign 'can edit' if role is not present
-	  }));
+		role: role === 'user' ? 'can edit' : role, // Set role to 'can edit' only if current role is 'user'
+	}));
   
 	  return NextResponse.json({ success: true, data: emails }, { status: 200 });
 	} catch (error) {
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 	  if (role === "admin")
 		await db.collection('users').insertOne({email, role});
 	  else
-	  	await db.collection('users').insertOne({email});
+	  	await db.collection('users').insertOne({email, role: 'user'});
 	//   if (role === 'admin') {
 	// 	document.role = 'admin';
 	//   }
@@ -64,13 +64,13 @@ export async function PUT(request: NextRequest, response: NextResponse) {
             // Removes the role from the admin
             await db.collection('users').updateOne(
                 { email: email },
-                { $unset: { role: role } }
+                { $set: { role: 'user' } }
             );
         } else if (role === 'admin') {
             // Add the role to the admin
             await db.collection('users').updateOne(
                 { email: email },
-                { $set: { role } }
+                { $set: { role: 'admin' } }
             );
         } else {
             throw new Error("Invalid role specified");
