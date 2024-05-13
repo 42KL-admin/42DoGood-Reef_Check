@@ -8,7 +8,7 @@ export type SlateRecognitionStatus =
   | "unknown"
   | "processing";
 
-  export type EmailRole = 
+export type EmailRole =
   | 'can edit'
   | 'admin';
 
@@ -31,4 +31,16 @@ export type FileRow = {
 export interface EmailRow {
   email: string;
   role: EmailRole;
+}
+
+// NOTE: Maybe can just use EmailRole for the User's role
+export type UserRole =
+  | 'admin'
+  | 'user';
+
+export interface LoggedUser {
+  // sessionId: string;
+  email: string;
+  role: UserRole;
+  isOTPVerified: boolean;
 }

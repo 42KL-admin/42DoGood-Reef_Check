@@ -19,11 +19,12 @@ export default function Home() {
         });
         const payload = await response.json();
         alert(payload.message);
+        // TODO: Set cookie here
         if (response.status == 200) {
-			if (payload.user["role"] == "admin")
-            	router.push("/admin_2FA");
-			else
-				router.push("/upload");
+          if (payload.user["role"] == "admin")
+            router.push("/admin_2FA");
+          else
+            router.push("/upload");
         }
       } catch (error) {
         console.error("Error:", error);
