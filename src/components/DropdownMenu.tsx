@@ -69,7 +69,7 @@ export default function DropdownMenu() {
         size="small"
         onClick={handleClick}
       >
-        user@email.com
+        {user && user.email}
       </DropdownButton>
       <StyledMenu
         id="dropdown-menu"
