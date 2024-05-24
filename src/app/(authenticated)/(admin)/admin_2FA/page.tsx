@@ -1,39 +1,90 @@
 "use client";
 
-import { Button, Container, Box, TextField } from "@mui/material";
+import {useEffect} from "react";
+import { Button, Container, Box, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
 
 export default function Admin_2FA() {
-  const [email, setEmail] = useState("");
-  const [token, setToken] = useState("");
-  const user = useLoggedUserStateStore(state => state.user);
-  const updateLoggedUserOTPStatus = useLoggedUserStateStore(state => state.updateLoggedUserOTPStatus);
-
-  const router = useRouter();
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (token) {    // #TODO Was copied from login page, convert fetch for 2fa token
-      try {
-        const response = await fetch("/api/admin/EmailOTP", {
-          method: "POST",
-          body: JSON.stringify({ email, token }),
-        });
-        const payload = await response.json();
-        alert(payload.message);
-        if (response.status == 200) {
-          router.push("/admin_dashboard");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      }
-      // NOTE: dummy testing. no matter what, just set OTP is verified since the OTP part is not done yet.
-      // TODO: FIX THIS!
-      user && updateLoggedUserOTPStatus(user, true);
-    }
-  };
+	const [email, setEmail] = useState("");
+	const [token, setToken] = useState("");
+	const [isResendDisabled, setIsResendDisabled] = useState(false);
+	const [resendTimeoutId, setResendTimeoutId] = useState(0);
+	const user = useLoggedUserStateStore((state) => state.user);
+	const updateLoggedUserOTPStatus = useLoggedUserStateStore((state) => state.updateLoggedUserOTPStatus);
+  
+	const router = useRouter();
+  
+	useEffect(() => {
+	  const sendOTP = async () => {
+		try {
+		  const response = await fetch("/api/admin/EmailOTP", {
+			method: "POST",
+			body: JSON.stringify({ adminEmail: user?.email }),
+		  });
+		  const payload = await response.json();
+		  if (!response.ok) {
+			console.error(payload.message);
+		  }
+		} catch (error) {
+		  console.error("Error:", error);
+		}
+	  };
+  
+	  if (user?.email) {
+		sendOTP();
+	  }
+	}, [user?.email]);
+  
+	const resendOTP = async () => {
+	  try {
+		setIsResendDisabled(true); // Disable the button
+		clearTimeout(resendTimeoutId); // Clear any existing timeout
+  
+		const response = await fetch("/api/admin/EmailOTP", {
+		  method: "POST",
+		  body: JSON.stringify({ adminEmail: user?.email }),
+		});
+		const payload = await response.json();
+		if (!response.ok) {
+		  console.error(payload.message);
+		} else {
+		  alert(payload.message);
+		}
+  
+		// Set a timeout to re-enable the button after 5 seconds
+		const timeoutId = setTimeout(() => {
+		  setIsResendDisabled(false);
+		}, 5000);
+		setResendTimeoutId(timeoutId);
+	  } catch (error) {
+		console.error("Error:", error);
+		setIsResendDisabled(false); // Re-enable the button in case of an error
+	  }
+	};
+  
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+	  e.preventDefault();
+	  if (token) {
+		try {
+		  const response = await fetch("/api/admin/OTPVerification", {
+			method: "POST",
+			body: JSON.stringify({ email, token }),
+		  });
+		  const payload = await response.json();
+		  alert(payload.message);
+		  if (response.status == 200) {
+			user && updateLoggedUserOTPStatus(user, true);
+			router.push("/admin_dashboard");
+		  }
+		} catch (error) {
+		  console.error("Error:", error);
+		}
+	  }
+	};
+  
 
   return (
     <Container maxWidth="sm">
@@ -49,7 +100,7 @@ export default function Admin_2FA() {
         <Box marginBottom={0}>
           <Image src="/images/logo.png" alt="Logo" width={197} height={171} />
         </Box>
-        <Box component="form" onSubmit={handleSubmit} marginTop={2} width="70%">
+        <Box component="form" marginTop={2} width="70%">
           <TextField
             label="Enter 2FA Code"
             type="token"
@@ -58,7 +109,6 @@ export default function Admin_2FA() {
             fullWidth
             sx={{
               marginTop: "16px",
-              marginBottom: "16px",
               "& fieldset": {
                 borderColor: "primary.main",
                 borderWidth: "1px",
@@ -70,19 +120,43 @@ export default function Admin_2FA() {
               },
             }}
           />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{
-              borderRadius: "100px",
-              "&:hover": { backgroundColor: "#107888" },
-            }}
-            onClick={() => router.push("/admin_dashboard")}
-          >
+		  <Box display="flex" justifyContent="flex-start">
+		  <Typography
+              variant="body2"
+              sx={{
+                opacity: isResendDisabled ? 0.5 : 1,
+                marginTop: "4px",
+                marginBottom: "16px",
+                color: "primary.main",
+              }}
+            >
+              Didn't receive code?{" "}
+              <Typography
+                component="span"
+                sx={{
+                  textDecoration: "underline",
+                  cursor: isResendDisabled ? "not-allowed" : "pointer",
+                  color: "primary.main",
+                }}
+                onClick={!isResendDisabled ? resendOTP : undefined}
+              >
+                Send again
+              </Typography>
+            </Typography>
+          </Box>
+		<Button
+		type="submit"
+		variant="contained"
+		color="primary"
+		fullWidth
+		sx={{
+			borderRadius: "100px",
+			"&:hover": { backgroundColor: "#107888" },
+		}}
+		onClick={() => handleSubmit}
+		>
             Next
-          </Button>
+		</Button>
         </Box>
       </Box>
     </Container>

@@ -29,7 +29,7 @@ export default function SlatesRouteGroupLayout({
 
     if (user.isOTPVerified === false) {
       alert("PLEASE VERIFY YOUR OTP! NOTE: DEVELOPMENT PHASE, ANY NUMBER WILL WORK");
-      router.push("/admin_2FA");
+    //   router.push("/admin_2FA");
       return;
     }
   }, [user]);
