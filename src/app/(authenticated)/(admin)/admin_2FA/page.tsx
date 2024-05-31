@@ -14,136 +14,166 @@ export default function Admin_2FA() {
 	const [resendTimeoutId, setResendTimeoutId] = useState(0);
 	const user = useLoggedUserStateStore((state) => state.user);
 	const updateLoggedUserOTPStatus = useLoggedUserStateStore((state) => state.updateLoggedUserOTPStatus);
-  
+
 	const router = useRouter();
-  
+
 	useEffect(() => {
-	  const sendOTP = async () => {
+	const sendOTP = async () => {
 		try {
-		  const response = await fetch("/api/admin/EmailOTP", {
+
+			// const validated = await fetch("/api/admin/SessionID", {
+			// method: "GET",
+			// credentials: 'include', // gets cookies
+			// });
+
+			// const valid = await validated.json();
+			// if (valid.status == 200)	{
+			// 	router.push("/admin_dashboard");
+			// }
+
+			const response = await fetch("/api/admin/EmailOTP", {
 			method: "POST",
 			body: JSON.stringify({ adminEmail: user?.email }),
-		  });
-		  const payload = await response.json();
-		  if (!response.ok) {
-			console.error(payload.message);
-		  }
+			});
+			const payload = await response.json();
+			if (!response.ok) {
+				console.error(payload.message);
+			}
 		} catch (error) {
-		  console.error("Error:", error);
+			console.error("Error:", error);
 		}
-	  };
-  
-	  if (user?.email) {
+		};
+
+		if (user?.email) {
 		sendOTP();
-	  }
+		}
 	}, [user?.email]);
-  
+
 	const resendOTP = async () => {
-	  try {
+		try {
 		setIsResendDisabled(true); // Disable the button
 		clearTimeout(resendTimeoutId); // Clear any existing timeout
-  
+
 		const response = await fetch("/api/admin/EmailOTP", {
-		  method: "POST",
-		  body: JSON.stringify({ adminEmail: user?.email }),
+			method: "POST",
+			body: JSON.stringify({ adminEmail: user?.email }),
 		});
 		const payload = await response.json();
 		if (!response.ok) {
-		  console.error(payload.message);
+			console.error(payload.message);
 		} else {
-		  alert(payload.message);
+			alert(payload.message);
 		}
-  
+
 		// Set a timeout to re-enable the button after 5 seconds
 		const timeoutId = setTimeout(() => {
-		  setIsResendDisabled(false);
+			setIsResendDisabled(false);
 		}, 5000);
 		setResendTimeoutId(timeoutId);
-	  } catch (error) {
+		} catch (error) {
 		console.error("Error:", error);
 		setIsResendDisabled(false); // Re-enable the button in case of an error
-	  }
-	};
-  
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-	  e.preventDefault();
-	  if (token) {
-		try {
-		  const response = await fetch("/api/admin/OTPVerification", {
-			method: "POST",
-			body: JSON.stringify({ email, token }),
-		  });
-		  const payload = await response.json();
-		  alert(payload.message);
-		  if (response.status == 200) {
-			user && updateLoggedUserOTPStatus(user, true);
-			router.push("/admin_dashboard");
-		  }
-		} catch (error) {
-		  console.error("Error:", error);
 		}
-	  }
 	};
-  
 
-  return (
-    <Container maxWidth="sm">
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        minHeight="90vh"
-        textAlign="center"
-        padding={0}
-      >
-        <Box marginBottom={0}>
-          <Image src="/images/logo.png" alt="Logo" width={197} height={171} />
-        </Box>
-        <Box component="form" marginTop={2} width="70%">
-          <TextField
-            label="Enter 2FA Code"
-            type="token"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            fullWidth
-            sx={{
-              marginTop: "16px",
-              "& fieldset": {
-                borderColor: "primary.main",
-                borderWidth: "1px",
-              },
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "12px",
-                "&:hover fieldset": { borderColor: "#107888" },
-                "&.Mui-focused fieldset": { borderColor: "#107888" },
-              },
-            }}
-          />
-		  <Box display="flex" justifyContent="flex-start">
-		  <Typography
-              variant="body2"
-              sx={{
-                opacity: isResendDisabled ? 0.5 : 1,
-                marginTop: "4px",
-                marginBottom: "16px",
-                color: "primary.main",
-              }}
-            >
-              Didn't receive code?{" "}
-              <Typography
-                component="span"
-                sx={{
-                  textDecoration: "underline",
-                  cursor: isResendDisabled ? "not-allowed" : "pointer",
-                  color: "primary.main",
-                }}
-                onClick={!isResendDisabled ? resendOTP : undefined}
-              >
-                Send again
-              </Typography>
-            </Typography>
-          </Box>
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		if (token) {
+			try {
+				const response = await fetch("/api/admin/OTPVerification", {
+					method: "POST",
+					body: JSON.stringify({ adminEmail: email, otp: token }),
+				});
+
+				const clonedResponse = response.clone();
+
+				if (response.status === 200) {
+					
+					const sessionResponse = await fetch("/api/admin/createSessionID", {
+						method: "POST",
+						headers: {
+						"Content-Type": "application/json",
+						},
+						body: JSON.stringify({ adminEmail: user?.email }),
+					});
+			
+					if (sessionResponse.ok) {
+						// Redirect to admin dashboard if sessionID creation is successful
+						router.replace("/admin_dashboard");
+					} else {
+						const error = await sessionResponse.json();
+						console.error("Failed to create sessionID:", error.message);
+					}
+				}
+				else {
+					const error = await clonedResponse.json();
+					console.error("OTP verification failed:", error.message);
+				}
+			} catch (error) {
+				console.error("Error:", error);
+			}
+		}
+	};
+
+
+	return (
+	<Container maxWidth="sm">
+		<Box
+		display="flex"
+		flexDirection="column"
+		alignItems="center"
+		justifyContent="center"
+		minHeight="90vh"
+		textAlign="center"
+		padding={0}
+		>
+		<Box marginBottom={0}>
+			<Image src="/images/logo.png" alt="Logo" width={197} height={171} />
+		</Box>
+		<Box component="form" marginTop={2} width="70%">
+			<TextField
+			label="Enter 2FA Code"
+			type="token"
+			value={token}
+			onChange={(e) => setToken(e.target.value)}
+			fullWidth
+			sx={{
+				marginTop: "16px",
+				"& fieldset": {
+				borderColor: "primary.main",
+				borderWidth: "1px",
+				},
+				"& .MuiOutlinedInput-root": {
+				borderRadius: "12px",
+				"&:hover fieldset": { borderColor: "#107888" },
+				"&.Mui-focused fieldset": { borderColor: "#107888" },
+				},
+			}}
+			/>
+			<Box display="flex" justifyContent="flex-start">
+			<Typography
+				variant="body2"
+				sx={{
+				opacity: isResendDisabled ? 0.5 : 1,
+				marginTop: "4px",
+				marginBottom: "16px",
+				color: "primary.main",
+				}}
+			>
+				Didn't receive code?{" "}
+				<Typography
+				component="span"
+				sx={{
+					textDecoration: "underline",
+					cursor: isResendDisabled ? "not-allowed" : "pointer",
+					color: "primary.main",
+				}}
+				onClick={!isResendDisabled ? resendOTP : undefined}
+				>
+				Send again
+				</Typography>
+			</Typography>
+			</Box>
 		<Button
 		type="submit"
 		variant="contained"
@@ -155,10 +185,10 @@ export default function Admin_2FA() {
 		}}
 		onClick={() => handleSubmit}
 		>
-            Next
+			Next
 		</Button>
-        </Box>
-      </Box>
-    </Container>
-  );
-}
+		</Box>
+		</Box>
+	</Container>
+	);
+	}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Typography, Container, Box, TextField } from "@mui/material";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
@@ -13,19 +13,35 @@ export default function Home() {
   const router = useRouter();
   const setLoggedUserState = useLoggedUserStateStore(state => state.setLoggedUserState);
 
-  useLayoutEffect(() => {
-    const userCookie: LoggedUser = getUserFromCookie();
+  useEffect(() => {
+    const validateSessionID = async () => {
 
     // NOTE: Force redirection using role
-    if (userCookie) {
-      setLoggedUserState(userCookie);
-      // NOTE: VERY VULNERABLE! USE SESSION ID INSTEAD!
-      if (userCookie.role === "admin") {
-        router.push("/admin_dashboard")
-      } else {
-        router.push("/upload");
-      }
-    }
+    // if (userCookie) {
+    //   setLoggedUserState(userCookie);
+    //   // NOTE: VERY VULNERABLE! USE SESSION ID INSTEAD!
+    //   if (userCookie.role === "admin") {
+    //     router.push("/admin_dashboard")
+    //   } else {
+    //     router.push("/upload");
+    //   }
+    // }
+
+		try {
+			const response = await fetch("/api/admin/SessionID", {
+			method: "GET",
+			credentials: 'include', // gets cookies
+			});
+
+			const payload = await response.json();
+			if (payload.status == 200)	{
+				router.push("/admin_dashboard");
+			}
+
+		}	catch(error){
+			console.error("Error:", error);
+		}
+	};
   }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

@@ -8,17 +8,17 @@ import { TransitionGroup } from "react-transition-group";
 import { Collapse } from "@mui/material";
 import { useEmailRowStore } from "@/stores/emailRowStore";
 import { EmailRole, EmailRow } from "@/stores/types";
+import { useRouter } from "next/navigation";
 import SortByPermission from "@/components/SortbyPermission";
 
 export default function UploadEmailSection() {
-
   const { addRow, rows, clearRows } = useEmailRowStore();
-
   const [sortByRole, setSortByRole] = useState<EmailRole | null>(null);
-
   const handleSortByRole = (role: EmailRole | null) => {
     setSortByRole(role);
   };
+
+  const router = useRouter();
 
   // Filter rows based on sortByRole
   const filteredRows = sortByRole
@@ -28,6 +28,17 @@ export default function UploadEmailSection() {
   useEffect(() => {
     const fetchEmails = async () => {
       try {
+
+		// const validated = await fetch("/api/admin/SessionID", {
+		// 	method: "GET",
+		// 	credentials: 'include', // gets cookies
+		// 	});
+
+		// 	const valid = await validated.json();
+		// 	if (valid.status == 401)	{
+		// 		router.push("/login");
+		// 	}
+
         const response = await fetch('/api/admin/Dashboard', {
           method: 'GET'
         });
