@@ -1,16 +1,9 @@
-// pages/api/upload-images.js
 import { NextRequest } from 'next/server';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { Readable } from 'stream';
 
 const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME || 'default-account-name';
 const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME || 'default-container-name';
-
-export const config = {
-  api: {
-    bodyParser: false, // Disable the default body parser
-  },
-};
 
 // Define an asynchronous POST function to handle incoming requests
 export async function POST(request: NextRequest) {
@@ -21,8 +14,8 @@ export async function POST(request: NextRequest) {
 
     for (const [key, value] of formData.entries()) {
       if (key === 'sasToken') {
-        sasToken = value;
-      } else if (key === 'file') {
+        sasToken = value.toString();
+      } else if (key === 'file' && typeof value === 'object' && 'arrayBuffer' in value) {
         const filename = value.name.replaceAll(" ", "_");
         const fileBuffer = Buffer.from(await value.arrayBuffer());
         const fileType = value.type;
@@ -30,7 +23,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (files.length === 0 || !sasToken) {8 
+    if (files.length === 0 || !sasToken) {
       return new Response(JSON.stringify({ message: 'Files or SAS token missing' }), {
         status: 400,
         headers: {
@@ -62,7 +55,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
     });
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
     return new Response(JSON.stringify({ message: 'Internal server error', error: e.message }), {
       status: 500,
