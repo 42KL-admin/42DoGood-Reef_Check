@@ -3,6 +3,7 @@ import { BlobServiceClient } from '@azure/storage-blob';
 import { Readable } from 'stream';
 import { URLSearchParams } from 'url';
 import { generateResponse } from '../../../utils/response';
+import { UploadFilesRequest, File } from '../../../interfaces/api';
 
 const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME || 'default-account-name';
 const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME || 'default-container-name';
@@ -20,10 +21,10 @@ async function isSasTokenExpired(sasToken: string): Promise<boolean> {
 }
 
 // Function to parse form data
-async function parseFormData(request: NextRequest) {
+async function parseFormData(request: NextRequest): Promise<UploadFilesRequest> {
   const formData = await request.formData();
-  let sasToken;
-  const files = [];
+  let sasToken = '';
+  const files: File[] = [];
 
   for (const [key, value] of formData.entries()) {
     if (key === 'sasToken') {
@@ -40,7 +41,7 @@ async function parseFormData(request: NextRequest) {
 }
 
 // Function to upload files to Azure Blob Storage
-async function uploadFiles(sasToken: string, files: Array<{ filename: string, fileBuffer: Buffer, fileType: string }>) {
+async function uploadFiles(sasToken: string, files: File[]): Promise<void> {
   const url = `https://${accountName}.blob.core.windows.net/${containerName}?${sasToken}`;
   const blobServiceClient = new BlobServiceClient(url);
   const containerClient = blobServiceClient.getContainerClient(containerName);
@@ -56,21 +57,21 @@ async function uploadFiles(sasToken: string, files: Array<{ filename: string, fi
 }
 
 // Main POST handler
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<Response> {
   try {
     const { sasToken, files } = await parseFormData(request);
 
     if (files.length === 0 || !sasToken)
-      return generateResponse({ message: 'Files or SAS token missing' }, 400);
+      return generateResponse({ error: 'Files or SAS token missing' }, 400);
 
     if (await isSasTokenExpired(sasToken))
-      return generateResponse({ message: 'SAS token has expired' }, 400);
+      return generateResponse({ error: 'SAS token has expired' }, 400);
 
     await uploadFiles(sasToken, files);
 
     return generateResponse({ message: 'Files uploaded successfully' }, 200);
   } catch (e: any) {
     console.error(e);
-    return generateResponse({ message: 'Internal server error' }, 500, e.message);
+    return generateResponse({ message: 'Internal server error', error: e.message }, 500);
   }
 }
