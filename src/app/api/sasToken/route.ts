@@ -1,5 +1,5 @@
 import { generateBlobSASQueryParameters, StorageSharedKeyCredential, ContainerSASPermissions, SASProtocol } from '@azure/storage-blob';
-import { generateResponse } from '../../utils/response';
+import { generateResponse } from '../../../utils/response';
 
 // Providing default values to ensure these variables are always defined as strings
 const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME || 'default-account-name';

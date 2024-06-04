@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { Readable } from 'stream';
 import { URLSearchParams } from 'url';
-import { generateResponse } from '../../utils/response';
+import { generateResponse } from '../../../utils/response';
 
 const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME || 'default-account-name';
 const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME || 'default-container-name';
