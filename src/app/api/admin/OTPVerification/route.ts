@@ -24,7 +24,6 @@ export async function POST(request: NextRequest, response: NextResponse)
             await db.collection("adminOTPVerification").deleteMany({ adminEmail: adminEmail });
             throw new Error("OTP expired. Please request a new OTP.");
         } else {
-            console.log(otp);
             const hashedOTP = await bcrypt.hash(otp, admin.salt);
             const valid = await bcrypt.compare(hashedOTP, admin.otp);
 
