@@ -49,8 +49,8 @@ export async function POST(req: NextRequest)
 		const response = NextResponse.json({ message: 'Logged in successfully' });
         response.cookies.set('sessionID', sessionID, {
             httpOnly: true,
-            secure: true,
-			sameSite: 'strict',
+            // secure: true,
+			sameSite: 'none',
             // maxAge: 60 * 60, // 1 hour
 			expires: new Date(Date.now() + 60 * 60 * 1000), 
             path: '/',
