@@ -32,8 +32,8 @@ export default function Admin_2FA() {
 			// }
 
 			const response = await fetch("/api/admin/EmailOTP", {
-			method: "POST",
-			body: JSON.stringify({ adminEmail: user?.email }),
+				method: "POST",
+				body: JSON.stringify({ adminEmail: user?.email }),
 			});
 			const payload = await response.json();
 			if (!response.ok) {
@@ -45,7 +45,8 @@ export default function Admin_2FA() {
 		};
 
 		if (user?.email) {
-		sendOTP();
+			setEmail(user.email);
+			sendOTP();
 		}
 	}, [user?.email]);
 
@@ -88,8 +89,7 @@ export default function Admin_2FA() {
 				const clonedResponse = response.clone();
 
 				if (response.status === 200) {
-					
-					const sessionResponse = await fetch("/api/admin/createSessionID", {
+					const sessionResponse = await fetch("/api/admin/SessionID", {
 						method: "POST",
 						headers: {
 						"Content-Type": "application/json",
@@ -130,7 +130,7 @@ export default function Admin_2FA() {
 		<Box marginBottom={0}>
 			<Image src="/images/logo.png" alt="Logo" width={197} height={171} />
 		</Box>
-		<Box component="form" marginTop={2} width="70%">
+		<Box component="form" marginTop={2} width="70%" onSubmit={handleSubmit}>
 			<TextField
 			label="Enter 2FA Code"
 			type="token"
@@ -183,7 +183,6 @@ export default function Admin_2FA() {
 			borderRadius: "100px",
 			"&:hover": { backgroundColor: "#107888" },
 		}}
-		onClick={() => handleSubmit}
 		>
 			Next
 		</Button>
