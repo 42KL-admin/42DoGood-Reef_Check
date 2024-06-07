@@ -15,8 +15,11 @@ export default function SlatesRouteGroupLayout({
     // NOTE: Since (authenticated) route already checked whether user is logged in or not
     //       here just need to check whether the user is admin and OTP is verified
 
+    // console.log({ user })
+
     // NOTE: SANITY CHECK
     if (user === null) {
+      console.log('routing to root! from admin layout')
       router.push("/");
       return;
     }
@@ -28,6 +31,7 @@ export default function SlatesRouteGroupLayout({
     }
 
     if (user.isOTPVerified === false) {
+      // console.log({ user })
       alert("PLEASE VERIFY YOUR OTP! NOTE: DEVELOPMENT PHASE, ANY NUMBER WILL WORK");
     //   router.push("/admin_2FA");
       return;

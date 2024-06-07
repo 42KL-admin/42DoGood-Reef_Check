@@ -14,7 +14,7 @@ const bcrypt = require("bcryptjs");
 //     } catch (error) {
 //         console.error("Error generating SessionID: ", error);
 //         throw new Error('Failed to generate SessionID');
-//     } 
+//     }
 // }
 
 // async function generateSalt() {
@@ -30,6 +30,7 @@ const bcrypt = require("bcryptjs");
 
 export async function POST(req: NextRequest)
 {
+    console.log('hitting the SessionID endpoint', Date.now())
 	try {
 		const res = await req.json();
 		const sessionID = uuidv4();
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest)
 			sessionID,
 			adminEmail: res.adminEmail,
 			createdAt: new Date(),
-			expiresAt: new Date(Date.now() + 60 * 60 * 1000), 
+			expiresAt: new Date(Date.now() + 60 * 60 * 1000),
 		});
 
         const client = await clientPromise;
@@ -50,12 +51,13 @@ export async function POST(req: NextRequest)
         response.cookies.set('sessionID', sessionID, {
             httpOnly: true,
             // secure: true,
-			sameSite: 'none',
+			sameSite: 'strict',
             // maxAge: 60 * 60, // 1 hour
-			expires: new Date(Date.now() + 60 * 60 * 1000), 
+			expires: new Date(Date.now() + 60 * 60 * 1000),
             path: '/',
         });
 
+        console.log('returning sessionID API response', Date.now())
 		return response;
     } catch (error) {
         console.error('Error creating sessionID:', error);
@@ -65,6 +67,8 @@ export async function POST(req: NextRequest)
 
 export async function GET(req: NextRequest)
 {
+    console.log('from sessionID route:')
+    console.log(req.cookies, Date.now())
     try {
         const client = await clientPromise;
         const db = client.db("42reef-check");
@@ -73,12 +77,12 @@ export async function GET(req: NextRequest)
 		if (!sessionID) {
             return NextResponse.json({ message: 'No session ID found' }, { status: 401 });
         }
-		
+
 		const sesionExists = await db.collection('adminSessions').findOne({ sessionID });
         if (sesionExists)
 			return NextResponse.json({ message: "SessionID is valid."}, {status: 200});
 		else
-			return NextResponse.json({ message: "SessionID is invalid or expired."}, {status: 401}); 
+			return NextResponse.json({ message: "SessionID is invalid or expired."}, {status: 401});
     } catch (error) {
         console.error('Error validating sessionID to database:', error);
         return NextResponse.json({ message: "Failed to validate sessionID."}, {status: 500});

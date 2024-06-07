@@ -17,6 +17,7 @@ export default function AuthenticatedGroupRouteLayout({ children }: { children: 
     // NOTE: Force redirection using role
     // NOTE: If user not logged in, force redirect to login page
     if (userCookie === null) {
+      console.log('routing to root! from layout')
       router.push("/");
       return;
     }

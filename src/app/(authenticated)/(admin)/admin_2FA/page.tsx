@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect} from "react";
+import { useEffect } from "react";
 import { Button, Container, Box, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import Image from "next/image";
@@ -18,30 +18,30 @@ export default function Admin_2FA() {
 	const router = useRouter();
 
 	useEffect(() => {
-	const sendOTP = async () => {
-		try {
+		const sendOTP = async () => {
+			try {
 
-			// const validated = await fetch("/api/admin/SessionID", {
-			// method: "GET",
-			// credentials: 'include', // gets cookies
-			// });
+				// const validated = await fetch("/api/admin/SessionID", {
+				// method: "GET",
+				// credentials: 'include', // gets cookies
+				// });
 
-			// const valid = await validated.json();
-			// if (valid.status == 200)	{
-			// 	router.push("/admin_dashboard");
-			// }
+				// const valid = await validated.json();
+				// if (valid.status == 200)	{
+				// 	router.push("/admin_dashboard");
+				// }
 
-			const response = await fetch("/api/admin/EmailOTP", {
-				method: "POST",
-				body: JSON.stringify({ adminEmail: user?.email }),
-			});
-			const payload = await response.json();
-			if (!response.ok) {
-				console.error(payload.message);
+				const response = await fetch("/api/admin/EmailOTP", {
+					method: "POST",
+					body: JSON.stringify({ adminEmail: user?.email }),
+				});
+				const payload = await response.json();
+				if (!response.ok) {
+					console.error(payload.message);
+				}
+			} catch (error) {
+				console.error("Error:", error);
 			}
-		} catch (error) {
-			console.error("Error:", error);
-		}
 		};
 
 		if (user?.email) {
@@ -52,28 +52,28 @@ export default function Admin_2FA() {
 
 	const resendOTP = async () => {
 		try {
-		setIsResendDisabled(true); // Disable the button
-		clearTimeout(resendTimeoutId); // Clear any existing timeout
+			setIsResendDisabled(true); // Disable the button
+			clearTimeout(resendTimeoutId); // Clear any existing timeout
 
-		const response = await fetch("/api/admin/EmailOTP", {
-			method: "POST",
-			body: JSON.stringify({ adminEmail: user?.email }),
-		});
-		const payload = await response.json();
-		if (!response.ok) {
-			console.error(payload.message);
-		} else {
-			alert(payload.message);
-		}
+			const response = await fetch("/api/admin/EmailOTP", {
+				method: "POST",
+				body: JSON.stringify({ adminEmail: user?.email }),
+			});
+			const payload = await response.json();
+			if (!response.ok) {
+				console.error(payload.message);
+			} else {
+				alert(payload.message);
+			}
 
-		// Set a timeout to re-enable the button after 5 seconds
-		const timeoutId = setTimeout(() => {
-			setIsResendDisabled(false);
-		}, 5000);
-		setResendTimeoutId(timeoutId);
+			// Set a timeout to re-enable the button after 5 seconds
+			const timeoutId = setTimeout(() => {
+				setIsResendDisabled(false);
+			}, 5000);
+			setResendTimeoutId(timeoutId);
 		} catch (error) {
-		console.error("Error:", error);
-		setIsResendDisabled(false); // Re-enable the button in case of an error
+			console.error("Error:", error);
+			setIsResendDisabled(false); // Re-enable the button in case of an error
 		}
 	};
 
@@ -92,14 +92,18 @@ export default function Admin_2FA() {
 					const sessionResponse = await fetch("/api/admin/SessionID", {
 						method: "POST",
 						headers: {
-						"Content-Type": "application/json",
+							"Content-Type": "application/json",
 						},
 						body: JSON.stringify({ adminEmail: user?.email }),
 					});
-			
+
 					if (sessionResponse.ok) {
 						// Redirect to admin dashboard if sessionID creation is successful
-						router.replace("/admin_dashboard");
+						setTimeout(() => {
+							console.log('re-directing to /admin_dashboard', Date.now())
+							router.replace("/admin_dashboard");
+						}, 1000)
+						// debugger;
 					} else {
 						const error = await sessionResponse.json();
 						console.error("Failed to create sessionID:", error.message);
@@ -117,77 +121,77 @@ export default function Admin_2FA() {
 
 
 	return (
-	<Container maxWidth="sm">
-		<Box
-		display="flex"
-		flexDirection="column"
-		alignItems="center"
-		justifyContent="center"
-		minHeight="90vh"
-		textAlign="center"
-		padding={0}
-		>
-		<Box marginBottom={0}>
-			<Image src="/images/logo.png" alt="Logo" width={197} height={171} />
-		</Box>
-		<Box component="form" marginTop={2} width="70%" onSubmit={handleSubmit}>
-			<TextField
-			label="Enter 2FA Code"
-			type="token"
-			value={token}
-			onChange={(e) => setToken(e.target.value)}
-			fullWidth
-			sx={{
-				marginTop: "16px",
-				"& fieldset": {
-				borderColor: "primary.main",
-				borderWidth: "1px",
-				},
-				"& .MuiOutlinedInput-root": {
-				borderRadius: "12px",
-				"&:hover fieldset": { borderColor: "#107888" },
-				"&.Mui-focused fieldset": { borderColor: "#107888" },
-				},
-			}}
-			/>
-			<Box display="flex" justifyContent="flex-start">
-			<Typography
-				variant="body2"
-				sx={{
-				opacity: isResendDisabled ? 0.5 : 1,
-				marginTop: "4px",
-				marginBottom: "16px",
-				color: "primary.main",
-				}}
+		<Container maxWidth="sm">
+			<Box
+				display="flex"
+				flexDirection="column"
+				alignItems="center"
+				justifyContent="center"
+				minHeight="90vh"
+				textAlign="center"
+				padding={0}
 			>
-				Didn't receive code?{" "}
-				<Typography
-				component="span"
-				sx={{
-					textDecoration: "underline",
-					cursor: isResendDisabled ? "not-allowed" : "pointer",
-					color: "primary.main",
-				}}
-				onClick={!isResendDisabled ? resendOTP : undefined}
-				>
-				Send again
-				</Typography>
-			</Typography>
+				<Box marginBottom={0}>
+					<Image src="/images/logo.png" alt="Logo" width={197} height={171} />
+				</Box>
+				<Box component="form" marginTop={2} width="70%" onSubmit={handleSubmit}>
+					<TextField
+						label="Enter 2FA Code"
+						type="token"
+						value={token}
+						onChange={(e) => setToken(e.target.value)}
+						fullWidth
+						sx={{
+							marginTop: "16px",
+							"& fieldset": {
+								borderColor: "primary.main",
+								borderWidth: "1px",
+							},
+							"& .MuiOutlinedInput-root": {
+								borderRadius: "12px",
+								"&:hover fieldset": { borderColor: "#107888" },
+								"&.Mui-focused fieldset": { borderColor: "#107888" },
+							},
+						}}
+					/>
+					<Box display="flex" justifyContent="flex-start">
+						<Typography
+							variant="body2"
+							sx={{
+								opacity: isResendDisabled ? 0.5 : 1,
+								marginTop: "4px",
+								marginBottom: "16px",
+								color: "primary.main",
+							}}
+						>
+							Didn't receive code?{" "}
+							<Typography
+								component="span"
+								sx={{
+									textDecoration: "underline",
+									cursor: isResendDisabled ? "not-allowed" : "pointer",
+									color: "primary.main",
+								}}
+								onClick={!isResendDisabled ? resendOTP : undefined}
+							>
+								Send again
+							</Typography>
+						</Typography>
+					</Box>
+					<Button
+						type="submit"
+						variant="contained"
+						color="primary"
+						fullWidth
+						sx={{
+							borderRadius: "100px",
+							"&:hover": { backgroundColor: "#107888" },
+						}}
+					>
+						Next
+					</Button>
+				</Box>
 			</Box>
-		<Button
-		type="submit"
-		variant="contained"
-		color="primary"
-		fullWidth
-		sx={{
-			borderRadius: "100px",
-			"&:hover": { backgroundColor: "#107888" },
-		}}
-		>
-			Next
-		</Button>
-		</Box>
-		</Box>
-	</Container>
+		</Container>
 	);
-	}
+}

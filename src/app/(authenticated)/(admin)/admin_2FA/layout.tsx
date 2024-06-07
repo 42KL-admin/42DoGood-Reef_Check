@@ -18,6 +18,7 @@ export default function AdminRouteLayout({
 
     // NOTE: SANITY CHECK
     if (user === null) {
+      console.log('routing to root! from admin_2FA')
       router.push("/");
       return;
     }
