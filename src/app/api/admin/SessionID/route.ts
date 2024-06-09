@@ -49,9 +49,9 @@ export async function POST(req: NextRequest)
 		const response = NextResponse.json({ message: 'Logged in successfully' });
         response.cookies.set('sessionID', sessionID, {
             httpOnly: true,
-            // secure: true,
-			sameSite: 'none',
-            // maxAge: 60 * 60, // 1 hour
+            secure: true,
+			sameSite: 'strict',
+            maxAge: 60 * 60, // 1 hour
 			expires: new Date(Date.now() + 60 * 60 * 1000), 
             path: '/',
         });
@@ -68,17 +68,27 @@ export async function GET(req: NextRequest)
     try {
         const client = await clientPromise;
         const db = client.db("42reef-check");
-		const sessionID = req.cookies.get('sessionID');
+		const sessionID = req.cookies.get('sessionID')?.value;
+
+		// console.log(sessionID);
 
 		if (!sessionID) {
             return NextResponse.json({ message: 'No session ID found' }, { status: 401 });
         }
 		
 		const sesionExists = await db.collection('adminSessions').findOne({ sessionID });
+		
+		// console.log('Query:', { sessionID });
+		// console.log('Result:', sesionExists);
+
         if (sesionExists)
-			return NextResponse.json({ message: "SessionID is valid."}, {status: 200});
-		else
-			return NextResponse.json({ message: "SessionID is invalid or expired."}, {status: 401}); 
+			{
+			// console.log("Session Exists!!!!");
+			return NextResponse.json({status: 200}); //{ message: "SessionID is valid."}, 
+		}
+		else{
+			return NextResponse.json({status: 401});  //{ message: "SessionID is invalid or expired."}, 
+		}
     } catch (error) {
         console.error('Error validating sessionID to database:', error);
         return NextResponse.json({ message: "Failed to validate sessionID."}, {status: 500});

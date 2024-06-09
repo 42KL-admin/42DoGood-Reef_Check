@@ -22,7 +22,7 @@ export default function UploadUserSection() {
 		});
 		const payload = await response.json();
 
-	    alert(payload.message); // Debugging purposes
+	    // alert(payload.message); // Debugging purposes
 
 		// If the email was successfully added to the database, add it to the table
 		if (response.status == 200)
