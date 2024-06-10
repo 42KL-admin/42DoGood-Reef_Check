@@ -76,19 +76,22 @@ export async function GET(req: NextRequest)
             return NextResponse.json({ message: 'No session ID found' }, { status: 401 });
         }
 		
-		const sesionExists = await db.collection('adminSessions').findOne({ sessionID });
+		const sessionExists = await db.collection('adminSessions').findOne({ sessionID });
 		
 		// console.log('Query:', { sessionID });
-		// console.log('Result:', sesionExists);
+		// console.log('Result:', sessionExists);
 
-        if (sesionExists)
-			{
-			// console.log("Session Exists!!!!");
-			return NextResponse.json({status: 200}); //{ message: "SessionID is valid."}, 
-		}
-		else{
+        if (!sessionExists) {
 			return NextResponse.json({status: 401});  //{ message: "SessionID is invalid or expired."}, 
 		}
+		
+		// console.log("Session Exists!!!!");
+
+		const currentTime = new Date();
+		if (sessionExists.expiresAt < currentTime) {
+			return NextResponse.json({status: 440}); //SessionID on Database is expired
+		}
+		return NextResponse.json({status: 200}); //{ message: "SessionID is valid."}, 
     } catch (error) {
         console.error('Error validating sessionID to database:', error);
         return NextResponse.json({ message: "Failed to validate sessionID."}, {status: 500});
