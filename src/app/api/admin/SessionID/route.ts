@@ -6,34 +6,11 @@ import { Db } from 'mongodb';
 
 const bcrypt = require("bcryptjs");
 
-
-// function generateSessionID() {
-//     try {
-//         let sessionID = Math.floor(100000 + Math.random() * 900000).toString();
-//         return sessionID;
-//     } catch (error) {
-//         console.error("Error generating SessionID: ", error);
-//         throw new Error('Failed to generate SessionID');
-//     } 
-// }
-
-// async function generateSalt() {
-//     try {
-//         const salt = await bcrypt.genSalt(10);
-//         return salt;
-//     } catch (error) {
-//         console.error("Error generating salt: ", error);
-//         throw new Error('Failed to generate salt');
-//     }
-// }
-
-
 export async function POST(req: NextRequest)
 {
 	try {
 		const res = await req.json();
 		const sessionID = uuidv4();
-		// const salt = await generateSalt();
 		const adminOTP = new AdminSessionID({
 			sessionID,
 			adminEmail: res.adminEmail,
@@ -60,6 +37,32 @@ export async function POST(req: NextRequest)
     } catch (error) {
         console.error('Error creating sessionID:', error);
         return NextResponse.json({ message: "Failed to create or save sesionID to database."}, {status: 400});
+    }
+}
+
+export async function DELETE(req: NextRequest)
+{
+	try {
+		const sessionID = req.cookies.get('sessionID')?.value;
+
+		if (!sessionID) {
+			return NextResponse.json({ message: 'No session ID found' }, { status: 400 });
+		}
+
+        const client = await clientPromise;
+        const db = client.db("42reef-check");
+		const result = await db.collection("adminSessions").deleteMany({ sessionID });
+
+		if (result.deletedCount === 0) {
+			return NextResponse.json({ message: "SessionID not found" }, { status: 404 });
+		}
+
+		const response = NextResponse.json({ message: "SessionID deleted successfully" }, { status: 200 });
+		response.cookies.set('sessionID', '', { expires: new Date(0) });
+		return response;
+	} catch (error) {
+        console.error('Error deleting sessionID:', error);
+        return NextResponse.json({ message: "Failed to delete SessionID."}, {status: 400});
     }
 }
 

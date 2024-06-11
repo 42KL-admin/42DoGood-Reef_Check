@@ -58,6 +58,28 @@ export default function DropdownMenu() {
     setAnchorEl(null);
   };
 
+  const logoutUser = async () => {
+	try {
+		const response = await fetch('/api/admin/SessionID' , {
+			method: 'DELETE',
+			headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+		})
+
+		const result = await response.json();
+
+		if (result.status == 200) {
+			setLoggedUserState(null);
+			router.replace("/");
+		}
+	}
+	catch (error) {
+		console.error("Error logging out:", error);
+	}
+}
+
   return (
     <div>
       <DropdownButton
@@ -84,7 +106,7 @@ export default function DropdownMenu() {
       >
         {user && user.role === "admin" && <MenuItem onClick={() => router.push("/upload")}>Upload Slates</MenuItem>}
         {user && user.role === "admin" && <MenuItem onClick={() => router.push("/admin_dashboard")}>Admin Dashboard</MenuItem>}
-        <MenuItem onClick={() => setLoggedUserState(null)}>Logout</MenuItem>
+        <MenuItem onClick={() => logoutUser()}>Logout</MenuItem>
       </StyledMenu>
     </div>
   );

@@ -21,17 +21,17 @@ export default function SlatesRouteGroupLayout({
       return;
     }
 
-    if (user.role !== "admin") {
-      alert("YOU HAVE NO ACCESS!");
-      router.push("/upload");
-      return;
-    }
+    // if (user.role !== "admin") {
+    //   alert("YOU HAVE NO ACCESS!");
+    //   router.push("/upload");
+    //   return;
+    // }
 
-    if (user.isOTPVerified === false) {
-      alert("PLEASE VERIFY YOUR OTP! NOTE: DEVELOPMENT PHASE, ANY NUMBER WILL WORK");
-    //   router.push("/admin_2FA");
-      return;
-    }
+    // if (user.isOTPVerified === false) {
+    //   alert("PLEASE VERIFY YOUR OTP! NOTE: DEVELOPMENT PHASE, ANY NUMBER WILL WORK");
+    // //   router.push("/admin_2FA");
+    //   return;
+    // }
   }, [user]);
   return <>{children}</>;
 }
