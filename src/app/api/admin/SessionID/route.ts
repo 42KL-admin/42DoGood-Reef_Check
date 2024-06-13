@@ -4,8 +4,6 @@ import clientPromise from "../../../../../lib/mongodb";
 import {v4 as uuidv4} from 'uuid';
 import { Db } from 'mongodb';
 
-const bcrypt = require("bcryptjs");
-
 export async function POST(req: NextRequest)
 {
 	try {

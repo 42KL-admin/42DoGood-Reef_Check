@@ -14,6 +14,8 @@ export default function UploadUserSection() {
   const [email, setEmail] = useState("");
   const addRow = useEmailRowStore((state) => state.addRow);
 
+  const router = useRouter();
+
   const handleInviteClick = async () => {
 	try {
 		const response = await fetch('/api/admin/Dashboard', {
@@ -22,21 +24,22 @@ export default function UploadUserSection() {
 		});
 		const payload = await response.json();
 
-	    // alert(payload.message); // Debugging purposes
-
-		// If the email was successfully added to the database, add it to the table
-		if (response.status == 200)
+		if (response.status == 200) {
 			addRow(email, selectedPermission);
-		else
-			alert("Error: " + payload.message); // Debugging purposes
+			setEmail("");
+		}
+		else {
+			throw(alert("Error: " + payload.message))// Debugging purposes
+		}
 
 	  } catch (error) {
 		console.error('Error fetching emails:', error);
+		router.push('/');
 	  }
     // if (email.trim() !== '') {
     //   addRow(email, selectedPermission);
     //   setEmail('');
-    // }
+    // } 
   };
 
   const handlePermissionChange = (permission: EmailRole) => {

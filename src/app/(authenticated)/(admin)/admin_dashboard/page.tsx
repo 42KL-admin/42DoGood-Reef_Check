@@ -54,6 +54,7 @@ export default function UploadEmailSection() {
         });
       } catch (error) {
         console.error('Error fetching emails:', error);
+		router.push('/');
       }
     };
 

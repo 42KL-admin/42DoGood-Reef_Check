@@ -16,18 +16,19 @@ export default function AuthenticatedGroupRouteLayout({ children }: { children: 
 
     // NOTE: Force redirection using role
     // NOTE: If user not logged in, force redirect to login page
+	// TODO Remove the router.push?
     if (userCookie === null) {
-      router.push("/");
+    //   router.push("/");
       return;
     }
 
     if (userCookie && user === null) {
       setLoggedUserState(userCookie);
-      if (userCookie.role === "admin") {
-        router.push("/admin_dashboard")
-      } else {
-        router.push("/upload");
-      }
+    //   if (userCookie.role === "admin") {
+    //     router.push("/admin_dashboard")
+    //   } else {
+    //     router.push("/upload");
+    //   }
     }
   }, [user]);
 

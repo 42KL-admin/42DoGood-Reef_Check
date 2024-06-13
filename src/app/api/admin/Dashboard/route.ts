@@ -1,6 +1,5 @@
 import { NextRequest ,NextResponse } from 'next/server';
 import clientPromise from "../../../../../lib/mongodb";
-const bcrypt = require('bcryptjs');
 
 // Fetches all users in the format of {email, role} to display on Dashboard
 export async function GET(req: NextRequest) {
