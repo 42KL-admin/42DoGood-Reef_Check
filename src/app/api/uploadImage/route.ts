@@ -12,13 +12,10 @@ const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME || 'default-conta
 // Function to parse form data
 async function parseFormData(request: NextRequest): Promise<UploadFilesRequest> {
   const formData = await request.formData();
-  let sasToken = '';
   const files: File[] = [];
 
   for (const [key, value] of formData.entries()) {
-    if (key === 'sasToken') {
-      sasToken = value.toString();
-    } else if (key === 'file' && typeof value === 'object' && 'arrayBuffer' in value) {
+    if (key === 'files' && typeof value === 'object' && 'arrayBuffer' in value) {
       const filename = value.name.replaceAll(" ", "_");
       const fileBuffer = Buffer.from(await value.arrayBuffer());
       const fileType = value.type;
@@ -26,7 +23,7 @@ async function parseFormData(request: NextRequest): Promise<UploadFilesRequest> 
     }
   }
 
-  return { sasToken, files };
+  return { files };
 }
 
 // Function to upload files to Azure Blob Storage
