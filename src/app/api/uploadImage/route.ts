@@ -16,7 +16,9 @@ async function parseFormData(request: NextRequest): Promise<UploadFilesRequest> 
 
   for (const [key, value] of formData.entries()) {
     if (key === 'files' && typeof value === 'object' && 'arrayBuffer' in value) {
-      const filename = value.name.replaceAll(" ", "_");
+      const timestamp = Date.now();
+      let filename = value.name.replaceAll(" ", "_");
+      filename = `${timestamp}_${filename}`;
       const fileBuffer = Buffer.from(await value.arrayBuffer());
       const fileType = value.type;
       files.push({ filename, fileBuffer, fileType });
