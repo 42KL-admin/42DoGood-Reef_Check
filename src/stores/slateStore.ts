@@ -20,7 +20,6 @@ export const useSelectedSlateStore = create<
       reader.readAsDataURL(slate.file);
       reader.onload = () => {
         const fileURI = reader.result as string;
-        console.log(fileURI);
         set({ slate: { ...slate, base64: fileURI } });
       };
     } else {

@@ -110,8 +110,6 @@ function EditSlateSmallerScreen() {
   const slate = useSelectedSlateStore((state) => state.slate);
   const selectedTab = useSelectedTabStore((state) => state.tab);
 
-  console.log(selectedTab);
-
   return slate ? (
     <Box width={"100%"} height={"100%"}>
       <TabPanel tag={"slatePicture"} value={selectedTab as string}>

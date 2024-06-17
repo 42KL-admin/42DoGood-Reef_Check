@@ -5,6 +5,5 @@ export interface File {
 }
 
 export interface UploadFilesRequest {
-  sasToken: string;
   files: File[];
 }

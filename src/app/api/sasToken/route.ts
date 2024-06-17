@@ -1,5 +1,7 @@
 import { generateBlobSASQueryParameters, StorageSharedKeyCredential, ContainerSASPermissions, SASProtocol } from '@azure/storage-blob';
 import { generateResponse } from '../../../utils/response';
+import { cookies } from 'next/headers';
+import { SAS_COOKIE_NAME, isSasTokenExpired } from '../utils';
 
 // Providing default values to ensure these variables are always defined as strings
 const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME || 'default-account-name';
@@ -28,8 +30,23 @@ function generateSasToken(): string {
 // Main GET handler
 export async function GET(): Promise<Response> {
   try {
-    const sasToken = generateSasToken();
-    return generateResponse({ message: 'SAS token generated successfully', sasToken }, 200);
+    let sasToken;
+    const existingSasToken = cookies().get(SAS_COOKIE_NAME);
+
+    if (!existingSasToken || isSasTokenExpired()) {
+      sasToken = generateSasToken();
+    } else {
+      sasToken = existingSasToken.value;
+    }
+    
+    cookies().set(SAS_COOKIE_NAME, sasToken, {
+      httpOnly: true,
+      secure: true,
+      path: '/',
+      maxAge: 3600
+    });
+
+    return generateResponse({ message: 'SAS token generated successfully' }, 200);
   } catch (e: any) {
     console.error(e);
     return generateResponse({ message: 'Error generating SAS token', error: e.message }, 500);

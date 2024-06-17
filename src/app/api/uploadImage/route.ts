@@ -1,43 +1,31 @@
 import { NextRequest } from 'next/server';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { Readable } from 'stream';
-import { URLSearchParams } from 'url';
 import { generateResponse } from '../../../utils/response';
 import { UploadFilesRequest, File } from '../../../interfaces/api';
+import { SAS_COOKIE_NAME, isSasTokenExpired } from '../utils';
+import { cookies } from 'next/headers';
 
 const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME || 'default-account-name';
 const containerName = process.env.AZURE_STORAGE_CONTAINER_NAME || 'default-container-name';
 
-// Function to validate SAS token
-async function isSasTokenExpired(sasToken: string): Promise<boolean> {
-  const params = new URLSearchParams(sasToken);
-  const expiryTime = params.get('se');
-  if (!expiryTime) return true;
-
-  const expiryDate = new Date(expiryTime);
-  const currentDate = new Date();
-
-  return currentDate >= expiryDate;
-}
-
 // Function to parse form data
 async function parseFormData(request: NextRequest): Promise<UploadFilesRequest> {
   const formData = await request.formData();
-  let sasToken = '';
   const files: File[] = [];
 
   for (const [key, value] of formData.entries()) {
-    if (key === 'sasToken') {
-      sasToken = value.toString();
-    } else if (key === 'file' && typeof value === 'object' && 'arrayBuffer' in value) {
-      const filename = value.name.replaceAll(" ", "_");
+    if (key === 'files' && typeof value === 'object' && 'arrayBuffer' in value) {
+      const timestamp = Date.now();
+      let filename = value.name.replaceAll(" ", "_");
+      filename = `${timestamp}_${filename}`;
       const fileBuffer = Buffer.from(await value.arrayBuffer());
       const fileType = value.type;
       files.push({ filename, fileBuffer, fileType });
     }
   }
 
-  return { sasToken, files };
+  return { files };
 }
 
 // Function to upload files to Azure Blob Storage
@@ -59,15 +47,19 @@ async function uploadFiles(sasToken: string, files: File[]): Promise<void> {
 // Main POST handler
 export async function POST(request: NextRequest): Promise<Response> {
   try {
-    const { sasToken, files } = await parseFormData(request);
+    const { files } = await parseFormData(request);
+    const sasToken = cookies().get(SAS_COOKIE_NAME);
 
-    if (files.length === 0 || !sasToken)
-      return generateResponse({ error: 'Files or SAS token missing' }, 400);
+    if (!sasToken)
+      return generateResponse({ error: 'SAS token missing' }, 400);
 
-    if (await isSasTokenExpired(sasToken))
+    if (isSasTokenExpired())
       return generateResponse({ error: 'SAS token has expired' }, 400);
 
-    await uploadFiles(sasToken, files);
+    if (files.length === 0)
+      return generateResponse({ error: 'Files missing' }, 400);
+
+    await uploadFiles(sasToken.value, files);
 
     return generateResponse({ message: 'Files uploaded successfully' }, 200);
   } catch (e: any) {
