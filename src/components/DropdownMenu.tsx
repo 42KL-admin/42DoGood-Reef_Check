@@ -8,6 +8,7 @@ import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
 import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
 import { useRouter } from "next/navigation";
+import { NextRequest } from "next/server";
 
 const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
   borderRadius: "12px",
@@ -58,7 +59,7 @@ export default function DropdownMenu() {
     setAnchorEl(null);
   };
 
-  const logoutUser = async () => {
+  const logoutUser = async () => { // ! Logout is not redirecting but delete is successful
 	try {
 		const response = await fetch('/api/admin/SessionID' , {
 			method: 'DELETE',
@@ -68,11 +69,16 @@ export default function DropdownMenu() {
             credentials: 'include'
 		})
 
+		console.log("error 1");
 		const result = await response.json();
+		console.log("error 2");
 
-		if (result.status == 200) {
+		console.log(result.status)
+		if (result.ok) {
 			setLoggedUserState(null);
-			router.replace("/");
+			router.push("/");
+		} else {
+			console.error("Logout failed:", response.statusText);
 		}
 	}
 	catch (error) {
@@ -106,8 +112,8 @@ export default function DropdownMenu() {
       >
         {user && user.role === "admin" && <MenuItem onClick={() => router.push("/upload")}>Upload Slates</MenuItem>}
         {user && user.role === "admin" && <MenuItem onClick={() => router.push("/admin_dashboard")}>Admin Dashboard</MenuItem>}
-        <MenuItem onClick={() => logoutUser()}>Logout</MenuItem>
-      </StyledMenu>
+		<MenuItem onClick={logoutUser}>Logout</MenuItem>
+		</StyledMenu>
     </div>
   );
 }

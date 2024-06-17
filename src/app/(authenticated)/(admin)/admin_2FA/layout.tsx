@@ -33,7 +33,7 @@ export default function AdminRouteLayout({
       router.push("/admin_dashboard");
       return;
     }
-  }, [user]);
+  }, [user, router]);
   return (
     <>{children}</>
   );

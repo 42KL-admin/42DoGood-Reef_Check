@@ -56,7 +56,7 @@ export async function DELETE(req: NextRequest)
 		}
 
 		const response = NextResponse.json({ message: "SessionID deleted successfully" }, { status: 200 });
-		response.cookies.set('sessionID', '', { expires: new Date(0) });
+        response.cookies.set('sessionID', '', { expires: new Date(0), path: '/' });
 		return response;
 	} catch (error) {
         console.error('Error deleting sessionID:', error);
