@@ -59,7 +59,7 @@ export default function DropdownMenu() {
     setAnchorEl(null);
   };
 
-  const logoutUser = async () => { // ! Logout is not redirecting but delete is successful
+  const logoutUser = async () => {
 	try {
 		const response = await fetch('/api/admin/SessionID' , {
 			method: 'DELETE',
@@ -69,12 +69,7 @@ export default function DropdownMenu() {
             credentials: 'include'
 		})
 
-		console.log("error 1");
-		const result = await response.json();
-		console.log("error 2");
-
-		console.log(result.status)
-		if (result.ok) {
+		if (response.status == 200) {
 			setLoggedUserState(null);
 			router.push("/");
 		} else {
