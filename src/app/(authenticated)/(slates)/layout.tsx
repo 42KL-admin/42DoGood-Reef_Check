@@ -1,7 +1,14 @@
+import { Suspense } from "react";
+import Loading from "../loading";
+
 export default function SlatesRouteGroupLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <Suspense fallback={<Loading />}>{children}</Suspense>
+    </>
+  );
 }

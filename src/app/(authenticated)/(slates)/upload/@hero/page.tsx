@@ -9,6 +9,9 @@ import Container from "@mui/material/Container";
 import { useRouter } from "next/navigation";
 import { Fragment } from "react";
 import NavBar from "@/components/mobile/NavBar";
+import { checkSasToken } from "@/services/sasTokenApi";
+import { useFileRowStore } from "@/stores/fileRowStore";
+import { uploadSlatesToBlob } from "@/services/uploadSlateApi";
 
 const ChipLabels = ["Not blurry", "Bright enough", "Pencil writing is clear"];
 
@@ -24,6 +27,27 @@ const ChipLabels = ["Not blurry", "Bright enough", "Pencil writing is clear"];
 
 export default function UploadPhotoHeroSection() {
   const router = useRouter();
+  const fileRows = useFileRowStore((state) => state.rows);
+
+  const uploadSlates = async () => {
+    // TODO: filter by status as well (those are not processed yet)
+    if (!fileRows) return;
+
+    const slatesToBeUploaded = fileRows
+      .flatMap((row) => [row.substrate.file, row.fishInverts.file])
+      .filter((file): file is File => file !== null);
+
+    if (slatesToBeUploaded.length > 0) {
+      try {
+        await checkSasToken();
+        await uploadSlatesToBlob(slatesToBeUploaded);
+      } catch (e: any) {
+        console.log("error uploading slates", e.message);
+        throw new Error("uploadSlatesToBlob error", e.message);
+      }
+    }
+  };
+
   return (
     <Fragment>
       <NavBar />
@@ -80,7 +104,7 @@ export default function UploadPhotoHeroSection() {
             <RoundedButton
               variant="contained"
               size="large"
-              onClick={() => {}}
+              onClick={uploadSlates}
             >
               convert files now
             </RoundedButton>
