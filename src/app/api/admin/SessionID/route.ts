@@ -83,14 +83,15 @@ export async function GET(req: NextRequest)
 		// console.log('Result:', sessionExists);
 
         if (!sessionExists) {
-			return NextResponse.json({status: 401});  //{ message: "SessionID is invalid or expired."}, 
+			console.log("Session is wrong!!!!");
+			return NextResponse.json({ message: "SessionID is invalid."}, {status: 401});
 		}
 		
-		// console.log("Session Exists!!!!");
+		console.log("Session Exists!!!!");
 
 		const currentTime = new Date();
 		if (sessionExists.expiresAt < currentTime) {
-			return NextResponse.json({status: 440}); //SessionID on Database is expired
+			return NextResponse.json({ message: "SessionID has expired."}, {status: 440}); //SessionID on Database is expired
 		}
 		return NextResponse.json({status: 200}); //{ message: "SessionID is valid."}, 
     } catch (error) {

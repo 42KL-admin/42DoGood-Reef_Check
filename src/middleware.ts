@@ -17,6 +17,14 @@ const adminPaths = [
 const userPaths = [
 ];
 
+function removeUser(request: NextRequest) {
+    const response = NextResponse.redirect(new URL('/', request.url))
+    response.cookies.delete('sessionID')
+	response.cookies.delete('RCUserCookie')
+	console.log("Removing user");
+    return response;
+}
+
 export async function validateAdminSession(request: NextRequest) {
 try {
 	// console.log("Validating Session");
@@ -42,24 +50,25 @@ try {
 
 	if (path == '/admin_dashboard' || adminApi.includes(path)) {
 		
-		console.log("Dashboard stuff");
+		// console.log("Dashboard stuff");
 
 		if (sessionValid.status == 200) {
 			return NextResponse.next();
 		}
 		
-		if (sessionValid.status == 440) {
-			return NextResponse.redirect(new URL('/', request.url))
-		}
 		console.log("api access denied");
-		return NextResponse.redirect(new URL('/', request.url))
+		return removeUser(request);
 	}
 
 	if (path == '/' || path == '/admin_2FA') {
-		console.log("Attempt to enter / or /admin_2FA")
+		// console.log("Attempt to enter / or /admin_2FA")
 		if (sessionValid.status == 200) {
 			console.log("redirecting to admin_dashboard");
 			return NextResponse.redirect(new URL('/admin_dashboard', request.url))
+		}
+		else {
+			console.log("incorrect SessionID");
+			return removeUser(request);
 		}
 	}
 
@@ -78,7 +87,7 @@ export async function middleware(request: NextRequest) {
     	console.log('Path is', path); // Debugging purposes
 
 		if (adminPaths.includes(path)) {
-			console.log("Admin path matched, validating admin session");
+			// console.log("Admin path matched, validating admin session");
 			const validationResult = await validateAdminSession(request);
 			return validationResult;
 		}

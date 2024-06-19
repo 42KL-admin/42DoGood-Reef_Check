@@ -72,6 +72,7 @@ export async function POST(request: NextRequest)
     try {
         const client = await clientPromise;
         const db = client.db("42reef-check");
+		await db.collection("adminOTPVerification").deleteMany({adminEmail: res.adminEmail});
         await db.collection("adminOTPVerification").insertOne(adminOTP);
     } catch (error) {
         console.error('Error saving OTP to database:', error);

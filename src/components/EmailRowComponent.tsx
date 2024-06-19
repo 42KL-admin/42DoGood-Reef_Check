@@ -8,6 +8,7 @@ import theme from "@/theme";
 import { EmailRow, EmailRole } from "@/stores/types";
 import { useEmailRowStore } from "@/stores/emailRowStore";
 import Dropdownpermission from "./Dropdownpermission";
+import { useRouter } from "next/navigation";
 
 interface EmailRowComponentProps {
   index: number;
@@ -69,22 +70,24 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
   const removeRow = useEmailRowStore((state) => state.removeRow);
   const [open, setOpen] = useState<boolean>(true);
   const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
+  const router = useRouter();
 
   const handleRemoveRow = async () => {
 	try {
 		const response = await fetch('/api/admin/Dashboard', {
 		  method: 'DELETE',
-		  body: JSON.stringify({ email }),
+		  body: JSON.stringify({ email: row.email }),
 		});
 		const payload = await response.json();
   
 		if (response.status === 200) {
-			removeRow( row.email);
+			removeRow(row.email);
 		} else {
 		  console.error('Error:', payload.message);
+		  router.replace('/');
 		}
-	  } catch (error) {
-		console.error('Error:', error);
+	  } catch {
+		console.error('Error: Remove row fail');
 	  }
 	};
 
@@ -92,7 +95,7 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
     try {
       const response = await fetch('/api/admin/Dashboard', {
         method: 'PUT',
-        body: JSON.stringify({ email, role }),
+        body: JSON.stringify({ email: row.email, role }),
       });
       const payload = await response.json();
 
@@ -100,9 +103,10 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
         updateRole(row.email, role);
       } else {
         console.error('Error:', payload.message);
+		router.replace('/');
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch {
+      console.error('Error: Permission Change fail');
     }
   };
 

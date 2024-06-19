@@ -24,7 +24,7 @@ export default function Admin_2FA() {
           body: JSON.stringify({ adminEmail: user?.email }),
         });
         const payload = await response.json();
-        if (!response.ok) {
+        if (response.status !== 200) {
           console.error(payload.message);
         }
       } catch (error) {
@@ -71,13 +71,14 @@ export default function Admin_2FA() {
     e.preventDefault();
     if (token) {
       try {
+		console.log("OTP checking");
         const response = await fetch("/api/admin/OTPVerification", {
           method: "POST",
           body: JSON.stringify({ adminEmail: email, otp: token }),
         });
-
-        if (response.ok) {
-          const sessionResponse = await fetch("/api/admin/SessionID", {
+        if (response.status === 200) {
+			console.log("OTP correct");
+			const sessionResponse = await fetch("/api/admin/SessionID", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -85,7 +86,9 @@ export default function Admin_2FA() {
             body: JSON.stringify({ adminEmail: user?.email }),
           });
 
-          if (sessionResponse.ok) {
+          if (sessionResponse.status === 200) {
+			console.log("session made");
+
             // Redirect to admin dashboard if sessionID creation is successful
             router.replace("/admin_dashboard");
           } else {
