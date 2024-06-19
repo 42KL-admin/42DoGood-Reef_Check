@@ -61,20 +61,22 @@ export default function DropdownMenu() {
 
   const logoutUser = async () => {
 	try {
-		const response = await fetch('/api/admin/SessionID' , {
-			method: 'DELETE',
-			headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include'
-		})
-
-		if (response.status == 200) {
-			setLoggedUserState(null);
-			router.push("/");
-		} else {
-			console.error("Logout failed:", response.statusText);
+		const role = user?.role;
+		setLoggedUserState(null);
+		console.log(user);
+		if (role == "admin") {
+			const response = await fetch('/api/admin/SessionID' , {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include'
+			})
+			if (response.status != 200) {
+				console.error("Error deleting SessionID");
+			}
 		}
+		router.push("/");
 	}
 	catch (error) {
 		console.error("Error logging out:", error);
