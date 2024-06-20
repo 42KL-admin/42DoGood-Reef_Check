@@ -6,8 +6,9 @@ import Menu, { MenuProps } from "@mui/material/Menu";
 import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
-
-// TODO: Improve this component, not done yet.
+import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
+import { useRouter } from "next/navigation";
+import { NextRequest } from "next/server";
 
 const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
   borderRadius: "12px",
@@ -47,12 +48,40 @@ const StyledMenu = styled((props: MenuProps) => (
 export default function DropdownMenu() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+  const user = useLoggedUserStateStore(state => state.user);
+  const setLoggedUserState = useLoggedUserStateStore(state => state.setLoggedUserState);
+  const router = useRouter();
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const logoutUser = async () => {
+	try {
+		const role = user?.role;
+		setLoggedUserState(null);
+		console.log(user);
+		if (role == "admin") {
+			const response = await fetch('/api/admin/SessionID' , {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include'
+			})
+			if (response.status != 200) {
+				console.error("Error deleting SessionID");
+			}
+		}
+		router.push("/");
+	}
+	catch (error) {
+		console.error("Error logging out:", error);
+	}
+}
 
   return (
     <div>
@@ -67,7 +96,7 @@ export default function DropdownMenu() {
         size="small"
         onClick={handleClick}
       >
-        user@email.com
+        {user && user.email}
       </DropdownButton>
       <StyledMenu
         id="dropdown-menu"
@@ -78,10 +107,10 @@ export default function DropdownMenu() {
         open={open}
         onClose={handleClose}
       >
-        <MenuItem>History?</MenuItem>
-        <MenuItem>Logout?</MenuItem>
-        <MenuItem>Idk</MenuItem>
-      </StyledMenu>
+        {user && user.role === "admin" && <MenuItem onClick={() => router.push("/upload")}>Upload Slates</MenuItem>}
+        {user && user.role === "admin" && <MenuItem onClick={() => router.push("/admin_dashboard")}>Admin Dashboard</MenuItem>}
+		<MenuItem onClick={logoutUser}>Logout</MenuItem>
+		</StyledMenu>
     </div>
   );
 }

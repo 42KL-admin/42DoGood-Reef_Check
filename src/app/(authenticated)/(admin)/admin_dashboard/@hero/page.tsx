@@ -7,21 +7,42 @@ import DropdownMenu from "@/components/DropdownMenu";
 import { useRouter } from "next/navigation";
 import Dropdownpermission from "@/components/Dropdownpermission";
 import { useEmailRowStore } from "@/stores/emailRowStore";
-import { EmailPermission } from "@/stores/types";
+import { EmailRole } from "@/stores/types";
 
 export default function UploadUserSection() {
-  const [selectedPermission, setSelectedPermission] = useState<EmailPermission>("can edit");
+  const [selectedPermission, setSelectedPermission] = useState<EmailRole>("can edit");
   const [email, setEmail] = useState("");
   const addRow = useEmailRowStore((state) => state.addRow);
 
-  const handleInviteClick = () => {
-    if (email.trim() !== '') {
-      addRow(email, selectedPermission);
-      setEmail('');
-    }
+  const router = useRouter();
+
+  const handleInviteClick = async () => {
+	try {
+		const response = await fetch('/api/admin/Dashboard', {
+		  method: 'POST',
+		  body: JSON.stringify({ email, role: selectedPermission }),
+		});
+		const payload = await response.json();
+
+		if (response.status == 200) {
+			addRow(email, selectedPermission);
+			setEmail("");
+		}
+		else {
+			throw(alert("Error: " + payload.message))// Debugging purposes
+		}
+
+	  } catch (error) {
+		console.error('Error fetching emails:', error);
+		router.push('/');
+	  }
+    // if (email.trim() !== '') {
+    //   addRow(email, selectedPermission);
+    //   setEmail('');
+    // } 
   };
 
-  const handlePermissionChange = (permission: EmailPermission) => {
+  const handlePermissionChange = (permission: EmailRole) => {
     setSelectedPermission(permission);
   };
 

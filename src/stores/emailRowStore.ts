@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import { EmailPermission, EmailRow} from "./types";
+import { EmailRole, EmailRow} from "./types";
 
 // All the rows (the main state)
 type EmailRowSet = {
@@ -9,69 +9,44 @@ type EmailRowSet = {
 
 // Actions that can be performed on the rows
 type EmailRowActions = {
-  addRow: (email: string, permission: EmailPermission) => void;
+  addRow: (email: string, role: EmailRole) => void;
   removeRow: (email: string) => void;
-  updatePermission: (email: string, permission: EmailPermission) => void;
+  updateRole: (email: string, role: EmailRole) => void;
+  clearRows: () => void;
 };
-
-// Create a file row
-const createEmailRow = (): EmailRow => {
-  return {
-    email: "test@gmail.com",
-    permission: "can edit",
-  };
-};
-
 
 // To store and fetch permission from the admin_dashboard @hero
 interface PermissionStore {
-  selectedPermission: EmailPermission;
-  setSelectedPermission: (permission: EmailPermission) => void;
+  selectedPermission: EmailRole;
+  setSelectedPermission: (role: EmailRole) => void;
 }
 
 
 export const usePermissionStore = create<PermissionStore>((set) => ({
-  selectedPermission: 'can edit'as EmailPermission,
-  setSelectedPermission: (permission : EmailPermission) => set({ selectedPermission: permission }),
+  selectedPermission: 'can edit'as EmailRole,
+  setSelectedPermission: (role : EmailRole) => set({ selectedPermission: role }),
 }));
-
-
-export const useEmailRowStore = create<EmailRowSet & EmailRowActions>()((set) => ({
+  
+export const useEmailRowStore = create<EmailRowSet & EmailRowActions>()((set, get) => ({
   // One row as test
-  rows: [createEmailRow()],
+  rows: [],
 
-  addRow: (email: string, permission: EmailPermission) =>
-    set((state) => ({
-      rows: [...state.rows, { email, permission }],
+	addRow: (email: string, role: EmailRole) =>
+		set((state) => ({
+		rows: [...state.rows, { email, role }],
     })),
 
-  removeRow: (email: string) =>
-    set((state) => ({
-      rows: state.rows.filter((row) => row.email !== email),
+	removeRow: (email: string) =>
+		set((state) => ({
+		rows: state.rows.filter((row) => row.email !== email),
     })),
 
-  updatePermission: (email: string, permission: EmailPermission) =>
-    set((state) => ({
-      rows: state.rows.map((row) => 
-        row.email === email ? { ...row, permission } : row
-      )
-    }))
+	updateRole: (email: string, role: EmailRole) =>
+		set((state) => ({
+		rows: state.rows.map((row) => 
+		row.email === email ? { ...row, role } : row)
+    })),
 
-
-//   // set a slate's file
-//   setSlateFile: (email: string, type: SlateType, file: File | null) =>
-//     set((state) => ({
-//       rows: state.rows.map((row) => {
-//         if (row.email === email) {
-//           return {
-//             ...row,
-//             [type]: {
-//               ...row[type],
-//               file: file,
-//             },
-//           };
-//         }
-//         return row;
-//       }),
-//     })),
+	clearRows: 	() => set({ rows: [] }),
+  // ...
 }));

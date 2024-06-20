@@ -6,7 +6,7 @@ import Menu, { MenuProps } from "@mui/material/Menu";
 import Button, { ButtonProps } from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import { MenuItem } from "@mui/material";
-import { EmailPermission } from "@/stores/types";
+import { EmailRole } from "@/stores/types";
 
 const DropdownButton = styled(Button)<ButtonProps>(({ theme }) => ({
     borderRadius: "4px",
@@ -52,12 +52,12 @@ const StyledMenu = styled((props: MenuProps) => (
   }));
 
 interface SortByPermissionProps {
-  onSortByPermission: (permission: EmailPermission | null) => void;
+  onSortByPermission: (permission: EmailRole | null) => void;
 }
 
 export default function SortByPermission({onSortByPermission}: SortByPermissionProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedPermission, setSelectedPermission] = useState<EmailPermission | null>(null);
+  const [selectedPermission, setSelectedPermission] = useState<EmailRole | null>(null);
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -68,7 +68,7 @@ export default function SortByPermission({onSortByPermission}: SortByPermissionP
     setAnchorEl(null);
   };
 
-  const handlePermissionSelect = (permission: EmailPermission | null) => {
+  const handlePermissionSelect = (permission: EmailRole | null) => {
     setSelectedPermission(permission);
     onSortByPermission(permission);
     handleClose();

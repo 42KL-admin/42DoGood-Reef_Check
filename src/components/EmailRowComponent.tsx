@@ -5,9 +5,10 @@ import { Fragment, useState } from "react";
 import { ArrowDropDown, ArrowDropUp } from "@mui/icons-material";
 import { Divider, TextField, Typography, useMediaQuery } from "@mui/material";
 import theme from "@/theme";
-import { EmailRow, EmailPermission } from "@/stores/types";
+import { EmailRow, EmailRole } from "@/stores/types";
 import { useEmailRowStore } from "@/stores/emailRowStore";
 import Dropdownpermission from "./Dropdownpermission";
+import { useRouter } from "next/navigation";
 
 interface EmailRowComponentProps {
   index: number;
@@ -65,13 +66,48 @@ function EmailRowCollapsibleControl({
 
 export default function EmailRowComponent(props: EmailRowComponentProps) {
   const { index, row, email } = props;
-  const updatePermission = useEmailRowStore((state) => state.updatePermission);
+  const updateRole = useEmailRowStore((state) => state.updateRole);
   const removeRow = useEmailRowStore((state) => state.removeRow);
   const [open, setOpen] = useState<boolean>(true);
   const isLargerScreen = useMediaQuery(theme.breakpoints.up("md"));
+  const router = useRouter();
 
-  const handlePermissionChange = (permission: EmailPermission) => {
-    updatePermission( row.email, permission);
+  const handleRemoveRow = async () => {
+	try {
+		const response = await fetch('/api/admin/Dashboard', {
+		  method: 'DELETE',
+		  body: JSON.stringify({ email: row.email }),
+		});
+		const payload = await response.json();
+  
+		if (response.status === 200) {
+			removeRow(row.email);
+		} else {
+		  console.error('Error:', payload.message);
+		  router.replace('/');
+		}
+	  } catch {
+		console.error('Error: Remove row fail');
+	  }
+	};
+
+  const handlePermissionChange = async (role: EmailRole) => {
+    try {
+      const response = await fetch('/api/admin/Dashboard', {
+        method: 'PUT',
+        body: JSON.stringify({ email: row.email, role }),
+      });
+      const payload = await response.json();
+
+      if (response.status === 200) {
+        updateRole(row.email, role);
+      } else {
+        console.error('Error:', payload.message);
+		router.replace('/');
+      }
+    } catch {
+      console.error('Error: Permission Change fail');
+    }
   };
 
   return (
@@ -98,16 +134,16 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
             sx={{ flex: 1, flexDirection: { xs: "column", md: "row" } ,fontFamily: 'Roboto', fontSize: "16 px",}}
             justifyContent="space-between"
           >
-            {email} , {row.permission}
+            {email}
           </Box>
           <Dropdownpermission 
-            initialPermission={row.permission}
+            initialPermission={row.role}
             onChange={handlePermissionChange}
             borderColor="white">
           </Dropdownpermission>
           <IconButton
             aria-label="delete"
-            onClick={() => removeRow(row.email)}
+            onClick={() => handleRemoveRow()}
             sx={{ display: { xs: "none", md: "block" } }}
           >
             <Delete />

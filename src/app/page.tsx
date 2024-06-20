@@ -1,13 +1,48 @@
 "use client";
 
 import { Button, Typography, Container, Box, TextField } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
+import { getUserFromCookie } from "../../lib/cookies";
+import { LoggedUser } from "@/stores/types";
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const router = useRouter();
+  const setLoggedUserState = useLoggedUserStateStore(state => state.setLoggedUserState);
+
+  useEffect(() => {
+    const validateSessionID = async () => {
+
+    // NOTE: Force redirection using role
+    // if (userCookie) {
+    //   setLoggedUserState(userCookie);
+    //   // NOTE: VERY VULNERABLE! USE SESSION ID INSTEAD!
+    //   if (userCookie.role === "admin") {
+    //     router.push("/admin_dashboard")
+    //   } else {
+    //     router.push("/upload");
+    //   }
+    // }
+
+		try {
+			const response = await fetch("/api/admin/SessionID", {
+			method: "GET",
+			credentials: 'include', // gets cookies
+			});
+
+			const payload = await response.json();
+			if (payload.status == 200)	{
+				router.push("/admin_dashboard");
+			}
+
+		}	catch(error){
+			console.error("Error:", error);
+		}
+	};
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,9 +53,27 @@ export default function Home() {
           body: JSON.stringify({ email }),
         });
         const payload = await response.json();
+        // TODO: Implement toast UI
         alert(payload.message);
-        if (response.status == 200) {
-            router.push("/admin");
+        if (response.status === 200) {
+          if (payload.user["role"] === "admin") {
+            const user = payload.user;
+            setLoggedUserState({
+              email: user.email,
+              role: "admin",
+              isOTPVerified: false,
+            });
+            router.push("/admin_2FA");
+          }
+          else {
+            const user = payload.user;
+            setLoggedUserState({
+              email: user.email,
+              role: "user",
+              isOTPVerified: false,
+            });
+            router.push("/upload");
+          }
         }
       } catch (error) {
         console.error("Error:", error);

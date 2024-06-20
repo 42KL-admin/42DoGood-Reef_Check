@@ -11,7 +11,7 @@ export async function POST(request: NextRequest, response: NextResponse)
         const db = client.db("42reef-check");
         const admin = await db.collection("adminOTPVerification").findOne({ adminEmail: adminEmail});
 
-        
+        console.log(admin);
         if (!adminEmail || !otp) {
             throw new Error('Missing required fields');
         }
@@ -25,10 +25,16 @@ export async function POST(request: NextRequest, response: NextResponse)
             throw new Error("OTP expired. Please request a new OTP.");
         } else {
             const hashedOTP = await bcrypt.hash(otp, admin.salt);
-            const valid = await bcrypt.compare(hashedOTP, admin.otp);
+			const valid = hashedOTP == admin.otp;
+			console.log('hashedOTP:');
+			console.log(hashedOTP);
+			console.log('admin.otp:');
+			console.log(admin.otp);
+			console.log('valid:');
+			console.log(valid);
 
             // If OTP is invalid
-            if (!valid) {
+            if (valid == true) {
                 await db.collection("adminOTPVerification").deleteMany({ adminEmail: adminEmail });
                 return NextResponse.json({ message: "Admin is verified successfully"}, {status: 200});
             } else {

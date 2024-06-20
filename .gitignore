@@ -37,4 +37,5 @@ next-env.d.ts
 
 # todo
 todo
+*.code-workspace
 bun.lockb
