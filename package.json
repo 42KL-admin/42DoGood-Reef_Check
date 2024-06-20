@@ -19,8 +19,8 @@
     "@types/js-cookie": "^3.0.6",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
-    "formidable": "^3.5.1",
     "cookie": "^0.6.0",
+    "formidable": "^3.5.1",
     "js-cookie": "^3.0.5",
     "mongodb": "^6.4.0",
     "mongoose": "^8.3.0",
@@ -34,9 +34,11 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@types/multiparty": "^0.0.36",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cookie": "^0.6.0",
+    "@types/multiparty": "^0.0.36",
     "@types/node": "20.12.10",
+    "@types/nodemailer": "^6.4.15",
     "@types/react": "18.3.1",
     "@types/react-dom": "^18",
     "@types/uuid": "^9.0.8",
