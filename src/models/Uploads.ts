@@ -18,7 +18,7 @@ export interface IUploads extends Document {
     file_name			: string;
     status				: string;
     status_description	: string;
-    created_at			: string;
+    created_at			: Date;
 }
 
 // Define the Uploads schema
