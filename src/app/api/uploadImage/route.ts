@@ -123,3 +123,22 @@ export async function POST(request: NextRequest): Promise<Response> {
     return generateResponse({ message: 'Internal server error', error: e.message }, 500);
   }
 }
+
+export async function GET(): Promise<Response> {
+  try {
+    const { userId, userEmail } = await getUserIdFromCookies();
+    const uploads = await Uploads.find({ user_id: userId }).sort({ timestamp: -1 }).limit(10);
+
+    const uploadStatuses = uploads.map(upload => ({
+      file_name: upload.file_name,
+      status: upload.status,
+      status_description: upload.status_description,
+      timestamp: upload.timestamp
+    }));
+
+    return generateResponse({ uploads: uploadStatuses }, 200);
+  } catch (e: any) {
+    console.error(`Internal server error: ${e.message}`);
+    return generateResponse({ message: 'Internal server error', error: e.message }, 500);
+  }
+}
