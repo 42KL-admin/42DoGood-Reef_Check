@@ -113,8 +113,6 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (files.length === 0) return generateResponse({ error: 'Files missing' }, 400);
 
     const { userId, userEmail  }= await getUserIdFromCookies();
-
-    console.log('userEmail = ', userEmail);
     
     const uploadPromises = files.map(file => handleFileUpload(file, userId, sasToken.value, userEmail));
     await Promise.all(uploadPromises);
