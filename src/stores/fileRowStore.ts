@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import { FileRow, SlateState, SlateType } from "./types";
+import { FileRow, SlateRecognitionStatus, SlateState, SlateType } from "./types";
 
 // All the rows (the main state)
 type FileRowSet = {
@@ -12,6 +12,7 @@ type FileRowActions = {
   addRow: () => void;
   removeRow: (id: string) => void;
   setSlateFile: (id: string, type: SlateType, file: File | null) => void;
+  setSlateStatus: (id: string, type: SlateType, status: SlateRecognitionStatus) => void;
 };
 
 // helper functions
@@ -21,7 +22,7 @@ const createSlate = (type: SlateType): SlateState => {
     type,
     file: null,
     base64: "",
-    status: "unknown",
+    status: "not processed",
   };
 };
 
@@ -57,6 +58,24 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
             [type]: {
               ...row[type],
               file: file,
+            },
+          };
+          return updatedRow;
+        }
+        return row;
+      }),
+    })),
+
+  // update slate conversion status
+  setSlateStatus: (id: string, type: SlateType, status: SlateRecognitionStatus) =>
+    set((state) => ({
+      rows: state.rows.map((row) => {
+        if (row.id === id) {
+          const updatedRow = {
+            ...row,
+            [type]: {
+              ...row[type],
+              status: status,
             },
           };
           return updatedRow;

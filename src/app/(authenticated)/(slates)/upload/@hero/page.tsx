@@ -7,11 +7,16 @@ import { RoundedButton } from '@/components/RoundedButton';
 import DropdownMenu from '@/components/DropdownMenu';
 import Container from '@mui/material/Container';
 import { useRouter } from 'next/navigation';
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import NavBar from '@/components/mobile/NavBar';
 import { checkSasToken } from '@/services/sasTokenApi';
 import { useFileRowStore } from '@/stores/fileRowStore';
 import { uploadSlatesToBlob } from '@/services/uploadSlateApi';
+import {
+  SlateType,
+  SlateUploadItem,
+  UploadFilesResponse,
+} from '@/stores/types';
 
 const ChipLabels = ['Not blurry', 'Bright enough', 'Pencil writing is clear'];
 
@@ -28,20 +33,41 @@ const ChipLabels = ['Not blurry', 'Bright enough', 'Pencil writing is clear'];
 export default function UploadPhotoHeroSection() {
   const router = useRouter();
   const fileRows = useFileRowStore((state) => state.rows);
+  const setSlateStatus = useFileRowStore((state) => state.setSlateStatus);
+
+  const updateSlateStatus = (response: UploadFilesResponse[]) => {
+    response.forEach((item) => {
+      const [id, type] = item.id.split(':');
+      setSlateStatus(
+        id,
+        type as SlateType,
+        item.status === 'success' ? 'processing' : 'failed',
+      );
+    });
+  };
 
   const uploadSlates = async () => {
-    // TODO: filter by status as well (those are not processed yet)
     if (!fileRows) return;
 
-    const slatesToBeUploaded = fileRows
-      .flatMap((row) => [row.substrate.file, row.fishInverts.file])
-      .filter((file): file is File => file !== null);
+    const slatesToBeUploaded: SlateUploadItem[] = fileRows
+      .flatMap((row) => [
+        row.substrate.file && row.substrate.status === 'not processed'
+          ? { id: `${row.id}:${row.substrate.type}`, file: row.substrate.file }
+          : null,
+        row.fishInverts.file && row.fishInverts.status === 'not processed'
+          ? {
+              id: `${row.id}:${row.fishInverts.type}`,
+              file: row.fishInverts.file,
+            }
+          : null,
+      ])
+      .filter((item): item is SlateUploadItem => item !== null);
 
     if (slatesToBeUploaded.length > 0) {
       try {
         await checkSasToken();
         const uploadResponse = await uploadSlatesToBlob(slatesToBeUploaded);
-        console.log('uploadResponse', uploadResponse);
+        updateSlateStatus(uploadResponse.results);
       } catch (e: any) {
         console.log('error uploading slates', e.message);
         throw new Error('uploadSlatesToBlob error', e.message);

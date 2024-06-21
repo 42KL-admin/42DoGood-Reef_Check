@@ -6,7 +6,8 @@ export type SlateRecognitionStatus =
   | "recognized"
   | "failed"
   | "unknown"
-  | "processing";
+  | "processing"
+  | "not processed";
 
 export type EmailRole =
   | 'can edit'
@@ -43,4 +44,16 @@ export interface LoggedUser {
   email: string;
   role: UserRole;
   isOTPVerified: boolean;
+}
+
+export interface SlateUploadItem {
+  id: string;
+  file: File;
+}
+
+export interface UploadFilesResponse {
+  id: string;
+  filename: string;
+  status: 'success' | 'failed';
+  error?: Error;
 }
