@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
-export const SAS_COOKIE_NAME = 'RCSasToken';
-
+export const SAS_COOKIE_NAME  = 'RCSasToken';
+export const USER_COOKIE		  = 'RCUserCookie';
 // Function to validate SAS token
 export function isSasTokenExpired(): boolean {
   const sasTokenCookie = cookies().get(SAS_COOKIE_NAME);
