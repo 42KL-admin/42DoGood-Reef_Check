@@ -13,6 +13,7 @@ mongoose.connect(mongoURI!).then(() => {
 
 // Define the Uploads interface
 export interface IUploads extends Document {
+    // _id                 : mongoose.Schema.Types.ObjectId; uncomment this line when merge with frontend
     user_id				: mongoose.Schema.Types.ObjectId;
     directory			: string;
     file_name			: string;
@@ -23,6 +24,7 @@ export interface IUploads extends Document {
 
 // Define the Uploads schema
 const UploadsSchema: Schema = new mongoose.Schema({
+    // _id                 : { type: mongoose.Schema.Types.ObjectId, required: true }, uncomment this line when merge with frontend
     user_id				: { type: mongoose.Schema.Types.ObjectId, required: true },
 	directory			: { 
         type: String, 
@@ -40,7 +42,7 @@ const UploadsSchema: Schema = new mongoose.Schema({
     status				: { 
         type: String, 
         enum: ['Uploaded', 'Processing', 'Failed', 'Successful'], 
-        required: true 
+        required: true   
     },
     status_description	: { type: String, trim: true },
     created_at			: { type: String, default: Date.now() }
