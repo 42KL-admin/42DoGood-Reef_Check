@@ -11,12 +11,6 @@ mongoose.connect(mongoURI!).then(() => {
     console.error("MongoDB connection error in Uploads model:", error);
 });
 
-// Function to get the current date and time in Malaysia timezone
-function getCurrentLocalDate(): Date {
-    const now = new Date();
-    const localDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kuala_Lumpur' }));
-    return localDate;
-}
 // Define the Uploads interface
 export interface IUploads extends Document {
     user_id				: mongoose.Schema.Types.ObjectId;
@@ -24,7 +18,7 @@ export interface IUploads extends Document {
     file_name			: string;
     status				: string;
     status_description	: string;
-    created_at			: Date;
+    created_at			: string;
 }
 
 // Define the Uploads schema
@@ -49,7 +43,7 @@ const UploadsSchema: Schema = new mongoose.Schema({
         required: true 
     },
     status_description	: { type: String, trim: true },
-    created_at			: { type: Date, default: getCurrentLocalDate() }
+    created_at			: { type: String, default: Date.now() }
 });
 
 // Define the Uploads model
