@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { Readable } from 'stream';
 import { generateResponse } from '../../../utils/response';
-import { UploadFilesRequest, File } from '../../../interfaces/api';
+import { UploadFilesRequest, File, UploadFilesResponse } from '../../../interfaces/api';
 import { SAS_COOKIE_NAME, isSasTokenExpired } from '../utils';
 import { cookies } from 'next/headers';
 
@@ -29,19 +29,28 @@ async function parseFormData(request: NextRequest): Promise<UploadFilesRequest> 
 }
 
 // Function to upload files to Azure Blob Storage
-async function uploadFiles(sasToken: string, files: File[]): Promise<void> {
+async function uploadFiles(sasToken: string, files: File[]): Promise<UploadFilesResponse[]> {
   const url = `https://${accountName}.blob.core.windows.net/${containerName}?${sasToken}`;
   const blobServiceClient = new BlobServiceClient(url);
   const containerClient = blobServiceClient.getContainerClient(containerName);
+
+  let uploadResponses: UploadFilesResponse[] = [];
 
   for (const { filename, fileBuffer, fileType } of files) {
     const blockBlobClient = containerClient.getBlockBlobClient(filename);
     const fileStream = Readable.from(fileBuffer);
 
-    await blockBlobClient.uploadStream(fileStream, fileBuffer.length, 20, {
-      blobHTTPHeaders: { blobContentType: fileType }
-    });
+    try {
+      await blockBlobClient.uploadStream(fileStream, fileBuffer.length, 20, {
+        blobHTTPHeaders: { blobContentType: fileType }
+      });
+      uploadResponses.push({ filename, status: 'success' });
+    } catch (error) {
+      uploadResponses.push({ filename, status: 'failed', error: error as Error });
+    }
   }
+
+  return uploadResponses;
 }
 
 // Main POST handler
@@ -59,9 +68,12 @@ export async function POST(request: NextRequest): Promise<Response> {
     if (files.length === 0)
       return generateResponse({ error: 'Files missing' }, 400);
 
-    await uploadFiles(sasToken.value, files);
+    const uploadResults = await uploadFiles(sasToken.value, files);
 
-    return generateResponse({ message: 'Files uploaded successfully' }, 200);
+    return generateResponse({
+      message: 'Files uploaded successfully',
+      results: uploadResults
+    }, 200);
   } catch (e: any) {
     console.error(e);
     return generateResponse({ message: 'Internal server error', error: e.message }, 500);

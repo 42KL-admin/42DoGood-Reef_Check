@@ -7,3 +7,9 @@ export interface File {
 export interface UploadFilesRequest {
   files: File[];
 }
+
+export interface UploadFilesResponse {
+  filename: string;
+  status: 'success' | 'failed';
+  error?: Error;
+}
