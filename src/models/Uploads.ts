@@ -45,7 +45,7 @@ const UploadsSchema: Schema = new mongoose.Schema({
         required: true   
     },
     status_description	: { type: String, trim: true },
-    created_at			: { type: String, default: Date.now() }
+    created_at			: { type: Date, default: Date.now() }
 });
 
 // Define the Uploads model
