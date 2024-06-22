@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import Dropdownpermission from '@/components/Dropdownpermission';
 import { useEmailRowStore } from '@/stores/emailRowStore';
 import { EmailRole } from '@/stores/types';
+import { inviteUser } from '@/services/dashboardApi';
 
 export default function UploadUserSection() {
   const [selectedPermission, setSelectedPermission] =
@@ -19,18 +20,9 @@ export default function UploadUserSection() {
 
   const handleInviteClick = async () => {
     try {
-      const response = await fetch('/api/admin/Dashboard', {
-        method: 'POST',
-        body: JSON.stringify({ email, role: selectedPermission }),
-      });
-      const payload = await response.json();
-
-      if (response.status == 200) {
-        addRow(email, selectedPermission);
-        setEmail('');
-      } else {
-        throw alert('Error: ' + payload.message); // Debugging purposes
-      }
+      const _ = await inviteUser(email, selectedPermission);
+      addRow(email, selectedPermission);
+      setEmail('');
     } catch (error) {
       console.error('Error fetching emails:', error);
       router.push('/');
