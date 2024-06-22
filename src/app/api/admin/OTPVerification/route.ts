@@ -1,5 +1,4 @@
 import { NextRequest ,NextResponse } from 'next/server';
-import AdminOTPVerification from "@/models/AdminOTPVerification";
 import clientPromise from "../../../../../lib/mongodb";
 const bcrypt = require('bcryptjs');
 
@@ -11,7 +10,6 @@ export async function POST(request: NextRequest, response: NextResponse)
         const db = client.db("42reef-check");
         const admin = await db.collection("adminOTPVerification").findOne({ adminEmail: adminEmail});
 
-        console.log(admin);
         if (!adminEmail || !otp) {
             throw new Error('Missing required fields');
         }
@@ -20,18 +18,17 @@ export async function POST(request: NextRequest, response: NextResponse)
         }
 
         // To check whether is OTP is expired or not
-        if (admin.expiresAt < Date.now()) {
+        const expiresAt = new Date(admin.expiresAt);
+        const now = new Date();
+        if (expiresAt.getTime() < now.getTime()) {
             await db.collection("adminOTPVerification").deleteMany({ adminEmail: adminEmail });
             throw new Error("OTP expired. Please request a new OTP.");
         } else {
             const hashedOTP = await bcrypt.hash(otp, admin.salt);
 			const valid = hashedOTP == admin.otp;
-			console.log('hashedOTP:');
-			console.log(hashedOTP);
-			console.log('admin.otp:');
-			console.log(admin.otp);
-			console.log('valid:');
-			console.log(valid);
+			console.log('hashedOTP:', hashedOTP);
+			console.log('admin.otp:', admin.otp);
+			console.log('valid:', valid);
 
             // If OTP is invalid
             if (valid == true) {
