@@ -5,7 +5,8 @@ import { Button, Container, Box, TextField, Typography } from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLoggedUserStateStore } from '@/stores/loggedUserStore';
-import { sendOTP } from '@/services/sendOTPApi';
+import { sendOTP, verifyOTP } from '@/services/otpApi';
+import { createSession } from '@/services/sessionApi';
 
 export default function Admin_2FA() {
   const [token, setToken] = useState('');
@@ -41,41 +42,37 @@ export default function Admin_2FA() {
     }
   };
 
+  const handleCreateSession = async (adminEmail: string) => {
+    try {
+      const _ = await createSession(adminEmail);
+      console.log('session made');
+      router.replace('/admin_dashboard');
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (token) {
-      try {
-        console.log('OTP checking');
-        const response = await fetch('/api/admin/OTPVerification', {
-          method: 'POST',
-          body: JSON.stringify({ adminEmail: user?.email, otp: token }),
-        });
-        if (response.status === 200) {
-          console.log('OTP correct');
-          const sessionResponse = await fetch('/api/admin/SessionID', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ adminEmail: user?.email }),
-          });
 
-          if (sessionResponse.status === 200) {
-            console.log('session made');
+    if (!user?.email) {
+      console.error('No email found');
+      return;
+    }
 
-            // Redirect to admin dashboard if sessionID creation is successful
-            router.replace('/admin_dashboard');
-          } else {
-            const error = await sessionResponse.json();
-            console.error('Failed to create sessionID:', error.message);
-          }
-        } else {
-          const error = await response.json();
-          console.error('OTP verification failed:', error.message);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      }
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+
+    try {
+      const _ = await verifyOTP({
+        adminEmail: user.email,
+        otp: token,
+      });
+      handleCreateSession(user.email);
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
