@@ -20,3 +20,21 @@ export async function inviteUser(email: string, role: EmailRole) {
     throw new Error("inviteUser error", e.message);
   }
 }
+
+export async function deleteUser(email: string) {
+  try {
+    const response = await apiCall(dashboardApiUrl, "DELETE", { email });
+    return response;
+  } catch (e: any) {
+    throw new Error("deleteUser error", e.message);
+  }
+}
+
+export async function updateUserRole(email: string, role: EmailRole) {
+  try {
+    const response = await apiCall(dashboardApiUrl, "PUT", { email, role });
+    return response;
+  } catch (e: any) {
+    throw new Error("updateUserRole error", e.message);
+  }
+}
