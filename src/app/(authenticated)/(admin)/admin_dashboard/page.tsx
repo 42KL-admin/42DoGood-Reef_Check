@@ -10,6 +10,7 @@ import { useEmailRowStore } from '@/stores/emailRowStore';
 import { EmailRole, EmailRow } from '@/stores/types';
 import { useRouter } from 'next/navigation';
 import SortByPermission from '@/components/SortbyPermission';
+import { getEmailList } from '@/services/dashboardApi';
 
 export default function UploadEmailSection() {
   const { addRow, rows, clearRows } = useEmailRowStore();
@@ -25,27 +26,24 @@ export default function UploadEmailSection() {
     ? rows.filter((row) => row.role === sortByRole)
     : rows;
 
+  const fetchEmails = async () => {
+    try {
+      const response = await getEmailList();
+      const { data: emailList }: { data: EmailRow[] } = response;
+
+      // Clear the existing rows
+      clearRows();
+
+      emailList.forEach(({ email, role }) => {
+        addRow(email, role);
+      });
+    } catch (error) {
+      console.error('Error fetching emails:', error);
+      router.push('/');
+    }
+  };
+
   useEffect(() => {
-    const fetchEmails = async () => {
-      try {
-        const response = await fetch('/api/admin/Dashboard', {
-          method: 'GET',
-        });
-        const payload = await response.json();
-
-        // Clear the existing rows
-        clearRows();
-
-        // Add the fetched emails to the store
-        payload.data.forEach(({ email, role }: EmailRow) => {
-          addRow(email, role);
-        });
-      } catch (error) {
-        console.error('Error fetching emails:', error);
-        router.push('/');
-      }
-    };
-
     fetchEmails();
   }, [addRow, clearRows]);
 
