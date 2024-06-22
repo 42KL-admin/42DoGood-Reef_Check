@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLoggedUserStateStore } from '@/stores/loggedUserStore';
 import { LoginResponse, login } from '@/services/loginApi';
+import { sendOTP } from '@/services/sendOTPApi';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -13,6 +14,15 @@ export default function Home() {
   const setLoggedUserState = useLoggedUserStateStore(
     (state) => state.setLoggedUserState,
   );
+
+  const handleSendOTP = async (adminEmail: string) => {
+    try {
+      const _ = await sendOTP(adminEmail);
+      router.push('/admin_2FA');
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,16 +32,16 @@ export default function Home() {
     try {
       const response: LoginResponse = await login(email);
       const { user } = response;
-      const { role } = user;
+      const { email: loggedEmail, role } = user;
 
       setLoggedUserState({
-        email: user.email,
+        email: loggedEmail,
         role,
         isOTPVerified: false,
       });
 
       if (role === 'admin') {
-        router.push('/admin_2FA');
+        handleSendOTP(loggedEmail);
       } else {
         router.push('/upload');
       }
