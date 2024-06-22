@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLoggedUserStateStore } from '@/stores/loggedUserStore';
 import { LoginResponse, login } from '@/services/loginApi';
-import { sendOTP } from '@/services/sendOTPApi';
+import { sendOTP } from '@/services/otpApi';
 
 export default function Home() {
   const [email, setEmail] = useState('');
