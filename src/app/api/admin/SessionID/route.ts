@@ -2,7 +2,6 @@ import { NextRequest ,NextResponse } from 'next/server';
 import AdminSessionID from "@/models/AdminSessionID";
 import clientPromise from "../../../../../lib/mongodb";
 import {v4 as uuidv4} from 'uuid';
-import { Db } from 'mongodb';
 
 export async function POST(req: NextRequest)
 {
@@ -18,9 +17,10 @@ export async function POST(req: NextRequest)
 
         const client = await clientPromise;
         const db = client.db("42reef-check");
-		await db.collection("adminSessions").deleteMany({ adminEmail: res.adminEmail });
-        await db.collection("adminSessions").insertOne(adminOTP);
+		await AdminSessionID.deleteMany({ adminEmail: res.adminEmail });
+        const result = await adminOTP.save();
 
+		console.log('result:', result);
 		const response = NextResponse.json({ message: 'Logged in successfully' });
         response.cookies.set('sessionID', sessionID, {
             httpOnly: true,
@@ -47,9 +47,7 @@ export async function DELETE(req: NextRequest)
 			return NextResponse.json({ message: 'No session ID found' }, { status: 400 });
 		}
 
-        const client = await clientPromise;
-        const db = client.db("42reef-check");
-		const result = await db.collection("adminSessions").deleteMany({ sessionID });
+		const result = await AdminSessionID.deleteMany({ sessionID });
 
 		if (result.deletedCount === 0) {
 			return NextResponse.json({ message: "SessionID not found" }, { status: 404 });
@@ -71,16 +69,11 @@ export async function GET(req: NextRequest)
         const db = client.db("42reef-check");
 		const sessionID = req.cookies.get('sessionID')?.value;
 
-		// console.log(sessionID);
-
 		if (!sessionID) {
             return NextResponse.json({ message: 'No session ID found' }, { status: 401 });
         }
 		
-		const sessionExists = await db.collection('adminSessions').findOne({ sessionID });
-		
-		// console.log('Query:', { sessionID });
-		// console.log('Result:', sessionExists);
+		const sessionExists = await AdminSessionID.findOne({ sessionID });
 
         if (!sessionExists) {
 			console.log("Session is wrong!!!!");
