@@ -6,13 +6,14 @@ import theme from "@/theme";
 import { Add, Remove, ZoomIn } from "@mui/icons-material";
 import { Box, IconButton, useMediaQuery } from "@mui/material";
 import Image from "next/image";
-import { Fragment } from "react";
 import {
   TransformComponent,
   TransformWrapper,
   useControls,
 } from "react-zoom-pan-pinch";
 import TabPanel from "./TabPanel";
+import Grid from "./Grid";
+import { data } from "./data";
 
 function EditControls() {
   const { zoomIn, zoomOut, resetTransform } = useControls();
@@ -99,7 +100,9 @@ function EditSlateLargerScreen() {
       >
         <EditImagePreview />
       </Box>
-      <Box width={"50%"} sx={{ backgroundColor: "teal" }}></Box>
+      <Box width={"50%"} sx={{ backgroundColor: "teal" }}>
+        <Grid data={data}></Grid>
+      </Box>
     </Box>
   ) : (
     <></>
