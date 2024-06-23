@@ -1,19 +1,20 @@
 import { NextRequest ,NextResponse } from 'next/server';
-import clientPromise from "../../../../../lib/mongodb";
+import AdminOTPVerification from '@/models/AdminOTPVerification';
 const bcrypt = require('bcryptjs');
 
 export async function POST(request: NextRequest, response: NextResponse)
 {
     try {
         const { adminEmail, otp } = await request.json();
-        const client = await clientPromise;
-        const db = client.db("42reef-check");
-        const admin = await db.collection("adminOTPVerification").findOne({ adminEmail: adminEmail});
-
         if (!adminEmail || !otp) {
+            console.log('Missing required fields')
             throw new Error('Missing required fields');
         }
+
+        const admin = await AdminOTPVerification.findOne({ 'adminEmail': adminEmail});
+
         if (!admin) {
+            console.log('Admin does not exist in database')
             throw new Error("Admin doesn't exist in database");
         }
 
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest, response: NextResponse)
         const expiresAt = new Date(admin.expiresAt);
         const now = new Date();
         if (expiresAt.getTime() < now.getTime()) {
-            await db.collection("adminOTPVerification").deleteMany({ adminEmail: adminEmail });
+            await AdminOTPVerification.deleteMany({ adminEmail: adminEmail });
             throw new Error("OTP expired. Please request a new OTP.");
         } else {
             const hashedOTP = await bcrypt.hash(otp, admin.salt);
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest, response: NextResponse)
 
             // If OTP is invalid
             if (valid == true) {
-                await db.collection("adminOTPVerification").deleteMany({ adminEmail: adminEmail });
+                await AdminOTPVerification.deleteMany({ adminEmail: adminEmail });
                 return NextResponse.json({ message: "Admin is verified successfully"}, {status: 200});
             } else {
                 throw new Error("Invalid OTP.");

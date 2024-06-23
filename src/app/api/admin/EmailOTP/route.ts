@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import AdminOTPVerification, { IAdminOTPVerification } from '@/models/AdminOTPVerification';
-import clientPromise from '../../../../../lib/mongodb';
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcryptjs';
 import { generateResponse } from '../../../../utils/response';
@@ -55,14 +54,12 @@ async function generateSalt() {
 }
 
 // Function to save OTP to database
-async function saveOTPToDatabase(adminOTP: typeof AdminOTPVerification, adminEmail: string) {
-    try {
-        const client = await clientPromise;
-        const db = client.db("42reef-check");
-
+async function saveOTPToDatabase(adminOTP: IAdminOTPVerification, adminEmail: string) {
+    try {   
         // Delete all previous OTPs and save the new OTP to the database
-        await db.collection("adminOTPVerification").deleteMany({ adminEmail });
-        await db.collection("adminOTPVerification").insertOne(adminOTP);
+        await AdminOTPVerification.deleteMany({ adminEmail });
+        adminOTP.save();
+        // await db.collection("adminOTPVerification").insertOne(adminOTP);
     } catch (error) {
         console.error('Error saving OTP to database:', error);
         throw new Error('Failed to save OTP to database');
