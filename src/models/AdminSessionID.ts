@@ -1,5 +1,6 @@
-import mongoose, { Document, Schema, Model } from "mongoose";
-// const bcrypt = require('bcryptjs');
+// import mongoose, { Document, Schema, Model } from "mongoose";
+import mongoose from '../../lib/mongoose';
+import { Document, Schema } from 'mongoose';
 
 export interface ISessionID extends Document {
 	sessionID: string;

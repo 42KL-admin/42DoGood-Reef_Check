@@ -1,5 +1,5 @@
-import mongoose, { Document, Schema, Model } from "mongoose";
-// const bcrypt = require('bcryptjs');
+import mongoose from '../../lib/mongoose';
+import { Document, Schema } from 'mongoose';
 
 export interface IAdminOTPVerification extends Document {
     adminEmail: string;
