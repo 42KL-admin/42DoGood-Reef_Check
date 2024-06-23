@@ -58,12 +58,28 @@ async function saveOTPToDatabase(adminOTP: IAdminOTPVerification, adminEmail: st
     try {   
         // Delete all previous OTPs and save the new OTP to the database
         await AdminOTPVerification.deleteMany({ adminEmail });
-        adminOTP.save();
-        // await db.collection("adminOTPVerification").insertOne(adminOTP);
+        await adminOTP.save();
     } catch (error) {
         console.error('Error saving OTP to database:', error);
         throw new Error('Failed to save OTP to database');
     }
+}
+
+// Function to handle OTP generation and sending
+async function handleOTPGeneration(adminEmail: string) {
+    const otp = generateOTP();
+    const salt = await generateSalt();
+    const hashedOtp = await bcrypt.hash(otp, salt);
+
+    const adminOTP = new AdminOTPVerification({
+        otp: hashedOtp,
+        salt,
+        adminEmail,
+        expiresAt: new Date(Date.now() + 3600 * 1000) // 1 hour expiration
+    });
+
+    await saveOTPToDatabase(adminOTP, adminEmail);
+    await sendEmail(adminEmail, 'Your 2FA Code', `<p>Your 2FA code is: <b>${otp}</b>.</p><p>This code <b>expires in 1 hour</b>.</p>`);
 }
 
 // POST request handler
@@ -75,21 +91,7 @@ export async function POST(request: NextRequest) {
             return generateResponse({ error: "Admin email is required" }, 400);
         }
 
-        const otp = generateOTP();
-        const salt = await generateSalt();
-        const hashedOtp = await bcrypt.hash(otp, salt);
-
-        const adminOTP = new AdminOTPVerification({
-            otp: hashedOtp,
-            salt,
-            adminEmail
-        });
-
-        // Save OTP to the database
-        await saveOTPToDatabase(adminOTP, adminEmail);
-
-        // Send OTP to admin email
-        await sendEmail(adminEmail, 'Your 2FA Code', `<p>Your 2FA code is: <b>${otp}</b>.</p><p>This code <b>expires in 1 hour</b>.</p>`);
+        await handleOTPGeneration(adminEmail);
 
         return generateResponse({ message: "2FA code sent to admin email successfully." }, 200);
     } catch (error) {
