@@ -14,6 +14,7 @@ import {
 import TabPanel from "./TabPanel";
 import Grid from "./Grid";
 import { data } from "./data";
+import FishInvertebratesAndImpactGrid from "./FishInvertebratesAndImpactGrid";
 
 function EditControls() {
   const { zoomIn, zoomOut, resetTransform } = useControls();
@@ -101,7 +102,8 @@ function EditSlateLargerScreen() {
         <EditImagePreview />
       </Box>
       <Box width={"50%"} sx={{ backgroundColor: "teal" }}>
-        <Grid data={data}></Grid>
+        {/* <Grid data={data}></Grid> */}
+        <FishInvertebratesAndImpactGrid />
       </Box>
     </Box>
   ) : (
