@@ -1,45 +1,32 @@
-"use client";
+'use client';
 
-import { Button, Typography, Container, Box, TextField } from "@mui/material";
-import { useState } from "react";
-import { RoundedButton } from "@/components/RoundedButton";
-import DropdownMenu from "@/components/DropdownMenu";
-import { useRouter } from "next/navigation";
-import Dropdownpermission from "@/components/Dropdownpermission";
-import { useEmailRowStore } from "@/stores/emailRowStore";
-import { EmailRole } from "@/stores/types";
+import { Container, Box, TextField } from '@mui/material';
+import { useState } from 'react';
+import { RoundedButton } from '@/components/RoundedButton';
+import DropdownMenu from '@/components/DropdownMenu';
+import { useRouter } from 'next/navigation';
+import Dropdownpermission from '@/components/Dropdownpermission';
+import { useEmailRowStore } from '@/stores/emailRowStore';
+import { EmailRole } from '@/stores/types';
+import { inviteUser } from '@/services/dashboardApi';
 
 export default function UploadUserSection() {
-  const [selectedPermission, setSelectedPermission] = useState<EmailRole>("can edit");
-  const [email, setEmail] = useState("");
+  const [selectedPermission, setSelectedPermission] =
+    useState<EmailRole>('can edit');
+  const [email, setEmail] = useState('');
   const addRow = useEmailRowStore((state) => state.addRow);
 
   const router = useRouter();
 
   const handleInviteClick = async () => {
-	try {
-		const response = await fetch('/api/admin/Dashboard', {
-		  method: 'POST',
-		  body: JSON.stringify({ email, role: selectedPermission }),
-		});
-		const payload = await response.json();
-
-		if (response.status == 200) {
-			addRow(email, selectedPermission);
-			setEmail("");
-		}
-		else {
-			throw(alert("Error: " + payload.message))// Debugging purposes
-		}
-
-	  } catch (error) {
-		console.error('Error fetching emails:', error);
-		router.push('/');
-	  }
-    // if (email.trim() !== '') {
-    //   addRow(email, selectedPermission);
-    //   setEmail('');
-    // } 
+    try {
+      const _ = await inviteUser(email, selectedPermission);
+      addRow(email, selectedPermission);
+      setEmail('');
+    } catch (error) {
+      console.error('Error fetching emails:', error);
+      router.push('/');
+    }
   };
 
   const handlePermissionChange = (permission: EmailRole) => {
@@ -62,8 +49,8 @@ export default function UploadUserSection() {
         <Box display="flex" columnGap={2.5}>
           <Box
             sx={{
-              width: "90vw", // Set width to 100% of the viewport width
-              gap: "12px",
+              width: '90vw', // Set width to 100% of the viewport width
+              gap: '12px',
               maxHeight: '56px',
               display: 'flex',
               alignItems: 'center',
@@ -79,25 +66,25 @@ export default function UploadUserSection() {
               sx={{
                 flex: 1, // Make the TextField fill the remaining space
                 '& .MuiInputBase-input': {
-                  borderRadius: "12px",
+                  borderRadius: '12px',
                   backgroundColor: 'white', // Set background color for text input
                 },
-                "& fieldset": {
-                  borderWidth: "1px",
+                '& fieldset': {
+                  borderWidth: '1px',
                 },
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "12px",
-                  "&:hover fieldset": { borderColor: "#107888" },
-                  "&.Mui-focused fieldset": { borderColor: "#107888" },
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '12px',
+                  '&:hover fieldset': { borderColor: '#107888' },
+                  '&.Mui-focused fieldset': { borderColor: '#107888' },
                 },
               }}
             />
-            <Dropdownpermission 
-              initialPermission={selectedPermission} 
+            <Dropdownpermission
+              initialPermission={selectedPermission}
               onChange={handlePermissionChange}
-              borderColor="#C3C3C3">
-            </Dropdownpermission>
-            <RoundedButton 
+              borderColor="#C3C3C3"
+            ></Dropdownpermission>
+            <RoundedButton
               variant="contained"
               disabled={email.trim() === ''}
               onClick={handleInviteClick}

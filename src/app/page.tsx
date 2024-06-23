@@ -1,83 +1,52 @@
-"use client";
+'use client';
 
-import { Button, Typography, Container, Box, TextField } from "@mui/material";
-import { useEffect, useLayoutEffect, useState } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
-import { getUserFromCookie } from "../../lib/cookies";
-import { LoggedUser } from "@/stores/types";
+import { Button, Typography, Container, Box, TextField } from '@mui/material';
+import { useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useLoggedUserStateStore } from '@/stores/loggedUserStore';
+import { LoginResponse, login } from '@/services/loginApi';
+import { sendOTP } from '@/services/otpApi';
 
 export default function Home() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const router = useRouter();
-  const setLoggedUserState = useLoggedUserStateStore(state => state.setLoggedUserState);
+  const setLoggedUserState = useLoggedUserStateStore(
+    (state) => state.setLoggedUserState,
+  );
 
-  useEffect(() => {
-    const validateSessionID = async () => {
-
-    // NOTE: Force redirection using role
-    // if (userCookie) {
-    //   setLoggedUserState(userCookie);
-    //   // NOTE: VERY VULNERABLE! USE SESSION ID INSTEAD!
-    //   if (userCookie.role === "admin") {
-    //     router.push("/admin_dashboard")
-    //   } else {
-    //     router.push("/upload");
-    //   }
-    // }
-
-		try {
-			const response = await fetch("/api/admin/SessionID", {
-			method: "GET",
-			credentials: 'include', // gets cookies
-			});
-
-			const payload = await response.json();
-			if (payload.status == 200)	{
-				router.push("/admin_dashboard");
-			}
-
-		}	catch(error){
-			console.error("Error:", error);
-		}
-	};
-  }, []);
+  const handleSendOTP = async (adminEmail: string) => {
+    try {
+      const _ = await sendOTP(adminEmail);
+      router.push('/admin_2FA');
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (email) {
-      try {
-        const response = await fetch("/api/login", {
-          method: "POST",
-          body: JSON.stringify({ email }),
-        });
-        const payload = await response.json();
-        // TODO: Implement toast UI
-        alert(payload.message);
-        if (response.status === 200) {
-          if (payload.user["role"] === "admin") {
-            const user = payload.user;
-            setLoggedUserState({
-              email: user.email,
-              role: "admin",
-              isOTPVerified: false,
-            });
-            router.push("/admin_2FA");
-          }
-          else {
-            const user = payload.user;
-            setLoggedUserState({
-              email: user.email,
-              role: "user",
-              isOTPVerified: false,
-            });
-            router.push("/upload");
-          }
-        }
-      } catch (error) {
-        console.error("Error:", error);
+
+    if (!email) return;
+
+    try {
+      const response: LoginResponse = await login(email);
+      const { user } = response;
+      const { email: loggedEmail, role } = user;
+
+      setLoggedUserState({
+        email: loggedEmail,
+        role,
+        isOTPVerified: false,
+      });
+
+      if (role === 'admin') {
+        handleSendOTP(loggedEmail);
+      } else {
+        router.push('/upload');
       }
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -103,15 +72,15 @@ export default function Home() {
             onChange={(e) => setEmail(e.target.value)}
             fullWidth
             sx={{
-              marginTop: "16px",
-              "& fieldset": {
-                borderColor: "primary.main",
-                borderWidth: "1px",
+              marginTop: '16px',
+              '& fieldset': {
+                borderColor: 'primary.main',
+                borderWidth: '1px',
               },
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "12px",
-                "&:hover fieldset": { borderColor: "#107888" },
-                "&.Mui-focused fieldset": { borderColor: "#107888" },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                '&:hover fieldset': { borderColor: '#107888' },
+                '&.Mui-focused fieldset': { borderColor: '#107888' },
               },
             }}
           />
@@ -121,11 +90,11 @@ export default function Home() {
             fontSize="8px"
             color="#006878"
             sx={{
-              marginTop: "4px",
-              marginBottom: "16px",
-              marginLeft: "16px",
-              "@media (min-width: 300px)": {
-                fontSize: "12px",
+              marginTop: '4px',
+              marginBottom: '16px',
+              marginLeft: '16px',
+              '@media (min-width: 300px)': {
+                fontSize: '12px',
               },
             }}
           >
@@ -137,8 +106,8 @@ export default function Home() {
             color="primary"
             fullWidth
             sx={{
-              borderRadius: "100px",
-              "&:hover": { backgroundColor: "#107888" },
+              borderRadius: '100px',
+              '&:hover': { backgroundColor: '#107888' },
             }}
           >
             Next

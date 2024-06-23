@@ -10,11 +10,11 @@ export async function uploadSlatesToBlob(items: SlateUploadItem[]) {
         formData.append(`items[${index}].file`, item.file);
     });
 
-    try {
-        const response = await apiCall(uploadSlateApiUrl, "POST", formData, true);
-        return response;
-    } catch (e: any) {
-        console.log("error uploading slates", e.message);
-        throw new Error("uploadSlatesToBlob error", e.message);
-    }
+  try {
+    const response = await apiCall(uploadSlateApiUrl, 'POST', formData, true);
+    return response;
+  } catch (e: any) {
+    console.log('error uploading slates', e.message);
+    throw new Error('uploadSlatesToBlob error', e.message);
+  }
 }

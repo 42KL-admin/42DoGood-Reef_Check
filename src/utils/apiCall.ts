@@ -1,6 +1,6 @@
 type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-export async function apiCall(url: string, method: HTTPMethod, body?: any, isFormData?: boolean) {
+export async function apiCall(url: string, method: HTTPMethod, body?: any, isFormData: boolean = false) {
   const options: RequestInit = {
     method,
     headers: isFormData ? {} : { 'Content-Type': 'application/json' },
