@@ -1,60 +1,35 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { Button, Container, Box, TextField, Typography } from "@mui/material";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
+import { useState } from 'react';
+import { Button, Container, Box, TextField, Typography } from '@mui/material';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useLoggedUserStateStore } from '@/stores/loggedUserStore';
+import { sendOTP, verifyOTP } from '@/services/otpApi';
+import { createSession } from '@/services/sessionApi';
 
 export default function Admin_2FA() {
-  const [email, setEmail] = useState("");
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState('');
   const [isResendDisabled, setIsResendDisabled] = useState(false);
-  const [resendTimeoutId, setResendTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const [resendTimeoutId, setResendTimeoutId] = useState<NodeJS.Timeout | null>(
+    null,
+  );
   const user = useLoggedUserStateStore((state) => state.user);
-  const updateLoggedUserOTPStatus = useLoggedUserStateStore((state) => state.updateLoggedUserOTPStatus);
-
   const router = useRouter();
 
-  useEffect(() => {
-    const sendOTP = async () => {
-      try {
-        const response = await fetch("/api/admin/EmailOTP", {
-          method: "POST",
-          body: JSON.stringify({ adminEmail: user?.email }),
-        });
-        const payload = await response.json();
-        if (response.status !== 200) {
-          console.error(payload.message);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    };
-
-    if (user?.email) {
-      setEmail(user.email);
-      sendOTP();
-    }
-  }, [user?.email]);
-
   const resendOTP = async () => {
-    try {
-      setIsResendDisabled(true); // Disable the button
-      if (resendTimeoutId) {
-        clearTimeout(resendTimeoutId); // Clear any existing timeout
-      }
+    if (!user?.email) {
+      console.error('No email found');
+      return;
+    }
 
-      const response = await fetch("/api/admin/EmailOTP", {
-        method: "POST",
-        body: JSON.stringify({ adminEmail: user?.email }),
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        console.error(payload.message);
-      } else {
-        alert(payload.message);
-      }
+    setIsResendDisabled(true); // Disable the button
+    if (resendTimeoutId) {
+      clearTimeout(resendTimeoutId); // Clear any existing timeout
+    }
+
+    try {
+      const _ = await sendOTP(user.email);
 
       // Set a timeout to re-enable the button after 5 seconds
       const timeoutId = window.setTimeout(() => {
@@ -62,46 +37,42 @@ export default function Admin_2FA() {
       }, 5000);
       setResendTimeoutId(timeoutId as unknown as NodeJS.Timeout);
     } catch (error) {
-      console.error("Error:", error);
+      console.error('Error:', error);
       setIsResendDisabled(false); // Re-enable the button in case of an error
+    }
+  };
+
+  const handleCreateSession = async (adminEmail: string) => {
+    try {
+      const _ = await createSession(adminEmail);
+      console.log('session made');
+      router.replace('/admin_dashboard');
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (token) {
-      try {
-		console.log("OTP checking");
-        const response = await fetch("/api/admin/OTPVerification", {
-          method: "POST",
-          body: JSON.stringify({ adminEmail: email, otp: token }),
-        });
-        if (response.status === 200) {
-			console.log("OTP correct");
-			const sessionResponse = await fetch("/api/admin/SessionID", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ adminEmail: user?.email }),
-          });
 
-          if (sessionResponse.status === 200) {
-			console.log("session made");
+    if (!user?.email) {
+      console.error('No email found');
+      return;
+    }
 
-            // Redirect to admin dashboard if sessionID creation is successful
-            router.replace("/admin_dashboard");
-          } else {
-            const error = await sessionResponse.json();
-            console.error("Failed to create sessionID:", error.message);
-          }
-        } else {
-          const error = await response.json();
-          console.error("OTP verification failed:", error.message);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      }
+    if (!token) {
+      console.error('No token found');
+      return;
+    }
+
+    try {
+      const _ = await verifyOTP({
+        adminEmail: user.email,
+        otp: token,
+      });
+      handleCreateSession(user.email);
+    } catch (error) {
+      console.error('Error:', error);
     }
   };
 
@@ -127,15 +98,15 @@ export default function Admin_2FA() {
             onChange={(e) => setToken(e.target.value)}
             fullWidth
             sx={{
-              marginTop: "16px",
-              "& fieldset": {
-                borderColor: "primary.main",
-                borderWidth: "1px",
+              marginTop: '16px',
+              '& fieldset': {
+                borderColor: 'primary.main',
+                borderWidth: '1px',
               },
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "12px",
-                "&:hover fieldset": { borderColor: "#107888" },
-                "&.Mui-focused fieldset": { borderColor: "#107888" },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                '&:hover fieldset': { borderColor: '#107888' },
+                '&.Mui-focused fieldset': { borderColor: '#107888' },
               },
             }}
           />
@@ -144,18 +115,18 @@ export default function Admin_2FA() {
               variant="body2"
               sx={{
                 opacity: isResendDisabled ? 0.5 : 1,
-                marginTop: "4px",
-                marginBottom: "16px",
-                color: "primary.main",
+                marginTop: '4px',
+                marginBottom: '16px',
+                color: 'primary.main',
               }}
             >
-              Didn&apos;t receive code?{" "}
+              Didn&apos;t receive code?{' '}
               <Typography
                 component="span"
                 sx={{
-                  textDecoration: "underline",
-                  cursor: isResendDisabled ? "not-allowed" : "pointer",
-                  color: "primary.main",
+                  textDecoration: 'underline',
+                  cursor: isResendDisabled ? 'not-allowed' : 'pointer',
+                  color: 'primary.main',
                 }}
                 onClick={!isResendDisabled ? resendOTP : undefined}
               >
@@ -169,8 +140,8 @@ export default function Admin_2FA() {
             color="primary"
             fullWidth
             sx={{
-              borderRadius: "100px",
-              "&:hover": { backgroundColor: "#107888" },
+              borderRadius: '100px',
+              '&:hover': { backgroundColor: '#107888' },
             }}
           >
             Next

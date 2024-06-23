@@ -1,4 +1,4 @@
-import Box from "@mui/material/Box";
+import Box from '@mui/material/Box';
 
 export default function UploadPhotoLayout({
   children,
@@ -9,7 +9,7 @@ export default function UploadPhotoLayout({
 }) {
   return (
     <Box>
-      <Box sx={{ backgroundColor: "primary.light" }}>{hero}</Box>
+      <Box sx={{ backgroundColor: 'primary.light' }}>{hero}</Box>
       <Box>{children}</Box>
     </Box>
   );
