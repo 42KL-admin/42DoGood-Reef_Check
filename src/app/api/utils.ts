@@ -1,15 +1,13 @@
-import { cookies } from "next/headers";
-
-export const SAS_COOKIE_NAME = 'RCSasToken';
+import { cookies } from 'next/headers';
 
 // Function to validate SAS token
-export function isSasTokenExpired(): boolean {
-  const sasTokenCookie = cookies().get(SAS_COOKIE_NAME);
+export function isSasTokenExpired(cookieName: string): boolean {
+  const sasTokenCookie = cookies().get(cookieName);
 
   if (sasTokenCookie === undefined) return true;
 
   const params = new URLSearchParams(sasTokenCookie.value);
-  const expiryTime = params.get("se");
+  const expiryTime = params.get('se');
   if (!expiryTime) return true;
 
   const expiryDate = new Date(expiryTime);

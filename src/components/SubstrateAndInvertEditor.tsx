@@ -19,9 +19,9 @@ import {
   registerPlugin,
 } from 'handsontable/plugins';
 import {
-  fetchSasToken,
   fetchTemplateFromBlobStorage,
 } from '@/utils/azureBlobStorageHelper';
+import { getExcelTemplateSasTokenCookie } from '@/services/excelTemplateSasTokenApi';
 
 registerCellType(CheckboxCellType);
 registerCellType(NumericCellType);
@@ -34,8 +34,6 @@ registerPlugin(DropdownMenu);
 registerPlugin(Filters);
 registerPlugin(HiddenRows);
 registerPlugin(MergeCells);
-
-const templateName = 'substrate-template.xlsx';
 
 interface ExportEditorProps {
   type: 'substrate' | 'fishInverts';
@@ -72,17 +70,21 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
 
   // Function to fetch data from Azure Blob Storage for a specific template
   const getExcelTemplateFiles = async () => {
-    const sasToken = await fetchSasToken();
-    console.log('sasToken: ', sasToken);
+	try {
+    const sasToken = await getExcelTemplateSasTokenCookie();
+
+	console.log('SasToken generated successfully: ', sasToken);
 
     // setting my blob
     const blobFromStorage = await fetchTemplateFromBlobStorage(
       sasToken.value,
       props.type,
-    );
-
-    setBlobData(blobFromStorage);
+    )
+	setBlobData(blobFromStorage);
     await parseBlobData(blobFromStorage);
+	} catch (error) {
+		console.error('Error in function getExcelTemplateFiles: ', error);
+	}
   };
 
   // Helper function to convert readable stream to buffer
