@@ -1,6 +1,11 @@
 type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-export async function apiCall(url: string, method: HTTPMethod, body?: any, isFormData: boolean = false) {
+export async function apiCall(
+  url: string,
+  method: HTTPMethod,
+  body?: any,
+  isFormData: boolean = false,
+) {
   const options: RequestInit = {
     method,
     headers: isFormData ? {} : { 'Content-Type': 'application/json' },
@@ -11,7 +16,9 @@ export async function apiCall(url: string, method: HTTPMethod, body?: any, isFor
   const response = await fetch(url, options);
 
   if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status}, url: ${url}`);
+    throw new Error(
+      `API request failed with status ${response.status}, url: ${url}`,
+    );
   }
 
   return response.json();

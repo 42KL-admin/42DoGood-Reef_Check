@@ -3,11 +3,13 @@ import {
   StorageSharedKeyCredential,
   ContainerSASPermissions,
   SASProtocol,
-  BlobSASPermissions,
 } from '@azure/storage-blob';
 import { generateResponse } from '../../../utils/response';
 import { cookies } from 'next/headers';
-import { SAS_COOKIE_NAME, isSasTokenExpired } from '../utils';
+import { isSasTokenExpired } from '../utils';
+import { COOKIE_TOKEN } from '@/enums/cookie';
+
+const SAS_COOKIE_NAME = COOKIE_TOKEN.REEF_CHECK_SLATE;
 
 // Providing default values to ensure these variables are always defined as strings
 const accountName =
@@ -45,7 +47,7 @@ export async function GET(): Promise<Response> {
     let sasToken;
     const existingSasToken = cookies().get(SAS_COOKIE_NAME);
 
-    if (!existingSasToken || isSasTokenExpired()) {
+    if (!existingSasToken || isSasTokenExpired(SAS_COOKIE_NAME)) {
       sasToken = generateSasToken();
     } else {
       sasToken = existingSasToken.value;
