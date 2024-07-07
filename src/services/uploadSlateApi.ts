@@ -11,13 +11,7 @@ export async function uploadSlatesToBlob(items: SlateUploadItem[]) {
   });
 
   try {
-    const response = await apiCall(
-      uploadSlateApiUrl,
-      'POST',
-      formData,
-      undefined,
-      true,
-    );
+    const response = await apiCall(uploadSlateApiUrl, 'POST', formData, true);
     return response;
   } catch (e: any) {
     console.log('error uploading slates: ', e.message);

@@ -15,8 +15,7 @@ const accountName =
 const accountKey =
   process.env.AZURE_STORAGE_ACCOUNT_KEY || 'default-account-key';
 const containerName =
-  process.env.AZURE_STORAGE_EXCEL_TEMPLATE_CONTAINER ||
-  'default-container-name';
+  process.env.AZURE_STORAGE_CONTAINER_NAME || 'default-container-name';
 
 // Function to generate SAS token
 function generateSasToken(): string {
@@ -25,23 +24,16 @@ function generateSasToken(): string {
     accountKey,
   );
 
-  const currentDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(currentDate.getDate() - 5); // 5 days in the past
-
   const expiryDate = new Date();
-  expiryDate.setDate(currentDate.getDate() + 5); // 5 days in the future
+  expiryDate.setHours(expiryDate.getHours() + 1);
 
   return generateBlobSASQueryParameters(
     {
       containerName: containerName,
-      blobName: 'reef-check-templates.xlsx',
-      permissions: BlobSASPermissions.parse('cr'),
-      // permissions: ContainerSASPermissions.parse('cwd'),
-      startsOn: startDate,
+      permissions: ContainerSASPermissions.parse('cwd'),
+      startsOn: new Date(),
       expiresOn: expiryDate,
-      protocol: SASProtocol.HttpsAndHttp,
-      version: '2022-11-02',
+      protocol: SASProtocol.Https,
     },
     sharedKeyCredential,
   ).toString();
@@ -69,7 +61,7 @@ export async function GET(): Promise<Response> {
     return generateResponse(
       {
         data: {
-          sasToken: existingSasToken,
+          sasToken: sasToken,
           message: 'SAS token generated successfully',
         },
       },
