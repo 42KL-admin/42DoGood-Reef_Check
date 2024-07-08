@@ -68,6 +68,9 @@ export default function UploadPhotoHeroSection() {
         await checkSasToken();
         const uploadResponse = await uploadSlatesToBlob(slatesToBeUploaded);
         updateSlateStatus(uploadResponse.results);
+		console.log('uploadResponse: ', uploadResponse)
+		// const something = await postOcrProcessUrl()
+		// console.log('something: ', something)
       } catch (e: any) {
         console.log('error uploading slates', e.message);
         throw new Error('uploadSlatesToBlob error', e.message);

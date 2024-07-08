@@ -4,4 +4,9 @@ declare namespace RequestBody {
     method: string;
     customHeader?: HeadersInit;
   }
+  interface OcrProcessUrl {
+    apiUrl: string;
+    method: string;
+    header: HeadersInit;
+  }
 }
