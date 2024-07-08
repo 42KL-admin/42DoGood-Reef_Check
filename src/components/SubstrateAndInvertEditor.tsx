@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { HotTable } from '@handsontable/react';
 import 'handsontable/dist/handsontable.full.min.css';
-import ExcelJS from 'exceljs';
+import ExcelJS, { Workbook } from 'exceljs';
 import {
   CheckboxCellType,
   NumericCellType,
@@ -18,9 +18,7 @@ import {
   MergeCells,
   registerPlugin,
 } from 'handsontable/plugins';
-import {
-  fetchTemplateFromBlobStorage,
-} from '@/utils/azureBlobStorageHelper';
+import { fetchTemplateFromBlobStorage } from '@/utils/azureBlobStorageHelper';
 import { getExcelTemplateSasTokenCookie } from '@/services/excelTemplateSasTokenApi';
 
 registerCellType(CheckboxCellType);
@@ -37,9 +35,10 @@ registerPlugin(MergeCells);
 
 interface ExportEditorProps {
   type: 'substrate' | 'fishInverts';
+  excelBlobData: Blob | File | null;
 }
 
-const SlateTypeConfig = Object.freeze({
+const SlateTypeConfig: Record<string, SlateConfig.SlateConfig> = Object.freeze({
   substrate: {
     rowNumberFrom: 13,
     rowNumberTo: 34,
@@ -54,14 +53,52 @@ const SlateTypeConfig = Object.freeze({
     ignoredRows: [24, 25, 26, 45, 48],
     ignoredCols: [1],
   },
+  substrateExtracted: {
+    rowNumberFrom: 13,
+    rowNumberTo: 34,
+    numberOfColumns: 16,
+    ignoredRows: [],
+    ignoredCols: [],
+  },
 });
 
 function getSlateConfig(type: 'substrate' | 'fishInverts') {
   return SlateTypeConfig[type];
 }
 
+function extractDataFromWorksheet(
+  workbook: Workbook,
+  config: SlateConfig.SlateConfig,
+): { data: (string | number)[][]; styles: any } {
+  const worksheet = workbook.worksheets[0]; // Assuming the first sheet
+  const jsonData: (string | number)[][] = [];
+  const styles: any = {};
+
+  worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+    if (rowNumber >= config.rowNumberFrom && rowNumber <= config.rowNumberTo) {
+      if (config.ignoredRows.includes(rowNumber)) {
+        jsonData.push(Array(config.numberOfColumns).fill(null)); // Placeholder for ignored rows
+      } else {
+        const rowValues = row.values as (string | number)[];
+        rowValues.shift(); // Remove the first element which is usually the row number itself
+
+        // Capture styles
+        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+          if (!styles[rowNumber - 1]) styles[rowNumber - 1] = {};
+          styles[rowNumber - 1][colNumber - 1] = cell.style;
+        });
+
+        jsonData.push(rowValues.slice(0, config.numberOfColumns));
+      }
+    }
+  });
+
+  return { data: jsonData, styles };
+}
+
 export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
   const [data, setData] = useState<(string | number)[][]>([]);
+  const [ocrData, setOcrData] = useState<(string | number)[][]>([]);
   const [blobData, setBlobData] = useState<Blob | null>(null);
   // const fileInputRef = useRef<HTMLInputElement>(null);
   const [cellStyles, setCellStyles] = useState<any>({});
@@ -70,21 +107,23 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
 
   // Function to fetch data from Azure Blob Storage for a specific template
   const getExcelTemplateFiles = async () => {
-	try {
-    const sasToken = await getExcelTemplateSasTokenCookie();
+    try {
+      const sasToken = await getExcelTemplateSasTokenCookie();
 
-	console.log('SasToken generated successfully: ', sasToken);
+      console.log('SasToken generated successfully: ', sasToken);
 
-    // setting my blob
-    const blobFromStorage = await fetchTemplateFromBlobStorage(
-      sasToken.value,
-      props.type,
-    )
-	setBlobData(blobFromStorage);
-    await parseBlobData(blobFromStorage);
-	} catch (error) {
-		console.error('Error in function getExcelTemplateFiles: ', error);
-	}
+      // setting my blob
+      const blobFromStorage = await fetchTemplateFromBlobStorage(
+        sasToken.value,
+        props.type,
+      );
+      setBlobData(blobFromStorage);
+      // parse
+      // await parseOcrData();
+      await parseBlobData(blobFromStorage);
+    } catch (error) {
+      console.error('Error in function getExcelTemplateFiles: ', error);
+    }
   };
 
   // Helper function to convert readable stream to buffer
@@ -103,132 +142,164 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
     });
   }
 
-  async function parseBlobData(blob: Blob) {
+  async function parseOcrData(blob: Blob) {
     try {
+      // getting Excel Data
       const arrayBuffer = await readBlobAsArrayBuffer(blob);
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
 
-      const worksheet = workbook.worksheets[0]; // Assuming the first sheet
-      const jsonData: (string | number)[][] = [];
-      const styles: any = {};
+      const { data, styles } = extractDataFromWorksheet(workbook, config);
 
-      worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-        if (
-          rowNumber >= config.rowNumberFrom &&
-          rowNumber <= config.rowNumberTo
-        ) {
-          if (config.ignoredRows.includes(rowNumber)) {
-            jsonData.push(Array(config.numberOfColumns).fill(null)); // Placeholder for ignored rows
-          } else {
-            const rowValues = row.values as (string | number)[];
-            rowValues.shift(); // Remove the first element which is usually the row number itself
-
-            // Capture styles
-            row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-              if (!styles[rowNumber - 1]) styles[rowNumber - 1] = {};
-              styles[rowNumber - 1][colNumber - 1] = cell.style;
-            });
-
-            jsonData.push(rowValues.slice(0, config.numberOfColumns));
-          }
-        }
-      });
-
-      setData(jsonData);
-      setCellStyles(styles);
+      setOcrData(data);
     } catch (error) {
       console.error('Error processing Excel file:', error);
     }
   }
 
-  // Currently I have file upload, I cannot directly read a file from our local path
-  // we might need to store template excel files in our Azure Storage Blob and get it from there
-  // File Upload function that was previously used.
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = async (event) => {
-      const arrayBuffer = event.target?.result as ArrayBuffer;
+  async function parseBlobData(blob: Blob) {
+    try {
+      // getting Excel Data
+      const arrayBuffer = await readBlobAsArrayBuffer(blob);
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
 
-      const worksheet = workbook.worksheets[0]; // Assuming the first sheet
-      const jsonData: (string | number)[][] = [];
-      const styles: any = {};
+      const { data, styles } = extractDataFromWorksheet(workbook, config);
 
-      worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-        // Extract rows 13 to 34
-        if (rowNumber >= 13 && rowNumber <= 34) {
-          const rowValues = row.values as (string | number)[];
-          rowValues.shift(); // Remove the first element which is usually the row number itself
-
-          // Capture styles
-          row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-            if (!styles[rowNumber - 1]) styles[rowNumber - 1] = {};
-            styles[rowNumber - 1][colNumber - 1] = cell.style;
-          });
-
-          jsonData.push(rowValues.slice(0, 16));
-        }
-      });
-
-      setData(jsonData);
+      setData(data);
       setCellStyles(styles);
-    };
+    } catch (error) {
+      console.error('Error processing Excel file:', error);
+    }
 
-    reader.readAsArrayBuffer(file);
-  };
+    // async function parseBlobData(blob: Blob) {
+    //   try {
+    //     const arrayBuffer = await readBlobAsArrayBuffer(blob);
+    //     const workbook = new ExcelJS.Workbook();
+    //     await workbook.xlsx.load(arrayBuffer);
 
-  // const handleUpdateExcel = async () => {
+    //     const worksheet = workbook.worksheets[0]; // Assuming the first sheet
+    //     const jsonData: (string | number)[][] = [];
+    //     const styles: any = {};
 
-  //   if (!fileInputRef.current?.files?.[0]) {
-  //     console.log('Currently no file selected.');
-  //     return;
-  //   }
-  //   const file = fileInputRef.current.files[0];
+    //     worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+    //       if (
+    //         rowNumber >= config.rowNumberFrom &&
+    //         rowNumber <= config.rowNumberTo
+    //       ) {
+    //         if (config.ignoredRows.includes(rowNumber)) {
+    //           jsonData.push(Array(config.numberOfColumns).fill(null)); // Placeholder for ignored rows
+    //         } else {
+    //           const rowValues = row.values as (string | number)[];
+    //           rowValues.shift(); // Remove the first element which is usually the row number itself
 
-  //   const reader = new FileReader();
+    //           // Capture styles
+    //           row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+    //             if (!styles[rowNumber - 1]) styles[rowNumber - 1] = {};
+    //             styles[rowNumber - 1][colNumber - 1] = cell.style;
+    //           });
 
-  //   reader.onload = async (event) => {
-  //     const arrayBuffer = event.target?.result as ArrayBuffer;
-  //     const workbook = new ExcelJS.Workbook();
-  //     await workbook.xlsx.load(arrayBuffer);
+    //           jsonData.push(rowValues.slice(0, config.numberOfColumns));
+    //         }
+    //       }
+    //     });
 
-  //     const worksheet = workbook.worksheets[0];
+    //     setData(jsonData);
+    //     setCellStyles(styles);
+    //   } catch (error) {
+    //     console.error('Error processing Excel file:', error);
+    //   }
+    // }
 
-  //     // Update the worksheet with data and preserve styles
-  //     data.forEach((row, rowIndex) => {
-  //       row.forEach((cell, colIndex) => {
-  //         const cellRef = worksheet.getCell(rowIndex + 13, colIndex + 1); // Update rows 13-34
+    // File Upload function that was previously used.
+    // const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    //   const file = e.target.files?.[0];
+    //   if (!file) return;
 
-  //         cellRef.value = cell;
-  //         if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
-  //           cellRef.style = cellStyles[rowIndex][colIndex];
-  //         }
-  //       });
-  //     });
+    //   const reader = new FileReader();
 
-  //     const buffer = await workbook.xlsx.writeBuffer();
-  //     const updatedBlob = new Blob([buffer], {
-  //       type: 'application/octet-stream',
-  //     });
+    //   reader.onload = async (event) => {
+    //     const arrayBuffer = event.target?.result as ArrayBuffer;
+    //     const workbook = new ExcelJS.Workbook();
+    //     await workbook.xlsx.load(arrayBuffer);
 
-  //     const url = window.URL.createObjectURL(updatedBlob);
-  //     const a = document.createElement('a');
-  //     a.href = url;
-  //     a.download = 'updated_file.xlsx';
-  //     document.body.appendChild(a);
-  //     a.click();
-  //     document.body.removeChild(a);
-  //     window.URL.revokeObjectURL(url);
-  //   };
+    //     const worksheet = workbook.worksheets[0]; // Assuming the first sheet
+    //     const jsonData: (string | number)[][] = [];
+    //     const styles: any = {};
 
-  //   reader.readAsArrayBuffer(file);
-  // };
+    //     worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+    //       // Extract rows 13 to 34
+    //       if (rowNumber >= 13 && rowNumber <= 34) {
+    //         const rowValues = row.values as (string | number)[];
+    //         rowValues.shift(); // Remove the first element which is usually the row number itself
+
+    //         // Capture styles
+    //         row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+    //           if (!styles[rowNumber - 1]) styles[rowNumber - 1] = {};
+    //           styles[rowNumber - 1][colNumber - 1] = cell.style;
+    //         });
+
+    //         jsonData.push(rowValues.slice(0, 16));
+    //       }
+    //     });
+
+    //     setData(jsonData);
+    //     setCellStyles(styles);
+    //   };
+
+    //   reader.readAsArrayBuffer(file);
+    // };
+
+    // const handleUpdateExcel = async () => {
+    //   if (!fileInputRef.current?.files?.[0]) {
+    //     console.log('Currently no file selected.');
+    //     return;
+    //   }
+    //   const file = fileInputRef.current.files[0];
+
+    //   const reader = new FileReader();
+
+    //   reader.onload = async (event) => {
+    //     const arrayBuffer = event.target?.result as ArrayBuffer;
+    //     const workbook = new ExcelJS.Workbook();
+    //     await workbook.xlsx.load(arrayBuffer);
+
+    //     const worksheet = workbook.worksheets[0];
+
+    //     // Update the worksheet with data and preserve styles
+    //     data.forEach((row, rowIndex) => {
+    //       row.forEach((cell, colIndex) => {
+    //         const cellRef = worksheet.getCell(rowIndex + 13, colIndex + 1); // Update rows 13-34
+
+    //         cellRef.value = cell;
+    //         if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
+    //           cellRef.style = cellStyles[rowIndex][colIndex];
+    //         }
+    //       });
+    //     });
+
+    //     const buffer = await workbook.xlsx.writeBuffer();
+    //     const updatedBlob = new Blob([buffer], {
+    //       type: 'application/octet-stream',
+    //     });
+
+    //     const url = window.URL.createObjectURL(updatedBlob);
+    //     const a = document.createElement('a');
+    //     a.href = url;
+    //     a.download = 'updated_file.xlsx';
+    //     document.body.appendChild(a);
+    //     a.click();
+    //     document.body.removeChild(a);
+    //     window.URL.revokeObjectURL(url);
+    //   };
+
+    //   reader.readAsArrayBuffer(file);
+    // };
+
+    React.useEffect(() => {
+      getExcelTemplateFiles();
+    }, []);
+  }
 
   const handleUpdateExcel = async () => {
     if (!blobData) {
@@ -279,10 +350,6 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   };
-
-  React.useEffect(() => {
-    getExcelTemplateFiles();
-  }, []);
 
   return (
     <div>

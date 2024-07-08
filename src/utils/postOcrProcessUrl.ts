@@ -36,13 +36,13 @@ export const postOcrProcessUrl = async (
 
     // ** THIS WILL DOWNLOAD THE FILE IMMEDIATELY ** //
 
-    // const link = document.createElement('a');
-    // link.href = URL.createObjectURL(blob);
-    // link.download = filename;
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
-    // console.log(`File saved as ${filename}`);
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    console.log(`File saved as ${filename}`);
 
     return blob;
   } catch (error) {

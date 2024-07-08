@@ -102,7 +102,10 @@ function EditSlateLargerScreen() {
         <EditImagePreview />
       </Box>
       <Box width={'50%'} sx={{ backgroundColor: 'teal' }}>
-        <SubstrateAndInvertEditor type={slate.type} />
+        <SubstrateAndInvertEditor
+          type={slate.type}
+          excelBlobData={slate.excelFile}
+        />
       </Box>
     </Box>
   ) : (
