@@ -17,6 +17,8 @@ import {
   SlateUploadItem,
   UploadFilesResponse,
 } from '@/stores/types';
+import { postOcrProcessUrl } from '@/utils/postOcrProcessUrl';
+import { getSlateImageUrl } from '@/utils/azureBlobStorageHelper';
 
 const ChipLabels = ['Not blurry', 'Bright enough', 'Pencil writing is clear'];
 
@@ -68,9 +70,31 @@ export default function UploadPhotoHeroSection() {
         await checkSasToken();
         const uploadResponse = await uploadSlatesToBlob(slatesToBeUploaded);
         updateSlateStatus(uploadResponse.results);
-		console.log('uploadResponse: ', uploadResponse)
-		// const something = await postOcrProcessUrl()
-		// console.log('something: ', something)
+        console.log('uploadResponse: ', uploadResponse);
+        const ocrImage = uploadResponse.results.map(
+          (item: UploadFilesResponse) => item.filename,
+        );
+        console.log('upload Response: ', uploadResponse);
+        console.log(ocrImage);
+        try {
+          ocrImage.forEach(async (item: any) => {
+            const blobUrlWithoutSas = `https://reefcheckslates.blob.core.windows.net/slates/slates/${item}`;
+
+            const postOcrProcessUrlResponse =
+              await postOcrProcessUrl(blobUrlWithoutSas);
+            console.log(
+              'postOcrProcessUrlResponse: ',
+              postOcrProcessUrlResponse,
+            );
+          });
+          // const ocrImageUrl = getSlateImageUrl(ocrImage);
+          // console.log(ocrImageUrl);
+          // const blobUrlWithoutSas = `https://reefcheckslates.blob.core.windows.net/slates/slates/${ocrImage}`;
+          // const postOcrProcessUrlResponse =
+          //   await postOcrProcessUrl(blobUrlWithoutSas);
+        } catch (e: any) {
+          console.log('error uploading slates', e.message);
+        }
       } catch (e: any) {
         console.log('error uploading slates', e.message);
         throw new Error('uploadSlatesToBlob error', e.message);

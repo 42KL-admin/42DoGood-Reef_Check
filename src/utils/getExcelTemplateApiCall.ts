@@ -1,6 +1,6 @@
 // Just using a custom api call to obtain blob
-export async function customApiCall(
-  data: RequestBody.UploadTemplateFromBlobStorage
+export async function getExcelTemplateApiCall(
+  data: RequestBody.UploadTemplateFromBlobStorage,
 ) {
   const options: RequestInit = {
     method: data.method,

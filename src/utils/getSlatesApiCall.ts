@@ -1,13 +1,14 @@
-export async function ocrUploadApiCall(data: RequestBody.OcrProcessUrl) {
+// Just using a custom api call to obtain slates
+export async function getSlatesApiCall(data: RequestBody.OcrProcessUrl) {
   const options: RequestInit = {
     method: data.method,
     headers: data?.header,
     body: JSON.stringify(data.body),
   };
 
-  const response = await fetch(data.apiUrl, options);
+  console.log(options);
 
-  console.log('response: ', response);
+  const response = await fetch(data.apiUrl, options);
 
   if (!response.ok) {
     throw new Error(
@@ -15,5 +16,5 @@ export async function ocrUploadApiCall(data: RequestBody.OcrProcessUrl) {
     );
   }
 
-  return response;
+  return response.blob();
 }

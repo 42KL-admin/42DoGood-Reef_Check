@@ -1,6 +1,11 @@
-import { create } from "zustand";
-import { v4 as uuidv4 } from "uuid";
-import { FileRow, SlateRecognitionStatus, SlateState, SlateType } from "./types";
+import { create } from 'zustand';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  FileRow,
+  SlateRecognitionStatus,
+  SlateState,
+  SlateType,
+} from './types';
 
 // All the rows (the main state)
 type FileRowSet = {
@@ -12,7 +17,16 @@ type FileRowActions = {
   addRow: () => void;
   removeRow: (id: string) => void;
   setSlateFile: (id: string, type: SlateType, file: File | null) => void;
-  setSlateStatus: (id: string, type: SlateType, status: SlateRecognitionStatus) => void;
+  setSlateExcelFile: (
+    id: string,
+    type: SlateType,
+    excelFile: File | null,
+  ) => void;
+  setSlateStatus: (
+    id: string,
+    type: SlateType,
+    status: SlateRecognitionStatus,
+  ) => void;
 };
 
 // helper functions
@@ -21,8 +35,9 @@ const createSlate = (type: SlateType): SlateState => {
   return {
     type,
     file: null,
-    base64: "",
-    status: "not processed",
+    base64: '',
+    status: 'not processed',
+    ocrResultsFile: null,
   };
 };
 
@@ -30,8 +45,8 @@ const createSlate = (type: SlateType): SlateState => {
 const createFileRow = (): FileRow => {
   return {
     id: uuidv4(),
-    substrate: createSlate("substrate"),
-    fishInverts: createSlate("fishInverts"),
+    substrate: createSlate('substrate'),
+    fishInverts: createSlate('fishInverts'),
   };
 };
 
@@ -66,8 +81,29 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
       }),
     })),
 
+  setSlateExcelFile: (id: string, type: SlateType, excelFile: File | null) =>
+    set((state) => ({
+      rows: state.rows.map((row) => {
+        if (row.id === id) {
+          const updatedRow = {
+            ...row,
+            [type]: {
+              ...row[type],
+              excelFile: excelFile,
+            },
+          };
+          return updatedRow;
+        }
+        return row;
+      }),
+    })),
+
   // update slate conversion status
-  setSlateStatus: (id: string, type: SlateType, status: SlateRecognitionStatus) =>
+  setSlateStatus: (
+    id: string,
+    type: SlateType,
+    status: SlateRecognitionStatus,
+  ) =>
     set((state) => ({
       rows: state.rows.map((row) => {
         if (row.id === id) {

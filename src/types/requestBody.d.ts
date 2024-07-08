@@ -7,6 +7,7 @@ declare namespace RequestBody {
   interface OcrProcessUrl {
     apiUrl: string;
     method: string;
-    header: HeadersInit;
+    header?: HeadersInit;
+    body: { url: string };
   }
 }

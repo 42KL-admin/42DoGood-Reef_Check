@@ -1,5 +1,6 @@
 import { BlobServiceClient, AnonymousCredential } from '@azure/storage-blob';
-import { customApiCall } from './customApiCall';
+import { getExcelTemplateApiCall } from './getExcelTemplateApiCall';
+import { getSlatesApiCall } from './getSlatesApiCall';
 
 // Having a problem to use process.env.xxx as it will always give me an empty value, i have to hard code the keys here for it work
 // Need to find a way to somehow get this to work because I can't get it, server/client issue?
@@ -38,7 +39,40 @@ export const fetchTemplateFromBlobStorage = async (
       method: 'GET',
     };
 
-    const response = await customApiCall(requestParams);
+    const response = await getExcelTemplateApiCall(requestParams);
+
+    return response;
+  } catch (e: any) {
+    throw new Error(`Failed to fetch blob: ${e.message}`);
+  }
+};
+
+export const getSlateImageUrl = async (imageName: string) => {
+  try {
+    // const blobServiceClient = new BlobServiceClient(
+    //   `https://${accountName}.blob.core.windows.net`,
+    //   new AnonymousCredential(),
+    // );
+
+    // const containerClient = blobServiceClient.getContainerClient(containerName);
+
+    // const blobClient = containerClient.getBlobClient(
+    //   TemplateFileName[templateType],
+    // );
+
+    // const blobUrlWithSAS = `${blobClient.url}?${sasToken}`;
+
+    // temporarily not using SAS cause I can't fix the settings
+    const blobUrlWithoutSas = `https://reefcheckslates.blob.core.windows.net/slates/slates/${imageName}`;
+
+    const requestParams: RequestBody.OcrProcessUrl = {
+      apiUrl: blobUrlWithoutSas,
+      method: 'GET',
+      body: { url: blobUrlWithoutSas },
+    };
+    console.log('requestparams: ', requestParams);
+
+    const response = await getSlatesApiCall(requestParams);
 
     return response;
   } catch (e: any) {
