@@ -89,6 +89,8 @@ function EditImagePreview() {
 
 function EditSlateLargerScreen() {
   const slate = useSelectedSlateStore((state) => state.slate);
+
+  console.log('selected slate: ', slate);
   return slate ? (
     <Box display="flex" height={'100vh'}>
       <Box

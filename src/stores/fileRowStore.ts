@@ -20,7 +20,7 @@ type FileRowActions = {
   setSlateExcelFile: (
     id: string,
     type: SlateType,
-    excelFile: File | null,
+    excelFile: File | Blob | null,
   ) => void;
   setSlateStatus: (
     id: string,
@@ -37,7 +37,7 @@ const createSlate = (type: SlateType): SlateState => {
     file: null,
     base64: '',
     status: 'not processed',
-    ocrResultsFile: null,
+    excelFile: null,
   };
 };
 
@@ -81,9 +81,14 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
       }),
     })),
 
-  setSlateExcelFile: (id: string, type: SlateType, excelFile: File | null) =>
+  setSlateExcelFile: (
+    id: string,
+    type: SlateType,
+    excelFile: File | Blob | null,
+  ) =>
     set((state) => ({
       rows: state.rows.map((row) => {
+        console.log('setting status');
         if (row.id === id) {
           const updatedRow = {
             ...row,

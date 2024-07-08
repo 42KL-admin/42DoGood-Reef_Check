@@ -7,7 +7,7 @@ import { RoundedButton } from '@/components/RoundedButton';
 import DropdownMenu from '@/components/DropdownMenu';
 import Container from '@mui/material/Container';
 import { useRouter } from 'next/navigation';
-import { Fragment, useEffect } from 'react';
+import { Fragment } from 'react';
 import NavBar from '@/components/mobile/NavBar';
 import { checkSasToken } from '@/services/sasTokenApi';
 import { useFileRowStore } from '@/stores/fileRowStore';
@@ -18,7 +18,6 @@ import {
   UploadFilesResponse,
 } from '@/stores/types';
 import { postOcrProcessUrl } from '@/utils/postOcrProcessUrl';
-import { getSlateImageUrl } from '@/utils/azureBlobStorageHelper';
 
 const ChipLabels = ['Not blurry', 'Bright enough', 'Pencil writing is clear'];
 
@@ -33,6 +32,7 @@ const ChipLabels = ['Not blurry', 'Bright enough', 'Pencil writing is clear'];
  */
 
 export default function UploadPhotoHeroSection() {
+  const setSlateExcelFile = useFileRowStore((state) => state.setSlateExcelFile);
   const router = useRouter();
   const fileRows = useFileRowStore((state) => state.rows);
   const setSlateStatus = useFileRowStore((state) => state.setSlateStatus);
@@ -71,14 +71,13 @@ export default function UploadPhotoHeroSection() {
         const uploadResponse = await uploadSlatesToBlob(slatesToBeUploaded);
         updateSlateStatus(uploadResponse.results);
         console.log('uploadResponse: ', uploadResponse);
-        const ocrImage = uploadResponse.results.map(
-          (item: UploadFilesResponse) => item.filename,
-        );
-        console.log('upload Response: ', uploadResponse);
-        console.log(ocrImage);
+
+        const ocrImageList = uploadResponse.results;
+
         try {
-          ocrImage.forEach(async (item: any) => {
-            const blobUrlWithoutSas = `https://reefcheckslates.blob.core.windows.net/slates/slates/${item}`;
+          // looping through each available item
+          ocrImageList.forEach(async (item: any) => {
+            const blobUrlWithoutSas = `https://reefcheckslates.blob.core.windows.net/slates/slates/${item.filename}`;
 
             const postOcrProcessUrlResponse =
               await postOcrProcessUrl(blobUrlWithoutSas);
@@ -86,12 +85,17 @@ export default function UploadPhotoHeroSection() {
               'postOcrProcessUrlResponse: ',
               postOcrProcessUrlResponse,
             );
+            const idAndType = item.id.split(':');
+            if (postOcrProcessUrlResponse) {
+              setSlateExcelFile(
+                idAndType[0],
+                idAndType[1],
+                postOcrProcessUrlResponse,
+              );
+            }
           });
-          // const ocrImageUrl = getSlateImageUrl(ocrImage);
-          // console.log(ocrImageUrl);
-          // const blobUrlWithoutSas = `https://reefcheckslates.blob.core.windows.net/slates/slates/${ocrImage}`;
-          // const postOcrProcessUrlResponse =
-          //   await postOcrProcessUrl(blobUrlWithoutSas);
+          // When each of them are done, change status from processing to recognized
+          // using updateSlateStatus here perhaps
         } catch (e: any) {
           console.log('error uploading slates', e.message);
         }

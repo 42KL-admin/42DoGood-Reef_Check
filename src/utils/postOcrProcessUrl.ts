@@ -33,13 +33,18 @@ export const postOcrProcessUrl = async (
     const blob = new Blob([arrayBuffer], {
       type: response.headers.get('Content-Type') || 'application/octet-stream',
     });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    console.log(`File saved as ${filename}`);
+
+    // ** THIS WILL DOWNLOAD THE FILE IMMEDIATELY ** //
+
+    // const link = document.createElement('a');
+    // link.href = URL.createObjectURL(blob);
+    // link.download = filename;
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
+    // console.log(`File saved as ${filename}`);
+
+    return blob;
   } catch (error) {
     console.error('Error:', error);
   }

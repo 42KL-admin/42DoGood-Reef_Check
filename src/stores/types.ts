@@ -17,7 +17,7 @@ export interface SlateState {
   file: File | null;
   base64: string;
   status: SlateRecognitionStatus;
-  ocrResultsFile: File | null;
+  excelFile: File | null;
 }
 
 // Each individual row
