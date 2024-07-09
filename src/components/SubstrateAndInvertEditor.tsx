@@ -38,24 +38,26 @@ interface ExportEditorProps {
   excelBlobData?: Blob | File | null;
 }
 
-const OcrResultsConfig = Object.freeze({
-  substrate: {
-    rowNumberFrom: 10,
-    rowNumberTo: 31,
-    numberOfColumns: 16,
-    ignoredRows: [],
-    ignoredCols: [],
+const OcrResultsConfig: Record<string, SlateConfig.SlateConfig> = Object.freeze(
+  {
+    substrate: {
+      rowNumberFrom: 10,
+      rowNumberTo: 31,
+      numberOfColumns: 16,
+      ignoredRows: [],
+      ignoredCols: [],
+    },
+    fishInverts: {
+      rowNumberFrom: 9,
+      rowNumberTo: 64,
+      numberOfColumns: 5,
+      ignoredRows: [24, 25, 26, 45, 48],
+      ignoredCols: [1],
+    },
   },
-  fishInverts: {
-    rowNumberFrom: 9,
-    rowNumberTo: 64,
-    numberOfColumns: 5,
-    ignoredRows: [24, 25, 26, 45, 48],
-    ignoredCols: [1],
-  },
-});
+);
 
-const SlateTypeConfig = Object.freeze({
+const SlateTypeConfig: Record<string, SlateConfig.SlateConfig> = Object.freeze({
   substrate: {
     rowNumberFrom: 13,
     rowNumberTo: 34,
@@ -109,11 +111,38 @@ function extractDataFromWorksheet(
 
   return { extractedData: jsonData, styles };
 }
+// pass worksheet you want to update, data to update, templateConfig, and cellStyles
+function updateWorksheet(
+  worksheet: ExcelJS.Worksheet,
+  data: (string | number)[][],
+  templateConfig: SlateConfig.SlateConfig,
+  cellStyles: any[],
+) {
+  data.forEach((row, rowIndex) => {
+    const actualRowIndex = rowIndex + templateConfig.rowNumberFrom;
+
+    if (templateConfig.ignoredRows.includes(actualRowIndex)) return; // Skip the ignored row
+
+    row.forEach((cell, colIndex) => {
+      if (templateConfig.ignoredCols.includes(colIndex + 1)) return; // Skip the ignored column
+
+      const cellRef = worksheet.getCell(actualRowIndex, colIndex + 1);
+      cellRef.value = cell;
+
+      if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
+        cellRef.style = cellStyles[rowIndex][colIndex];
+      }
+    });
+  });
+}
 
 export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
-  const [data, setData] = useState<(string | number)[][]>([]);
-  const [ocrData, setOcrData] = useState<(string | number)[][]>([]);
+  const [exportFileData, setExportFileData] = useState<(string | number)[][]>(
+    [],
+  );
+  // const [ocrData, setOcrData] = useState<(string | number)[][]>([]);
   const [blobData, setBlobData] = useState<Blob | null>(null);
+  // const [ocrBlobData, setOcrBlobData] = useState<Blob | null>(null);
   // const fileInputRef = useRef<HTMLInputElement>(null);
   const [cellStyles, setCellStyles] = useState<any>({});
 
@@ -122,7 +151,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
 
   // const config: SlateConfig.SlateConfig = getSlateConfig(props.type);
 
-  // Function to fetch data from Azure Blob Storage for a specific template
+  // I might be doing more than just "getExcelTemplatefiles"
   const getExcelTemplateFiles = async () => {
     try {
       const sasToken = await getExcelTemplateSasTokenCookie();
@@ -134,16 +163,56 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
         sasToken.value,
         props.type,
       );
-      setBlobData(blobFromStorage);
+
       if (props.excelBlobData) {
         console.log('Excel Blob Data: ', props.excelBlobData);
-        await parseOcrData(props.excelBlobData);
+
+        // PASSING THE BLOB DATA TO UPDATE THE EXCEL FILE
+        const updatedExcelBlob = await updateExportFileData(
+          props.excelBlobData,
+        );
+        if (updatedExcelBlob) setBlobData(updatedExcelBlob);
       }
+      // console.log('my Ocr Data: ', ocrData);
       await parseBlobData(blobFromStorage);
+      // await parseBlobData(blobData ?? new Blob());
+
+      // after getting the template excel file, I parse OCR values data into it
     } catch (error) {
       console.error('Error in function getExcelTemplateFiles: ', error);
     }
   };
+
+  async function updateExportFileData(
+    blobData: Blob | File | null,
+  ): Promise<Blob | void> {
+    if (!blobData)
+      return console.log('updateExportFileData: currently no file selected.');
+
+    const arrayBuffer = await readBlobAsArrayBuffer(blobData);
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(arrayBuffer);
+
+    const worksheet = workbook.worksheets[0];
+
+    const updatedExcelConfig = templateConfig;
+    const updatedCellStyles = cellStyles;
+
+    // Update the worksheet with data and preserve styles
+    // passing it templateConfig
+    updateWorksheet(
+      worksheet,
+      exportFileData,
+      updatedExcelConfig,
+      updatedCellStyles,
+    );
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const updatedBlob = new Blob([buffer], {
+      type: 'application/octet-stream',
+    });
+    return updatedBlob;
+  }
 
   // Helper function to convert readable stream to buffer
   async function readBlobAsArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
@@ -161,6 +230,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
     });
   }
 
+  // I MIGHT NOT NEED IT ANYMORE
   async function parseOcrData(blob: Blob) {
     try {
       // getting Excel Data
@@ -173,21 +243,19 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
         templateConfig,
       );
       console.log('|OCR Data obtained| !! : ', extractedData);
-      setOcrData(data);
+      // setOcrData(extractedData);
+      // console.log('|setOcrData| !! : ', ocrData);
     } catch (error) {
       console.error('Error processing Excel file:', error);
     }
   }
 
+  // PARSE data to be used in the handsontable
   async function parseBlobData(blob: Blob) {
     try {
       const arrayBuffer = await readBlobAsArrayBuffer(blob);
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
-
-      const worksheet = workbook.worksheets[0]; // Assuming the first sheet
-      const jsonData: (string | number)[][] = [];
-      // const styles: any = {};
 
       // extract from Template
       const { extractedData, styles } = extractDataFromWorksheet(
@@ -195,8 +263,9 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
         templateConfig,
       );
 
-      console.log('|BLob Data obtained| !! : ');
-      setData(extractedData);
+      console.log('|BLob Data obtained| !! : ', extractedData);
+      setExportFileData(extractedData);
+      console.log('|setExportFileData| !! : ', exportFileData);
       setCellStyles(styles);
     } catch (error) {
       console.error('Error processing Excel file:', error);
@@ -237,7 +306,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
         }
       });
 
-      setData(jsonData);
+      setExportFileData(jsonData);
       setCellStyles(styles);
     };
 
@@ -297,34 +366,51 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
       return;
     }
 
+    //worksheet will be taken and looped through template Config
     const arrayBuffer = await readBlobAsArrayBuffer(blobData);
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(arrayBuffer);
 
     const worksheet = workbook.worksheets[0];
 
+    const updatedExcelConfig = templateConfig;
+    const updatedCellStyles = cellStyles;
+
     // Update the worksheet with data and preserve styles
-    data.forEach((row, rowIndex) => {
-      const actualRowIndex = rowIndex + templateConfig.rowNumberFrom;
+    // passing it templateConfig
+    updateWorksheet(
+      worksheet,
+      exportFileData,
+      updatedExcelConfig,
+      updatedCellStyles,
+    );
 
-      if (templateConfig.ignoredRows.includes(actualRowIndex)) {
-        return; // Skip the ignored row
-      }
+    // const buffer = await workbook.xlsx.writeBuffer();
+    // const updatedBlob = new Blob([buffer], {
+    //   type: 'application/octet-stream',
+    // });
 
-      row.forEach((cell, colIndex) => {
-        if (templateConfig.ignoredCols.includes(colIndex + 1)) {
-          console.log('entered');
-          return; // Skip the ignored column
-        }
+    // data.forEach((row, rowIndex) => {
+    //   const actualRowIndex = rowIndex + templateConfig.rowNumberFrom;
 
-        const cellRef = worksheet.getCell(actualRowIndex, colIndex + 1);
+    //   if (templateConfig.ignoredRows.includes(actualRowIndex)) {
+    //     return; // Skip the ignored row
+    //   }
 
-        cellRef.value = cell;
-        if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
-          cellRef.style = cellStyles[rowIndex][colIndex];
-        }
-      });
-    });
+    //   row.forEach((cell, colIndex) => {
+    //     if (templateConfig.ignoredCols.includes(colIndex + 1)) {
+    //       console.log('entered');
+    //       return; // Skip the ignored column
+    //     }
+
+    //     const cellRef = worksheet.getCell(actualRowIndex, colIndex + 1);
+
+    //     cellRef.value = cell;
+    //     if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
+    //       cellRef.style = cellStyles[rowIndex][colIndex];
+    //     }
+    //   });
+    // });
 
     const buffer = await workbook.xlsx.writeBuffer();
     const updatedBlob = new Blob([buffer], {
@@ -348,10 +434,10 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
   return (
     <div>
       {/* <input type="file" ref={fileInputRef} onChange={handleFileUpload} /> */}
-      {data.length > 0 && (
+      {exportFileData.length > 0 && (
         <div>
           <HotTable
-            data={data}
+            data={exportFileData}
             rowHeaders={true}
             width="100%"
             height="auto"
