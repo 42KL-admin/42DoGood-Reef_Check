@@ -82,7 +82,7 @@ function getSlateConfig(
   return isOcrResultsConfig ? OcrResultsConfig[type] : SlateTypeConfig[type];
 }
 
-function extractDataFromWorksheet(
+function extractApiDataFromWorksheet(
   workbook: Workbook,
   config: SlateConfig.SlateConfig,
 ): { extractedData: (string | number)[][]; styles: any } {
@@ -113,28 +113,29 @@ function extractDataFromWorksheet(
 }
 // pass worksheet you want to update, data to update, templateConfig, and cellStyles
 function updateWorksheet(
-  worksheet: ExcelJS.Worksheet,
-  data: (string | number)[][],
-  templateConfig: SlateConfig.SlateConfig,
-  cellStyles: any[],
-) {
-  data.forEach((row, rowIndex) => {
-    const actualRowIndex = rowIndex + templateConfig.rowNumberFrom;
-
-    if (templateConfig.ignoredRows.includes(actualRowIndex)) return; // Skip the ignored row
-
-    row.forEach((cell, colIndex) => {
-      if (templateConfig.ignoredCols.includes(colIndex + 1)) return; // Skip the ignored column
-
-      const cellRef = worksheet.getCell(actualRowIndex, colIndex + 1);
-      cellRef.value = cell;
-
-      if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
-        cellRef.style = cellStyles[rowIndex][colIndex];
-      }
-    });
-  });
-}
+	worksheet: ExcelJS.Worksheet,
+	data: (string | number)[][],
+	templateConfig: SlateConfig.SlateConfig,
+	// apiConfig: SlateConfig.SlateConfig,
+	cellStyles: any[],
+  ) {
+	data.forEach((row, rowIndex) => {
+	  const actualRowIndex = rowIndex + templateConfig.rowNumberFrom;
+  
+	  if (templateConfig.ignoredRows.includes(actualRowIndex)) return; // Skip the ignored row
+  
+	  row.forEach((cell, colIndex) => {
+		if (templateConfig.ignoredCols.includes(colIndex + 1)) return; // Skip the ignored column
+  
+		const cellRef = worksheet.getCell(actualRowIndex, colIndex + 1);
+		cellRef.value = cell;
+  
+		if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
+		  cellRef.style = cellStyles[rowIndex][colIndex];
+		}
+	  });
+	});
+  }
 
 export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
   const [exportFileData, setExportFileData] = useState<(string | number)[][]>(
@@ -153,34 +154,50 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
 
   // I might be doing more than just "getExcelTemplatefiles"
   const getExcelTemplateFiles = async () => {
-    try {
-      const sasToken = await getExcelTemplateSasTokenCookie();
-
-      console.log('SasToken generated successfully: ', sasToken);
-
-      // setting my blob
-      const blobFromStorage = await fetchTemplateFromBlobStorage(
-        sasToken.value,
-        props.type,
-      );
-
-      if (props.excelBlobData) {
-        console.log('Excel Blob Data: ', props.excelBlobData);
-
-        // PASSING THE BLOB DATA TO UPDATE THE EXCEL FILE
-        const updatedExcelBlob = await updateExportFileData(
-          props.excelBlobData,
-        );
-        if (updatedExcelBlob) setBlobData(updatedExcelBlob);
-      }
-      // console.log('my Ocr Data: ', ocrData);
-      await parseBlobData(blobFromStorage);
-      // await parseBlobData(blobData ?? new Blob());
-
-      // after getting the template excel file, I parse OCR values data into it
-    } catch (error) {
-      console.error('Error in function getExcelTemplateFiles: ', error);
-    }
+	try {
+	  const sasToken = await getExcelTemplateSasTokenCookie();
+  
+	  console.log('SasToken generated successfully: ', sasToken);
+  
+	  const blobFromStorage = await fetchTemplateFromBlobStorage(
+		sasToken.value,
+		props.type,
+	  );
+  
+	  if (props.excelBlobData) {
+		console.log('Excel Blob Data: ', props.excelBlobData);
+  
+		const apiArrayBuffer = await readBlobAsArrayBuffer(props.excelBlobData);
+		const apiWorkbook = new ExcelJS.Workbook();
+		await apiWorkbook.xlsx.load(apiArrayBuffer);
+  
+		const apiConfig = getSlateConfig(props.type, true);
+		const { extractedData: apiData, styles: apiStyles } = extractApiDataFromWorksheet(apiWorkbook, apiConfig);
+  
+		const templateArrayBuffer = await readBlobAsArrayBuffer(blobFromStorage);
+		const templateWorkbook = new ExcelJS.Workbook();
+		await templateWorkbook.xlsx.load(templateArrayBuffer);
+  
+		const templateWorksheet = templateWorkbook.worksheets[0];
+		updateWorksheet(
+		  templateWorksheet,
+		  apiData,
+		  templateConfig,
+		//   apiConfig,
+		  apiStyles
+		);
+  
+		const buffer = await templateWorkbook.xlsx.writeBuffer();
+		const updatedBlob = new Blob([buffer], {
+		  type: 'application/octet-stream',
+		});
+		setBlobData(updatedBlob);
+  
+		parseBlobData(updatedBlob);
+	  }
+	} catch (error) {
+	  console.error('Error in function getExcelTemplateFiles: ', error);
+	}
   };
 
   async function updateExportFileData(
@@ -238,7 +255,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
 
-      const { extractedData, styles } = extractDataFromWorksheet(
+      const { extractedData, styles } = extractApiDataFromWorksheet(
         workbook,
         templateConfig,
       );
@@ -252,24 +269,23 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
 
   // PARSE data to be used in the handsontable
   async function parseBlobData(blob: Blob) {
-    try {
-      const arrayBuffer = await readBlobAsArrayBuffer(blob);
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(arrayBuffer);
-
-      // extract from Template
-      const { extractedData, styles } = extractDataFromWorksheet(
-        workbook,
-        templateConfig,
-      );
-
-      console.log('|BLob Data obtained| !! : ', extractedData);
-      setExportFileData(extractedData);
-      console.log('|setExportFileData| !! : ', exportFileData);
-      setCellStyles(styles);
-    } catch (error) {
-      console.error('Error processing Excel file:', error);
-    }
+	try {
+	  const arrayBuffer = await readBlobAsArrayBuffer(blob);
+	  const workbook = new ExcelJS.Workbook();
+	  await workbook.xlsx.load(arrayBuffer);
+  
+	  const { extractedData, styles } = extractApiDataFromWorksheet(
+		workbook,
+		templateConfig,
+	  );
+  
+	  console.log('|BLob Data obtained| !! : ', extractedData);
+	  setExportFileData(extractedData);
+	  console.log('|setExportFileData| !! : ', exportFileData);
+	  setCellStyles(styles);
+	} catch (error) {
+	  console.error('Error processing Excel file:', error);
+	}
   }
 
   // Currently I have file upload, I cannot directly read a file from our local path
@@ -312,6 +328,71 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
 
     reader.readAsArrayBuffer(file);
   };
+
+
+  const handleUpdateExcel = async () => {
+    if (!blobData) {
+      console.log('Currently no file selected.');
+      return;
+    }
+
+    //worksheet will be taken and looped through template Config
+    const arrayBuffer = await readBlobAsArrayBuffer(blobData);
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(arrayBuffer);
+
+    const worksheet = workbook.worksheets[0];
+
+    const updatedExcelConfig = templateConfig;
+    const updatedCellStyles = cellStyles;
+
+    // Update the worksheet with data and preserve styles
+    // passing it templateConfig
+    updateWorksheet(
+      worksheet,
+      exportFileData,
+      updatedExcelConfig,
+      updatedCellStyles,
+    );
+
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const updatedBlob = new Blob([buffer], {
+      type: 'application/octet-stream',
+    });
+
+    const url = window.URL.createObjectURL(updatedBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'updated_file.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
+  React.useEffect(() => {
+    getExcelTemplateFiles();
+  }, []);
+
+  return (
+    <div>
+      {/* <input type="file" ref={fileInputRef} onChange={handleFileUpload} /> */}
+      {exportFileData.length > 0 && (
+        <div>
+          <HotTable
+            data={exportFileData}
+            rowHeaders={true}
+            width="100%"
+            height="auto"
+            licenseKey="non-commercial-and-evaluation"
+          />
+          <button onClick={handleUpdateExcel}>Update Excel File</button>
+        </div>
+      )}
+    </div>
+  );
+}
 
   // const handleUpdateExcel = async () => {
 
@@ -360,31 +441,6 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
   //   reader.readAsArrayBuffer(file);
   // };
 
-  const handleUpdateExcel = async () => {
-    if (!blobData) {
-      console.log('Currently no file selected.');
-      return;
-    }
-
-    //worksheet will be taken and looped through template Config
-    const arrayBuffer = await readBlobAsArrayBuffer(blobData);
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(arrayBuffer);
-
-    const worksheet = workbook.worksheets[0];
-
-    const updatedExcelConfig = templateConfig;
-    const updatedCellStyles = cellStyles;
-
-    // Update the worksheet with data and preserve styles
-    // passing it templateConfig
-    updateWorksheet(
-      worksheet,
-      exportFileData,
-      updatedExcelConfig,
-      updatedCellStyles,
-    );
-
     // const buffer = await workbook.xlsx.writeBuffer();
     // const updatedBlob = new Blob([buffer], {
     //   type: 'application/octet-stream',
@@ -411,41 +467,3 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
     //     }
     //   });
     // });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const updatedBlob = new Blob([buffer], {
-      type: 'application/octet-stream',
-    });
-
-    const url = window.URL.createObjectURL(updatedBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'updated_file.xlsx';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
-  React.useEffect(() => {
-    getExcelTemplateFiles();
-  }, []);
-
-  return (
-    <div>
-      {/* <input type="file" ref={fileInputRef} onChange={handleFileUpload} /> */}
-      {exportFileData.length > 0 && (
-        <div>
-          <HotTable
-            data={exportFileData}
-            rowHeaders={true}
-            width="100%"
-            height="auto"
-            licenseKey="non-commercial-and-evaluation"
-          />
-          <button onClick={handleUpdateExcel}>Update Excel File</button>
-        </div>
-      )}
-    </div>
-  );
-}
