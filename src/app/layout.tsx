@@ -5,6 +5,7 @@ import theme from "@/theme";
 import { GlobalStyles } from "@mui/material";
 import { Suspense } from "react";
 import Loading from "./loading";
+import GlobalSnackbar from "@/components/GlobalSnackbar";
 
 export const metadata: Metadata = {
   title: "Reef Check Malaysia",
@@ -27,7 +28,10 @@ export default function RootLayout({
       <body>
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <ThemeProvider theme={theme}>
-            <Suspense fallback={<Loading />}>{children}</Suspense>
+            <Suspense fallback={<Loading />}>
+              {children}
+              <GlobalSnackbar />
+            </Suspense>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>
