@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useLoggedUserStateStore } from '@/stores/loggedUserStore';
 import { LoginResponse, login } from '@/services/loginApi';
 import { sendOTP } from '@/services/otpApi';
+import useSnackbarStore from '@/stores/snackbarStore';
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -14,13 +15,14 @@ export default function Home() {
   const setLoggedUserState = useLoggedUserStateStore(
     (state) => state.setLoggedUserState,
   );
+  const addMessage = useSnackbarStore((state) => state.addMessage);
 
   const handleSendOTP = async (adminEmail: string) => {
     try {
       const _ = await sendOTP(adminEmail);
       router.push('/admin_2FA');
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (e: any) {
+      addMessage(e, 'error');
     }
   };
 
@@ -41,12 +43,14 @@ export default function Home() {
       });
 
       if (role === 'admin') {
+        addMessage(`Sending login OTP to ${loggedEmail}...`, 'info');
         handleSendOTP(loggedEmail);
       } else {
+        addMessage(`Welcome back. Logging as ${loggedEmail}`, 'success');
         router.push('/upload');
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (e: any) {
+      addMessage(e.message, 'error');
     }
   };
 
