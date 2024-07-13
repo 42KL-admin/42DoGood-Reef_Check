@@ -34,15 +34,15 @@ export const postOcrProcessUrl = async (
       type: response.headers.get('Content-Type') || 'application/octet-stream',
     });
 
-    // ** THIS WILL DOWNLOAD THE FILE IMMEDIATELY ** //
+    // ** THIS BELOW WILL DOWNLOAD THE FILE IMMEDIATELY ** //
 
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    console.log(`File saved as ${filename}`);
+    // const link = document.createElement('a');
+    // link.href = URL.createObjectURL(blob);
+    // link.download = filename;
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
+    // console.log(`File saved as ${filename}`);
 
     return blob;
   } catch (error) {

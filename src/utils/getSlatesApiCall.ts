@@ -6,8 +6,6 @@ export async function getSlatesApiCall(data: RequestBody.OcrProcessUrl) {
     body: JSON.stringify(data.body),
   };
 
-  console.log(options);
-
   const response = await fetch(data.apiUrl, options);
 
   if (!response.ok) {

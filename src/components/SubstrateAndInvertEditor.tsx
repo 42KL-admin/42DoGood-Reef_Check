@@ -38,6 +38,7 @@ interface ExportEditorProps {
   excelBlobData?: Blob | File | null;
 }
 
+// Stuff to set, probably the settings are wrong too cause I suck
 const OcrResultsConfig: Record<string, SlateConfig.SlateConfig> = Object.freeze(
   {
     substrate: {
@@ -57,6 +58,7 @@ const OcrResultsConfig: Record<string, SlateConfig.SlateConfig> = Object.freeze(
   },
 );
 
+// Stuff to set, probably the settings are wrong too cause I suck
 const SlateTypeConfig: Record<string, SlateConfig.SlateConfig> = Object.freeze({
   substrate: {
     rowNumberFrom: 13,
@@ -98,7 +100,7 @@ function extractApiDataFromWorksheet(
         const rowValues = row.values as (string | number)[];
         rowValues.shift(); // Remove the first element which is usually the row number itself
 
-        // Capture styles
+        // Capture styles (LOGIC HERE PROBABLY WRONG, THE DISPLAY IN THE EXCEL REALLY NEED A FIX)
         row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
           if (!styles[rowNumber - 1]) styles[rowNumber - 1] = {};
           styles[rowNumber - 1][colNumber - 1] = cell.style;
@@ -113,91 +115,89 @@ function extractApiDataFromWorksheet(
 }
 // pass worksheet you want to update, data to update, templateConfig, and cellStyles
 function updateWorksheet(
-	worksheet: ExcelJS.Worksheet,
-	data: (string | number)[][],
-	templateConfig: SlateConfig.SlateConfig,
-	// apiConfig: SlateConfig.SlateConfig,
-	cellStyles: any[],
-  ) {
-	data.forEach((row, rowIndex) => {
-	  const actualRowIndex = rowIndex + templateConfig.rowNumberFrom;
-  
-	  if (templateConfig.ignoredRows.includes(actualRowIndex)) return; // Skip the ignored row
-  
-	  row.forEach((cell, colIndex) => {
-		if (templateConfig.ignoredCols.includes(colIndex + 1)) return; // Skip the ignored column
-  
-		const cellRef = worksheet.getCell(actualRowIndex, colIndex + 1);
-		cellRef.value = cell;
-  
-		if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
-		  cellRef.style = cellStyles[rowIndex][colIndex];
-		}
-	  });
-	});
-  }
+  worksheet: ExcelJS.Worksheet,
+  data: (string | number)[][],
+  templateConfig: SlateConfig.SlateConfig,
+  // apiConfig: SlateConfig.SlateConfig,
+  cellStyles: any[],
+) {
+  data.forEach((row, rowIndex) => {
+    const actualRowIndex = rowIndex + templateConfig.rowNumberFrom;
+
+    if (templateConfig.ignoredRows.includes(actualRowIndex)) return; // Skip the ignored row
+
+    row.forEach((cell, colIndex) => {
+      if (templateConfig.ignoredCols.includes(colIndex + 1)) return; // Skip the ignored column
+
+      const cellRef = worksheet.getCell(actualRowIndex, colIndex + 1);
+      cellRef.value = cell;
+
+      if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
+        cellRef.style = cellStyles[rowIndex][colIndex];
+      }
+    });
+  });
+}
 
 export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
   const [exportFileData, setExportFileData] = useState<(string | number)[][]>(
     [],
   );
-  // const [ocrData, setOcrData] = useState<(string | number)[][]>([]);
   const [blobData, setBlobData] = useState<Blob | null>(null);
-  // const [ocrBlobData, setOcrBlobData] = useState<Blob | null>(null);
   // const fileInputRef = useRef<HTMLInputElement>(null);
   const [cellStyles, setCellStyles] = useState<any>({});
 
   const templateConfig: SlateConfig.SlateConfig = getSlateConfig(props.type);
-  const config: SlateConfig.SlateConfig = getSlateConfig(props.type);
-
   // const config: SlateConfig.SlateConfig = getSlateConfig(props.type);
 
   // I might be doing more than just "getExcelTemplatefiles"
   const getExcelTemplateFiles = async () => {
-	try {
-	  const sasToken = await getExcelTemplateSasTokenCookie();
-  
-	  console.log('SasToken generated successfully: ', sasToken);
-  
-	  const blobFromStorage = await fetchTemplateFromBlobStorage(
-		sasToken.value,
-		props.type,
-	  );
-  
-	  if (props.excelBlobData) {
-		console.log('Excel Blob Data: ', props.excelBlobData);
-  
-		const apiArrayBuffer = await readBlobAsArrayBuffer(props.excelBlobData);
-		const apiWorkbook = new ExcelJS.Workbook();
-		await apiWorkbook.xlsx.load(apiArrayBuffer);
-  
-		const apiConfig = getSlateConfig(props.type, true);
-		const { extractedData: apiData, styles: apiStyles } = extractApiDataFromWorksheet(apiWorkbook, apiConfig);
-  
-		const templateArrayBuffer = await readBlobAsArrayBuffer(blobFromStorage);
-		const templateWorkbook = new ExcelJS.Workbook();
-		await templateWorkbook.xlsx.load(templateArrayBuffer);
-  
-		const templateWorksheet = templateWorkbook.worksheets[0];
-		updateWorksheet(
-		  templateWorksheet,
-		  apiData,
-		  templateConfig,
-		//   apiConfig,
-		  apiStyles
-		);
-  
-		const buffer = await templateWorkbook.xlsx.writeBuffer();
-		const updatedBlob = new Blob([buffer], {
-		  type: 'application/octet-stream',
-		});
-		setBlobData(updatedBlob);
-  
-		parseBlobData(updatedBlob);
-	  }
-	} catch (error) {
-	  console.error('Error in function getExcelTemplateFiles: ', error);
-	}
+    try {
+      const sasToken = await getExcelTemplateSasTokenCookie();
+
+      console.log('SasToken generated successfully: ', sasToken);
+
+      const blobFromStorage = await fetchTemplateFromBlobStorage(
+        sasToken.value,
+        props.type,
+      );
+
+      if (props.excelBlobData) {
+        console.log('Excel Blob Data: ', props.excelBlobData);
+
+        const apiArrayBuffer = await readBlobAsArrayBuffer(props.excelBlobData);
+        const apiWorkbook = new ExcelJS.Workbook();
+        await apiWorkbook.xlsx.load(apiArrayBuffer);
+
+        const apiConfig = getSlateConfig(props.type, true);
+        const { extractedData: apiData, styles: apiStyles } =
+          extractApiDataFromWorksheet(apiWorkbook, apiConfig);
+
+        const templateArrayBuffer =
+          await readBlobAsArrayBuffer(blobFromStorage);
+        const templateWorkbook = new ExcelJS.Workbook();
+        await templateWorkbook.xlsx.load(templateArrayBuffer);
+
+        const templateWorksheet = templateWorkbook.worksheets[0];
+        updateWorksheet(
+          templateWorksheet,
+          apiData,
+          templateConfig,
+          //   apiConfig,
+          apiStyles,
+        );
+
+        const buffer = await templateWorkbook.xlsx.writeBuffer();
+        const updatedBlob = new Blob([buffer], {
+          type: 'application/octet-stream',
+        });
+        setBlobData(updatedBlob);
+
+        parseBlobData(updatedBlob);
+      }
+    } catch (error) {
+      console.error('Error in function getExcelTemplateFiles: ', error);
+    }
   };
 
   async function updateExportFileData(
@@ -216,7 +216,6 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
     const updatedCellStyles = cellStyles;
 
     // Update the worksheet with data and preserve styles
-    // passing it templateConfig
     updateWorksheet(
       worksheet,
       exportFileData,
@@ -269,28 +268,26 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
 
   // PARSE data to be used in the handsontable
   async function parseBlobData(blob: Blob) {
-	try {
-	  const arrayBuffer = await readBlobAsArrayBuffer(blob);
-	  const workbook = new ExcelJS.Workbook();
-	  await workbook.xlsx.load(arrayBuffer);
-  
-	  const { extractedData, styles } = extractApiDataFromWorksheet(
-		workbook,
-		templateConfig,
-	  );
-  
-	  console.log('|BLob Data obtained| !! : ', extractedData);
-	  setExportFileData(extractedData);
-	  console.log('|setExportFileData| !! : ', exportFileData);
-	  setCellStyles(styles);
-	} catch (error) {
-	  console.error('Error processing Excel file:', error);
-	}
+    try {
+      const arrayBuffer = await readBlobAsArrayBuffer(blob);
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+
+      const { extractedData, styles } = extractApiDataFromWorksheet(
+        workbook,
+        templateConfig,
+      );
+
+      // console.log('|BLob Data obtained| !! : ', extractedData);
+      setExportFileData(extractedData);
+      // console.log('|setExportFileData| !! : ', exportFileData);
+      setCellStyles(styles);
+    } catch (error) {
+      console.error('Error processing Excel file:', error);
+    }
   }
 
-  // Currently I have file upload, I cannot directly read a file from our local path
-  // we might need to store template excel files in our Azure Storage Blob and get it from there
-  // File Upload function that was previously used.
+  // File Upload function that was previously used. Leaving it here because it was hard work ;_;
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -312,7 +309,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
           const rowValues = row.values as (string | number)[];
           rowValues.shift(); // Remove the first element which is usually the row number itself
 
-          // Capture styles
+          // Capture styles ( the logic here should probably be wrong, THIS NEEDS REFACTORING FOR EXCEL DISPLAY TO LOOK GOOD)
           row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
             if (!styles[rowNumber - 1]) styles[rowNumber - 1] = {};
             styles[rowNumber - 1][colNumber - 1] = cell.style;
@@ -328,7 +325,6 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
 
     reader.readAsArrayBuffer(file);
   };
-
 
   const handleUpdateExcel = async () => {
     if (!blobData) {
@@ -354,7 +350,6 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
       updatedExcelConfig,
       updatedCellStyles,
     );
-
 
     const buffer = await workbook.xlsx.writeBuffer();
     const updatedBlob = new Blob([buffer], {
@@ -393,77 +388,3 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
     </div>
   );
 }
-
-  // const handleUpdateExcel = async () => {
-
-  //   if (!fileInputRef.current?.files?.[0]) {
-  //     console.log('Currently no file selected.');
-  //     return;
-  //   }
-  //   const file = fileInputRef.current.files[0];
-
-  //   const reader = new FileReader();
-
-  //   reader.onload = async (event) => {
-  //     const arrayBuffer = event.target?.result as ArrayBuffer;
-  //     const workbook = new ExcelJS.Workbook();
-  //     await workbook.xlsx.load(arrayBuffer);
-
-  //     const worksheet = workbook.worksheets[0];
-
-  //     // Update the worksheet with data and preserve styles
-  //     data.forEach((row, rowIndex) => {
-  //       row.forEach((cell, colIndex) => {
-  //         const cellRef = worksheet.getCell(rowIndex + 13, colIndex + 1); // Update rows 13-34
-
-  //         cellRef.value = cell;
-  //         if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
-  //           cellRef.style = cellStyles[rowIndex][colIndex];
-  //         }
-  //       });
-  //     });
-
-  //     const buffer = await workbook.xlsx.writeBuffer();
-  //     const updatedBlob = new Blob([buffer], {
-  //       type: 'application/octet-stream',
-  //     });
-
-  //     const url = window.URL.createObjectURL(updatedBlob);
-  //     const a = document.createElement('a');
-  //     a.href = url;
-  //     a.download = 'updated_file.xlsx';
-  //     document.body.appendChild(a);
-  //     a.click();
-  //     document.body.removeChild(a);
-  //     window.URL.revokeObjectURL(url);
-  //   };
-
-  //   reader.readAsArrayBuffer(file);
-  // };
-
-    // const buffer = await workbook.xlsx.writeBuffer();
-    // const updatedBlob = new Blob([buffer], {
-    //   type: 'application/octet-stream',
-    // });
-
-    // data.forEach((row, rowIndex) => {
-    //   const actualRowIndex = rowIndex + templateConfig.rowNumberFrom;
-
-    //   if (templateConfig.ignoredRows.includes(actualRowIndex)) {
-    //     return; // Skip the ignored row
-    //   }
-
-    //   row.forEach((cell, colIndex) => {
-    //     if (templateConfig.ignoredCols.includes(colIndex + 1)) {
-    //       console.log('entered');
-    //       return; // Skip the ignored column
-    //     }
-
-    //     const cellRef = worksheet.getCell(actualRowIndex, colIndex + 1);
-
-    //     cellRef.value = cell;
-    //     if (cellStyles[rowIndex] && cellStyles[rowIndex][colIndex]) {
-    //       cellRef.style = cellStyles[rowIndex][colIndex];
-    //     }
-    //   });
-    // });

@@ -70,32 +70,31 @@ export default function UploadPhotoHeroSection() {
         await checkSasToken();
         const uploadResponse = await uploadSlatesToBlob(slatesToBeUploaded);
         updateSlateStatus(uploadResponse.results);
-        console.log('uploadResponse: ', uploadResponse);
 
         const ocrImageList = uploadResponse.results;
 
         try {
           // looping through each available item
           ocrImageList.forEach(async (item: any) => {
+            // a bit hardcody but it works, when SAS token is done then we can refactor this part
             const blobUrlWithoutSas = `https://reefcheckslates.blob.core.windows.net/slates/slates/${item.filename}`;
 
             const postOcrProcessUrlResponse =
               await postOcrProcessUrl(blobUrlWithoutSas);
-            console.log(
-              'postOcrProcessUrlResponse: ',
-              postOcrProcessUrlResponse,
-            );
+
             const idAndType = item.id.split(':');
+
             if (postOcrProcessUrlResponse) {
               setSlateExcelFile(
                 idAndType[0],
                 idAndType[1],
                 postOcrProcessUrlResponse,
               );
+              // When each of them are done, change status from processing to recognized
+              // Logic is in InputFileUpload.tsx if further enhancement is needed
+              setSlateStatus(idAndType[0], idAndType[1], 'recognized');
             }
           });
-          // When each of them are done, change status from processing to recognized
-          // using updateSlateStatus here perhaps
         } catch (e: any) {
           console.log('error uploading slates', e.message);
         }

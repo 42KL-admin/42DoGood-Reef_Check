@@ -70,7 +70,6 @@ export const getSlateImageUrl = async (imageName: string) => {
       method: 'GET',
       body: { url: blobUrlWithoutSas },
     };
-    console.log('requestparams: ', requestParams);
 
     const response = await getSlatesApiCall(requestParams);
 
