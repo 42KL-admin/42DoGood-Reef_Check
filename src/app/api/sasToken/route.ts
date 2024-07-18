@@ -70,7 +70,7 @@ export async function GET(): Promise<Response> {
       200,
     );
   } catch (e: any) {
-    console.error(e);
+    console.log(e);
     return generateResponse(
       { message: 'Error generating SAS token', error: e.message },
       500,

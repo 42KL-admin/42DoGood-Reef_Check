@@ -16,9 +16,8 @@ export async function apiCall(
   const response = await fetch(url, options);
 
   if (!response.ok) {
-    throw new Error(
-      `API request failed with status ${response.status}, url: ${url}`,
-    );
+    const errorResponse = await response.json();
+    throw new Error(errorResponse.message);
   }
 
   return response.json();
