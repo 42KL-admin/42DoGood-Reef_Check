@@ -1,30 +1,57 @@
-"use client";
+'use client';
 
-import { Button, Typography, Container, Box, TextField } from "@mui/material";
-import { useState } from "react";
-import Image from "next/image";
+import { Button, Typography, Container, Box, TextField } from '@mui/material';
+import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useLoggedUserStateStore } from '@/stores/loggedUserStore';
+import { LoginResponse, login } from '@/services/loginApi';
+import { sendOTP } from '@/services/otpApi';
+import useSnackbarStore from '@/stores/snackbarStore';
 
 export default function Home() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const router = useRouter();
+  const setLoggedUserState = useLoggedUserStateStore(
+    (state) => state.setLoggedUserState,
+  );
+  const addMessage = useSnackbarStore((state) => state.addMessage);
+
+  const handleSendOTP = async (adminEmail: string) => {
+    try {
+      const _ = await sendOTP(adminEmail);
+      addMessage(`OTP sent to ${adminEmail}! Please check your email!`, 'success');
+      router.push('/admin_2FA');
+    } catch (e: any) {
+      addMessage(e, 'error');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (email) {
-      try {
-        const response = await fetch("/api/login", {
-          method: "POST",
-          body: JSON.stringify({email}),
-        });
-        const payload = await response.json();
-        alert(payload.message);
-        if (response.status == 200) {
-            router.push("/admin");
-        }
-      } catch (error) {
-        console.error("Error:", error);
+
+    if (!email) return;
+
+    try {
+      const response: LoginResponse = await login(email);
+      const { user } = response;
+      const { email: loggedEmail, role } = user;
+
+      setLoggedUserState({
+        email: loggedEmail,
+        role,
+        isOTPVerified: false,
+      });
+
+      if (role === 'admin') {
+        addMessage(`Sending login OTP to ${loggedEmail}...`, 'info');
+        handleSendOTP(loggedEmail);
+      } else {
+        addMessage(`Welcome back. Logging as ${loggedEmail}`, 'success');
+        router.push('/upload');
       }
+    } catch (e: any) {
+      addMessage(e.message, 'error');
     }
   };
 
@@ -50,15 +77,15 @@ export default function Home() {
             onChange={(e) => setEmail(e.target.value)}
             fullWidth
             sx={{
-              marginTop: "16px",
-              "& fieldset": {
-                borderColor: "primary.main",
-                borderWidth: "1px",
+              marginTop: '16px',
+              '& fieldset': {
+                borderColor: 'primary.main',
+                borderWidth: '1px',
               },
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "12px",
-                "&:hover fieldset": { borderColor: "#107888" },
-                "&.Mui-focused fieldset": { borderColor: "#107888" },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                '&:hover fieldset': { borderColor: '#107888' },
+                '&.Mui-focused fieldset': { borderColor: '#107888' },
               },
             }}
           />
@@ -68,11 +95,11 @@ export default function Home() {
             fontSize="8px"
             color="#006878"
             sx={{
-              marginTop: "4px",
-              marginBottom: "16px",
-              marginLeft: "16px",
-              "@media (min-width: 300px)": {
-                fontSize: "12px",
+              marginTop: '4px',
+              marginBottom: '16px',
+              marginLeft: '16px',
+              '@media (min-width: 300px)': {
+                fontSize: '12px',
               },
             }}
           >
@@ -84,8 +111,8 @@ export default function Home() {
             color="primary"
             fullWidth
             sx={{
-              borderRadius: "100px",
-              "&:hover": { backgroundColor: "#107888" },
+              borderRadius: '100px',
+              '&:hover': { backgroundColor: '#107888' },
             }}
           >
             Next

@@ -13,5 +13,18 @@ export const useSelectedSlateStore = create<
   SelectedSlate & SelectedSlateActions
 >()((set) => ({
   slate: null,
-  setSelectedSlate: (slate: SlateState | null) => set({ slate }),
+  setSelectedSlate: (slate: SlateState | null) => {
+    if (slate && slate.file) {
+      // convert file object to a data URI
+      const reader = new FileReader();
+      reader.readAsDataURL(slate.file);
+      reader.onload = () => {
+        const fileURI = reader.result as string;
+        set({ slate: { ...slate, base64: fileURI } });
+      };
+    } else {
+      // if no file is provided, set the slate directly
+      set({ slate });
+    }
+  },
 }));
