@@ -13,7 +13,7 @@ export async function sendOTP(adminEmail: string) {
     const response = await apiCall(sendOTPApiUrl, 'POST', { adminEmail });
     return response;
   } catch (e: any) {
-    throw new Error('Error:', e.message);
+    throw new Error(e.message);
   }
 }
 
@@ -22,6 +22,6 @@ export async function verifyOTP(data: OTPVerification) {
     const response = await apiCall(otpVerficationApiUrl, "POST", data);
     return response;
   } catch (e: any) {
-    throw new Error('verifyOTP error', e.message);
+    throw new Error(e.message);
   }
 }

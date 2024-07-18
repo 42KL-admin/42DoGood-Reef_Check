@@ -20,6 +20,7 @@ export default function Home() {
   const handleSendOTP = async (adminEmail: string) => {
     try {
       const _ = await sendOTP(adminEmail);
+      addMessage(`OTP sent to ${adminEmail}! Please check your email!`, 'success');
       router.push('/admin_2FA');
     } catch (e: any) {
       addMessage(e, 'error');
