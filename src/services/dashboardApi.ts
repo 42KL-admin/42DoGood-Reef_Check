@@ -8,7 +8,7 @@ export async function getEmailList() {
     const response = await apiCall(dashboardApiUrl, "GET");
     return response;
   } catch (e: any) {
-    throw new Error("getEmailList error", e.message);
+    throw new Error(e.message);
   }
 }
 
@@ -17,7 +17,7 @@ export async function inviteUser(email: string, role: EmailRole) {
     const response = await apiCall(dashboardApiUrl, "POST", { email, role });
     return response;
   } catch (e: any) {
-    throw new Error("inviteUser error", e.message);
+    throw new Error(e.message);
   }
 }
 
@@ -26,7 +26,7 @@ export async function deleteUser(email: string) {
     const response = await apiCall(dashboardApiUrl, "DELETE", { email });
     return response;
   } catch (e: any) {
-    throw new Error("deleteUser error", e.message);
+    throw new Error(e.message);
   }
 }
 
@@ -35,6 +35,6 @@ export async function updateUserRole(email: string, role: EmailRole) {
     const response = await apiCall(dashboardApiUrl, "PUT", { email, role });
     return response;
   } catch (e: any) {
-    throw new Error("updateUserRole error", e.message);
+    throw new Error(e.message);
   }
 }

@@ -3,13 +3,14 @@ import IconButton from '@mui/material/IconButton';
 import Delete from '@mui/icons-material/Delete';
 import { Fragment, useState } from 'react';
 import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material';
-import { Divider, TextField, Typography, useMediaQuery } from '@mui/material';
+import { Divider, Typography, useMediaQuery } from '@mui/material';
 import theme from '@/theme';
 import { EmailRow, EmailRole } from '@/stores/types';
 import { useEmailRowStore } from '@/stores/emailRowStore';
 import Dropdownpermission from './Dropdownpermission';
 import { useRouter } from 'next/navigation';
 import { deleteUser, updateUserRole } from '@/services/dashboardApi';
+import useSnackbarStore from '@/stores/snackbarStore';
 
 interface EmailRowComponentProps {
   index: number;
@@ -20,15 +21,14 @@ interface EmailRowComponentProps {
 function EmailRowCollapsibleControl({
   index,
   open,
-  rowId,
   setOpen,
+  handleRemoveRow,
 }: {
   index: number;
   open: boolean;
-  rowId: string;
   setOpen: (state: boolean) => void;
+  handleRemoveRow: () => void;
 }) {
-  const removeRow = useEmailRowStore((state) => state.removeRow);
   return (
     <Box
       onClick={() => setOpen(!open)}
@@ -56,7 +56,7 @@ function EmailRowCollapsibleControl({
       />
       <IconButton
         aria-label="delete"
-        onClick={() => removeRow(rowId)}
+        onClick={handleRemoveRow}
         sx={{ ml: -2.5 }}
       >
         <Delete />
@@ -69,6 +69,7 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
   const { index, row, email } = props;
   const updateRole = useEmailRowStore((state) => state.updateRole);
   const removeRow = useEmailRowStore((state) => state.removeRow);
+  const addMessage = useSnackbarStore((state) => state.addMessage);
   const [open, setOpen] = useState<boolean>(true);
   const isLargerScreen = useMediaQuery(theme.breakpoints.up('md'));
   const router = useRouter();
@@ -77,8 +78,9 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
     try {
       const _ = await deleteUser(row.email);
       removeRow(row.email);
-    } catch (error) {
-      console.error('Error: Remove row fail.', error);
+      addMessage(`Removed ${row.email}.`, 'success');
+    } catch (error: any) {
+      addMessage(error.message, 'error');
       router.replace('/');
     }
   };
@@ -87,8 +89,9 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
     try {
       const _ = await updateUserRole(row.email, role);
       updateRole(row.email, role);
+      addMessage(`Updated ${row.email} permission to ${role}.`, 'success');
     } catch (error) {
-      console.error('Error: Permission Change fail', error);
+      addMessage('Permission Change failed! Please try again', 'error');
       router.replace('/');
     }
   };
@@ -98,8 +101,8 @@ export default function EmailRowComponent(props: EmailRowComponentProps) {
       <EmailRowCollapsibleControl
         index={index}
         open={open}
-        rowId={row.email}
         setOpen={setOpen}
+        handleRemoveRow={handleRemoveRow}
       />
       {/** IF is not on mobile, always show this box
        * IF it's not, meaning on mobile, check if it's open */}

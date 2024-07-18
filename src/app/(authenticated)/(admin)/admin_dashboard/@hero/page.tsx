@@ -9,12 +9,14 @@ import Dropdownpermission from '@/components/Dropdownpermission';
 import { useEmailRowStore } from '@/stores/emailRowStore';
 import { EmailRole } from '@/stores/types';
 import { inviteUser } from '@/services/dashboardApi';
+import useSnackbarStore from '@/stores/snackbarStore';
 
 export default function UploadUserSection() {
   const [selectedPermission, setSelectedPermission] =
     useState<EmailRole>('can edit');
   const [email, setEmail] = useState('');
   const addRow = useEmailRowStore((state) => state.addRow);
+  const addMessage = useSnackbarStore((state) => state.addMessage);
 
   const router = useRouter();
 
@@ -23,8 +25,9 @@ export default function UploadUserSection() {
       const _ = await inviteUser(email, selectedPermission);
       addRow(email, selectedPermission);
       setEmail('');
-    } catch (error) {
-      console.error('Error fetching emails:', error);
+      addMessage(`Invited ${email}.`, 'success');
+    } catch (error: any) {
+      addMessage(error.message, 'error');
       router.push('/');
     }
   };
