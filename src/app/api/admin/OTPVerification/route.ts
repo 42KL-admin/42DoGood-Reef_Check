@@ -26,16 +26,13 @@ export async function POST(request: NextRequest, response: NextResponse)
         } else {
             const hashedOTP = await bcrypt.hash(otp, admin.salt);
 			const valid = hashedOTP == admin.otp;
-			console.log('hashedOTP:', hashedOTP);
-			console.log('admin.otp:', admin.otp);
-			console.log('valid:', valid);
 
             // If OTP is invalid
             if (valid == true) {
                 await db.collection("adminOTPVerification").deleteMany({ adminEmail: adminEmail });
                 return NextResponse.json({ message: "Admin is verified successfully"}, {status: 200});
             } else {
-                throw new Error("Invalid OTP.");
+                return NextResponse.json({ message: "Invalid OTP code. Please try again."}, { status: 403 });
             }
         }
     } catch (error) {

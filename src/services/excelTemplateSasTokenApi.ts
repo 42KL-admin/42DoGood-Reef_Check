@@ -9,6 +9,6 @@ export async function getExcelTemplateSasTokenCookie() {
 
     return response;
   } catch (e: any) {
-    throw new Error('getNewSasToken error', e.message);
+    throw new Error(e.message);
   }
 }

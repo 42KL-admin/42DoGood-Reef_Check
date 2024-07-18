@@ -20,6 +20,7 @@ import {
 } from 'handsontable/plugins';
 import { fetchTemplateFromBlobStorage } from '@/utils/azureBlobStorageHelper';
 import { getExcelTemplateSasTokenCookie } from '@/services/excelTemplateSasTokenApi';
+import useSnackbarStore from '@/stores/snackbarStore';
 
 registerCellType(CheckboxCellType);
 registerCellType(NumericCellType);
@@ -146,6 +147,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
   const [blobData, setBlobData] = useState<Blob | null>(null);
   // const fileInputRef = useRef<HTMLInputElement>(null);
   const [cellStyles, setCellStyles] = useState<any>({});
+  const addMessage = useSnackbarStore((state) => state.addMessage);
 
   const templateConfig: SlateConfig.SlateConfig = getSlateConfig(props.type);
   // const config: SlateConfig.SlateConfig = getSlateConfig(props.type);
@@ -195,8 +197,8 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
 
         parseBlobData(updatedBlob);
       }
-    } catch (error) {
-      console.error('Error in function getExcelTemplateFiles: ', error);
+    } catch (error: any) {
+      addMessage(error.message, 'error');
     }
   };
 

@@ -5,7 +5,7 @@ const loginApiUrl = `api/login`;
 interface LoginUser {
   _id: string;
   email: string;
-  role: "admin" | "user";
+  role: 'admin' | 'user';
 }
 
 export interface LoginResponse {
@@ -18,6 +18,6 @@ export async function login(email: string) {
     const response = await apiCall(loginApiUrl, 'POST', { email });
     return response as LoginResponse;
   } catch (e: any) {
-    throw new Error('login error', e.message);
+    throw new Error(e.message);
   }
 }

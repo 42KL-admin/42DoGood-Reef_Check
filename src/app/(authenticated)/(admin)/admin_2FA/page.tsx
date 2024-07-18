@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useLoggedUserStateStore } from '@/stores/loggedUserStore';
 import { sendOTP, verifyOTP } from '@/services/otpApi';
 import { createSession } from '@/services/sessionApi';
+import useSnackbarStore from '@/stores/snackbarStore';
 
 export default function Admin_2FA() {
   const [token, setToken] = useState('');
@@ -15,6 +16,7 @@ export default function Admin_2FA() {
     null,
   );
   const user = useLoggedUserStateStore((state) => state.user);
+  const addMessage = useSnackbarStore((state) => state.addMessage);
   const router = useRouter();
 
   const resendOTP = async () => {
@@ -45,10 +47,9 @@ export default function Admin_2FA() {
   const handleCreateSession = async (adminEmail: string) => {
     try {
       const _ = await createSession(adminEmail);
-      console.log('session made');
       router.replace('/admin_dashboard');
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (error: any) {
+      addMessage(error.message, 'error');
     }
   };
 
@@ -61,7 +62,7 @@ export default function Admin_2FA() {
     }
 
     if (!token) {
-      console.error('No token found');
+      addMessage('No 2FA token was found!', 'error');
       return;
     }
 
@@ -71,8 +72,9 @@ export default function Admin_2FA() {
         otp: token,
       });
       handleCreateSession(user.email);
-    } catch (error) {
-      console.error('Error:', error);
+      addMessage(`Welcome back, ${user.email}.`, 'success');
+    } catch (error: any) {
+      addMessage(error.message, 'error');
     }
   };
 

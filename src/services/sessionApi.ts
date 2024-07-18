@@ -7,7 +7,7 @@ export async function validateSessionId() {
     const response = await apiCall(sessionApiUrl, 'GET');
     return response;
   } catch (e: any) {
-    throw new Error('validateSessionId error', e.message);
+    throw new Error(e.message);
   }
 }
 
@@ -16,6 +16,6 @@ export async function createSession(adminEmail: string) {
       const response = await apiCall(sessionApiUrl, 'POST', { adminEmail });
       return response;
     } catch (e: any) {
-      throw new Error('createSession error', e.message);
+      throw new Error(e.message);
     }
 }

@@ -11,9 +11,11 @@ import { EmailRole, EmailRow } from '@/stores/types';
 import { useRouter } from 'next/navigation';
 import SortByPermission from '@/components/SortbyPermission';
 import { getEmailList } from '@/services/dashboardApi';
+import useSnackbarStore from '@/stores/snackbarStore';
 
 export default function UploadEmailSection() {
   const { addRow, rows, clearRows } = useEmailRowStore();
+  const addMessage = useSnackbarStore((state) => state.addMessage);
   const [sortByRole, setSortByRole] = useState<EmailRole | null>(null);
   const handleSortByRole = (role: EmailRole | null) => {
     setSortByRole(role);
@@ -37,8 +39,8 @@ export default function UploadEmailSection() {
       emailList.forEach(({ email, role }) => {
         addRow(email, role);
       });
-    } catch (error) {
-      console.error('Error fetching emails:', error);
+    } catch (error: any) {
+      addMessage(error.message, 'error');
       router.push('/');
     }
   };
