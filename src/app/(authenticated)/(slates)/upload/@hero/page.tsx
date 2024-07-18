@@ -18,6 +18,7 @@ import {
   UploadFilesResponse,
 } from '@/stores/types';
 import { postOcrProcessUrl } from '@/utils/postOcrProcessUrl';
+import useSnackbarStore from '@/stores/snackbarStore';
 
 const ChipLabels = ['Not blurry', 'Bright enough', 'Pencil writing is clear'];
 
@@ -36,6 +37,7 @@ export default function UploadPhotoHeroSection() {
   const router = useRouter();
   const fileRows = useFileRowStore((state) => state.rows);
   const setSlateStatus = useFileRowStore((state) => state.setSlateStatus);
+  const addMessage = useSnackbarStore((state) => state.addMessage);
 
   const updateSlateStatus = (response: UploadFilesResponse[]) => {
     response.forEach((item) => {
@@ -96,9 +98,10 @@ export default function UploadPhotoHeroSection() {
             }
           });
         } catch (e: any) {
-          console.log('error uploading slates', e.message);
+          addMessage(e.message, 'error');
         }
       } catch (e: any) {
+        addMessage(e.message, 'error');
         console.log('error uploading slates', e.message);
         throw new Error('uploadSlatesToBlob error', e.message);
       }
