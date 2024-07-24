@@ -77,21 +77,25 @@ function BurgerMenu(props: BurgerMenuProps) {
           alignItems={"center"}
         >
           <Button
-            href={"/upload"}
             style={{ textDecoration: "none", color: "white", textTransform: "capitalize" }}
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              router.push('/upload');
+              setOpen(false);
+            }}
           >
             <Typography py={4} letterSpacing={2} align="center" textTransform={"capitalize"}>
-              Convert Slates
+              Upload Slates
             </Typography>
           </Button>
           <Button
-            href={"/results"}
             style={{ textDecoration: "none", color: "white", textTransform: "capitalize" }}
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              router.push('/results');
+              setOpen(false);
+            }}
           >
             <Typography py={4} letterSpacing={2} align="center" textTransform={"capitalize"}>
-              View My Slates
+              View Results
             </Typography>
           </Button>
           <Button

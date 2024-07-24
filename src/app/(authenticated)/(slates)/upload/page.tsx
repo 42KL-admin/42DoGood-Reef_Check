@@ -9,7 +9,6 @@ import { TransitionGroup } from "react-transition-group";
 import { Collapse, Drawer } from "@mui/material";
 import { RoundedButton } from "@/components/RoundedButton";
 import { useFileRowStore } from "@/stores/fileRowStore";
-import { useEffect } from "react";
 
 export default function UploadPhotoSection() {
   const rows = useFileRowStore((state) => state.rows);
@@ -50,7 +49,7 @@ export default function UploadPhotoSection() {
           }}
           onClick={addRow}
         >
-          Add more files
+          Add more set
         </Button>
         {/** Drawer here (mobile) */}
         <Drawer
@@ -78,7 +77,7 @@ export default function UploadPhotoSection() {
               Add more set
             </RoundedButton>
             <RoundedButton variant="contained" sx={{ width: "256px" }}>
-              Process
+              Convert Files Now
             </RoundedButton>
           </Box>
         </Drawer>
