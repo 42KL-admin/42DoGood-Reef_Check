@@ -2,10 +2,13 @@
 
 import { ArrowBack, Close, Menu } from "@mui/icons-material";
 import Drawer from "@mui/material/Drawer";
-import { AppBar, Box, IconButton, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, IconButton, Toolbar, Typography } from "@mui/material";
 import { Fragment, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useLoggedUserStateStore } from "@/stores/loggedUserStore";
+import { deleteSession } from "@/services/sessionApi";
+import useSnackbarStore from "@/stores/snackbarStore";
 
 interface BurgerMenuProps {
   open: boolean;
@@ -14,6 +17,32 @@ interface BurgerMenuProps {
 
 function BurgerMenu(props: BurgerMenuProps) {
   const { open, setOpen } = props;
+  const user = useLoggedUserStateStore((state) => state.user);
+  const setLoggedUserState = useLoggedUserStateStore(
+    (state) => state.setLoggedUserState,
+  );
+  const addMessage = useSnackbarStore((state) => state.addMessage);
+  const router = useRouter();
+
+  const logoutUser = async () => {
+    try {
+      const role = user?.role;
+      setLoggedUserState(null);
+      if (role == 'admin') {
+        deleteSession()
+          .then(() => {
+            setOpen(false);
+            router.push('/');
+          });
+      } else {
+        setOpen(false);
+        router.push('/');
+      }
+      addMessage("Logout successfully.", 'success');
+    } catch (e: any) {
+      addMessage(e.message, 'error');
+    }
+  };
 
   return (
     <Drawer
@@ -47,33 +76,32 @@ function BurgerMenu(props: BurgerMenuProps) {
           justifyContent={"center"}
           alignItems={"center"}
         >
-          <Link
+          <Button
             href={"/upload"}
-            style={{ textDecoration: "none", color: "white" }}
+            style={{ textDecoration: "none", color: "white", textTransform: "capitalize" }}
             onClick={() => setOpen(false)}
           >
-            <Typography py={4} letterSpacing={2} align="center">
+            <Typography py={4} letterSpacing={2} align="center" textTransform={"capitalize"}>
               Convert Slates
             </Typography>
-          </Link>
-          <Link
+          </Button>
+          <Button
             href={"/results"}
-            style={{ textDecoration: "none", color: "white" }}
+            style={{ textDecoration: "none", color: "white", textTransform: "capitalize" }}
             onClick={() => setOpen(false)}
           >
-            <Typography py={4} letterSpacing={2} align="center">
+            <Typography py={4} letterSpacing={2} align="center" textTransform={"capitalize"}>
               View My Slates
             </Typography>
-          </Link>
-          <Link
-            href={"/upload"}
-            style={{ textDecoration: "none", color: "white" }}
-            onClick={() => setOpen(false)}
+          </Button>
+          <Button
+            style={{ textDecoration: "none", color: "white", textTransform: "capitalize" }}
+            onClick={logoutUser}
           >
-            <Typography py={4} letterSpacing={2} align="center">
-              Sign Out
+            <Typography py={4} letterSpacing={2} align="center" textTransform={"capitalize"}>
+              Logout
             </Typography>
-          </Link>
+          </Button>
         </Box>
         <Box
           mt={"auto"}
