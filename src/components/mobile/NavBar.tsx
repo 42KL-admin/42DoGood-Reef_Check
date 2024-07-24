@@ -120,7 +120,7 @@ function BurgerMenu(props: BurgerMenuProps) {
           >
             Signed in as:
             <br />
-            user@email.com
+            { user?.email || 'user@gmail.com' }
           </Typography>
           <IconButton
             sx={{ width: "fit-content", color: "white" }}
