@@ -19,3 +19,12 @@ export async function createSession(adminEmail: string) {
       throw new Error(e.message);
     }
 }
+
+export async function deleteSession() {
+  try {
+    const response = await apiCall(sessionApiUrl, 'DELETE');
+    return response;
+  } catch (e: any) {
+    throw new Error(e.message);
+  }
+}
