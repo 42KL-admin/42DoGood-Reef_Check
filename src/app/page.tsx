@@ -1,21 +1,24 @@
 'use client';
 
 import { Button, Typography, Container, Box, TextField } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLoggedUserStateStore } from '@/stores/loggedUserStore';
 import { LoginResponse, login } from '@/services/loginApi';
 import { sendOTP } from '@/services/otpApi';
 import useSnackbarStore from '@/stores/snackbarStore';
+import LogoImage from '@/../public/images/logo.png';
 
-export default function Home() {
+export default function Login() {
   const [email, setEmail] = useState('');
   const router = useRouter();
   const setLoggedUserState = useLoggedUserStateStore(
     (state) => state.setLoggedUserState,
   );
   const addMessage = useSnackbarStore((state) => state.addMessage);
+  const queryParams = useSearchParams();
+  const loginStatus = queryParams.get('status');
 
   const handleSendOTP = async (adminEmail: string) => {
     try {
@@ -55,6 +58,16 @@ export default function Home() {
     }
   };
 
+  // for catching the unauthorized access
+  useEffect(() => {
+    if (loginStatus && parseInt(loginStatus) === 401) {
+      addMessage('Unauthorized access. Please login first!', 'error');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('status');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [loginStatus, addMessage]);
+
   return (
     <Container maxWidth="sm">
       <Box
@@ -67,7 +80,7 @@ export default function Home() {
         padding={0}
       >
         <Box marginBottom={0}>
-          <Image src="/images/logo.png" alt="Logo" width={197} height={171} />
+          <Image src={LogoImage} alt="Logo" width={197} height={171} priority />
         </Box>
         <Box component="form" onSubmit={handleSubmit} marginTop={2} width="70%">
           <TextField

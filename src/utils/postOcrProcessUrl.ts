@@ -16,7 +16,7 @@ export const postOcrProcessUrl = async (
         'x-return-json': isReturnJson.toString(),
       },
     };
-    console.log('requestParam: ', requestParams);
+    // console.log('requestParam: ', requestParams);
 
     const response = await ocrUploadApiCall(requestParams);
 

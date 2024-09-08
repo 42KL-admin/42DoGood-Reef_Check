@@ -7,7 +7,7 @@ export async function ocrUploadApiCall(data: RequestBody.OcrProcessUrl) {
 
   const response = await fetch(data.apiUrl, options);
 
-  console.log('response: ', response);
+  // console.log('response: ', response);
 
   if (!response.ok) {
     throw new Error(
