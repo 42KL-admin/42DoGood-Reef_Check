@@ -1,109 +1,112 @@
-import { NextResponse } from 'next/server'
-import { NextRequest } from 'next/server'
-import clientPromise from '../lib/mongodb';
-// import { validateAdminSession } from '../lib/middleware/validateSession';
+import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
-const adminApi = [
-	'/api/admin/Dashboard',
-];
+const adminApi = ['/api/admin/Dashboard'];
 
 const adminPaths = [
-	'/',
-	'/admin_2FA',
-	'/admin_dashboard',
-	'/api/admin/Dashboard',
+  '/',
+  '/admin_2FA',
+  '/admin_dashboard',
+  '/api/admin/Dashboard',
 ];
 
-const userPaths = [
-];
+const userPaths = [];
 
 function removeUser(request: NextRequest) {
-    const response = NextResponse.redirect(new URL('/', request.url))
-    response.cookies.delete('sessionID')
-	response.cookies.delete('RCUserCookie')
-	console.log("Removing user");
-    return response;
+  const response = NextResponse.redirect(new URL('/', request.url));
+  response.cookies.delete('sessionID');
+  response.cookies.delete('RCUserCookie');
+  return response;
 }
 
-export async function validateAdminSession(request: NextRequest) {
-try {
-	// console.log("Validating Session");
-	const path = request.nextUrl.pathname;
-	const sessionID = request.cookies.get('sessionID')?.value;
-
-
-	if (!sessionID) { // If sessionID is missing
-		if (path == '/' || path == '/admin_2FA') {
-			return NextResponse.next();
-		}
-		return NextResponse.redirect(new URL('/', request.url))
-	}
-
-	const sessionValid = await fetch(`${request.nextUrl.origin}/api/admin/SessionID`, {
-		method: "GET",
-		headers: {
-			'Content-Type': 'application/json',
-			'Cookie': `sessionID=${sessionID}`
-		},
-		credentials: 'include' // Ensure cookies are included in the request
-	});
-
-	if (path == '/admin_dashboard' || adminApi.includes(path)) {
-		
-		// console.log("Dashboard stuff");
-
-		if (sessionValid.status == 200) {
-			return NextResponse.next();
-		}
-		
-		console.log("api access denied");
-		return removeUser(request);
-	}
-
-	if (path == '/' || path == '/admin_2FA') {
-		// console.log("Attempt to enter / or /admin_2FA")
-		if (sessionValid.status == 200) {
-			console.log("redirecting to admin_dashboard");
-			return NextResponse.redirect(new URL('/admin_dashboard', request.url))
-		}
-		else {
-			console.log("incorrect SessionID");
-			return removeUser(request);
-		}
-	}
-
-	return NextResponse.next();
-} catch (error) {
-	console.error('Error validating sessionID to database:', error);
-	return { status: 500, message: "Failed to validate sessionID." };
+async function isSessionValid(request: NextRequest, sessionID: string) {
+  const sessionValid = await fetch(
+    `${request.nextUrl.origin}/api/admin/SessionID`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `sessionID=${sessionID}`,
+      },
+      credentials: 'include',
+    },
+  );
+  return sessionValid.status === 200;
 }
+
+async function validateAdminSession(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const sessionID = request.cookies.get('sessionID')?.value;
+
+  if (!sessionID) {
+    // Allow unauthenticated access to these paths
+    if (path === '/' || path === '/admin_2FA') {
+      return NextResponse.next();
+    }
+    return NextResponse.redirect(new URL('/', request.url));
+  }
+
+  try {
+    const sessionValid = await isSessionValid(request, sessionID);
+
+    // Handle access to dashboard and API routes
+    if (path === '/admin_dashboard' || adminApi.includes(path)) {
+      return sessionValid ? NextResponse.next() : removeUser(request);
+    }
+
+    if (path == '/' || path == '/admin_2FA') {
+      return sessionValid
+        ? NextResponse.redirect(new URL('/admin_dashboard', request.url))
+        : removeUser(request);
+    }
+
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Error validating sessionID:', error);
+    return NextResponse.error();
+  }
 }
-  
 
 export async function middleware(request: NextRequest) {
-	try {
-		console.log("\n\nEntering Middleware");
-		const path = request.nextUrl.pathname;
-    	console.log('Path is', path); // Debugging purposes
+  try {
+    const path = request.nextUrl.pathname;
+    const userCookie = request.cookies.get('RCUserCookie')?.value;
 
-		if (adminPaths.includes(path)) {
-			// console.log("Admin path matched, validating admin session");
-			const validationResult = await validateAdminSession(request);
-			return validationResult;
+    // redirect user to upload page if logged in or has cookie
+    if (userCookie && path === '/') {
+      return NextResponse.redirect(new URL('/upload', request.url));
+    }
+
+		// proceed API routes
+		if (path.startsWith('/api/')) {
+			return NextResponse.next();
 		}
-		// console.log("no redirects");
-		return NextResponse.next(); // TODO Can redirect random urls to home page
-	}catch{
-		return NextResponse.json({ message: "Failed middleware."}, {status: 500});
-	}
+
+		// for all the user, if there's no cookie, redirect to login
+		if (!userCookie && path !== '/') {
+			const url = new URL('/', request.url);
+			url.searchParams.set('status', '401');
+			return NextResponse.redirect(url);
+		}
+
+		// begin admin routes validation
+    if (adminPaths.includes(path)) {
+      const validationResult = await validateAdminSession(request);
+      return validationResult;
+    }
+
+    // Default behavior: allow access to all other routes
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Middleware error:', error);
+    return NextResponse.json(
+      { message: 'Failed middleware.' },
+      { status: 500 },
+    );
+  }
 }
 
+// exclude static and resources route
 export const config = {
-  matcher: [
-	'/:path*',
-],
-}
-// '/',
-// '/admin_2FA',
-// '/admin_dashboard',
-// '/api/admin/Dashboard'
+  matcher: ['/((?!.*\\.).*)'],
+};
