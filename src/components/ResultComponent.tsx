@@ -6,11 +6,22 @@ import MoreActionButton from './MoreActionButton';
 import { Card, CardActionArea, CardActions } from '@mui/material';
 import { SlateState } from '@/stores/types';
 import { useSelectedSlateStore } from '@/stores/slateStore';
+import { ConversionStatusIndicator } from './InputFileUpload';
+import useSnackbarStore from '@/stores/snackbarStore';
 
 export default function ResultComponent({ slate }: { slate: SlateState }) {
   const setSelectedSlate = useSelectedSlateStore(
     (state) => state.setSelectedSlate,
   );
+  const addMessage = useSnackbarStore((state) => state.addMessage);
+
+  const handleClick = () => {
+    if (slate.status === 'recognized') {
+      setSelectedSlate(slate);
+    } else {
+      addMessage('This file is still being processed :)', 'warning');
+    }
+  };
 
   return slate.file === null ? (
     <></>
@@ -23,13 +34,19 @@ export default function ResultComponent({ slate }: { slate: SlateState }) {
         borderRadius={3}
         sx={{ backgroundColor: 'white' }}
       >
-        <CardActionArea onClick={() => setSelectedSlate(slate)}>
+        <CardActionArea
+          onClick={handleClick}
+        >
           <Box py={6} px={2.5}>
             <Typography sx={{ flex: 1 }}>{slate.file.name}</Typography>
           </Box>
         </CardActionArea>
         <CardActions>
-          <MoreActionButton id={'1'} /> {/* fix this */}
+          {slate.status !== 'recognized' ? (
+            <ConversionStatusIndicator status={slate.status} />
+          ) : (
+            <MoreActionButton id={'1'} />
+          )}
         </CardActions>
       </Box>
     </Card>

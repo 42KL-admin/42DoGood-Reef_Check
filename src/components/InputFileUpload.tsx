@@ -108,7 +108,7 @@ function SlateActionButton(props: SlateActionButtonProps) {
   );
 }
 
-function ConversionStatusIndicator({
+export function ConversionStatusIndicator({
   status,
 }: {
   status: SlateRecognitionStatus;
