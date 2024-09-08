@@ -16,11 +16,11 @@ export default function ResultComponent({ slate }: { slate: SlateState }) {
   const addMessage = useSnackbarStore((state) => state.addMessage);
 
   const handleClick = () => {
-    if (slate.status === 'recognized') {
+    // if (slate.status === 'recognized') {
       setSelectedSlate(slate);
-    } else {
-      addMessage('This file is still being processed :)', 'warning');
-    }
+    // } else {
+      // addMessage('This file is still being processed :)', 'warning');
+    // }
   };
 
   return slate.file === null ? (

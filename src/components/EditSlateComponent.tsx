@@ -60,25 +60,46 @@ function EditControls() {
 
 function EditImagePreview() {
   const slate = useSelectedSlateStore((state) => state.slate);
+  const isMd = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+  const isLg = useMediaQuery(theme.breakpoints.between('lg', 'xl'));
+  const isXl = useMediaQuery(theme.breakpoints.up('xl'));
+
+  const imageWidth = isMd ? '100%' : isLg ? '80%' : isXl ? '50%' : '70%';
 
   return (
     slate && (
       <Box
-        width="100%"
+        maxWidth="100%"
+        maxHeight="100%"
         display="grid"
         alignContent={'center'}
         justifyContent={'center'}
+        overflow={'hidden'}
+        sx={{ position: 'relative' }}
       >
         <TransformWrapper>
           <TransformComponent>
-            <Image
-              src={slate.base64}
-              alt={slate.file?.name || 'image preview'}
-              width={0}
-              height={0}
-              sizes="100vw"
-              style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
-            />
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                height: '100%',
+              }}
+            >
+              <Image
+                src={slate.base64}
+                alt={slate.file?.name || 'image preview'}
+                width={0}
+                height={0}
+                style={{
+                  width: imageWidth,
+                  height: 'auto',
+                  objectFit: 'contain',
+                }}
+              />
+            </Box>
           </TransformComponent>
           <EditControls />
         </TransformWrapper>
@@ -90,18 +111,17 @@ function EditImagePreview() {
 function EditSlateLargerScreen() {
   const slate = useSelectedSlateStore((state) => state.slate);
 
-  console.log('selected slate: ', slate);
   return slate ? (
-    <Box display="flex" height={'100vh'}>
+    <Box display="flex" height={'90vh'}>
       <Box
         width={'50%'}
         display="grid"
         justifyItems="center"
-        sx={{ position: 'relative' }}
+        sx={{ position: 'relative', flexShrink: 0 }}
       >
         <EditImagePreview />
       </Box>
-      <Box width={'50%'} sx={{ backgroundColor: 'teal' }}>
+      <Box width={'50%'} sx={{ backgroundColor: 'teal', flex: 1 }}>
         <SubstrateAndInvertEditor
           type={slate.type}
           excelBlobData={slate.excelFile}

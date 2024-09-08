@@ -6,6 +6,7 @@ import { GlobalStyles } from "@mui/material";
 import { Suspense } from "react";
 import Loading from "./loading";
 import GlobalSnackbar from "@/components/GlobalSnackbar";
+import zIndex from "@mui/material/styles/zIndex";
 
 export const metadata: Metadata = {
   title: "Reef Check Malaysia",
@@ -23,6 +24,9 @@ export default function RootLayout({
         styles={{
           html: { height: "100%" },
           body: { margin: 0, height: "100%" },
+          '.ht_clone_inline_start': {
+            zIndex: '0 !important',
+          }
         }}
       />
       <body>
