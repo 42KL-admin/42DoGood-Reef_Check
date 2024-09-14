@@ -17,6 +17,7 @@ type FileRowActions = {
   addRow: () => void;
   removeRow: (id: string) => void;
   removeSlate: (slateId: string) => void;
+  renameSlate: (slateId: string, newName: string) => void;
   setSlateFile: (id: string, type: SlateType, file: File | null) => void;
   setSlateExcelFile: (
     id: string,
@@ -55,12 +56,29 @@ const createFileRow = (): FileRow => {
 const removeSlateFromRow = (row: FileRow, slateId: string): FileRow => {
   const result = {
     ...row,
-    substrate: row.substrate.id === slateId ? createSlate('substrate') : row.substrate,
-    fishInverts: row.fishInverts.id === slateId ? createSlate('fishInverts') : row.fishInverts,
+    substrate:
+      row.substrate.id === slateId ? createSlate('substrate') : row.substrate,
+    fishInverts:
+      row.fishInverts.id === slateId
+        ? createSlate('fishInverts')
+        : row.fishInverts,
   };
-  console.log(result);
   return result;
-}
+};
+
+const renameSlateInRow = (row: FileRow, slateId: string, newName: string): FileRow => {
+  return {
+    ...row,
+    substrate:
+      row.substrate.id === slateId
+        ? { ...row.substrate, type: newName } as SlateState
+        : row.substrate,
+    fishInverts:
+      row.fishInverts.id === slateId
+        ? { ...row.fishInverts, type: newName } as SlateState
+        : row.fishInverts,
+  };
+};
 
 export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
   // start with one row
@@ -74,14 +92,23 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
     set((state) => ({
       rows: state.rows.filter((row) => row.id !== id),
     })),
-  
+
   // remove a specific slate by its id
   removeSlate: (slateId: string) =>
     set((state) => ({
-      rows: state.rows.map((row) => 
+      rows: state.rows.map((row) =>
         row.substrate.id === slateId || row.fishInverts.id === slateId
           ? removeSlateFromRow(row, slateId)
-          : row
+          : row,
+      ),
+    })),
+
+  renameSlate: (slateId: string, newName: string) =>
+    set((state) => ({
+      rows: state.rows.map((row) =>
+        row.substrate.id === slateId || row.fishInverts.id === slateId
+          ? renameSlateInRow(row, slateId, newName)
+          : row,
       ),
     })),
 
