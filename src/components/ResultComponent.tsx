@@ -17,9 +17,9 @@ export default function ResultComponent({ slate }: { slate: SlateState }) {
 
   const handleClick = () => {
     // if (slate.status === 'recognized') {
-      setSelectedSlate(slate);
+    setSelectedSlate(slate);
     // } else {
-      // addMessage('This file is still being processed :)', 'warning');
+    // addMessage('This file is still being processed :)', 'warning');
     // }
   };
 
@@ -34,19 +34,16 @@ export default function ResultComponent({ slate }: { slate: SlateState }) {
         borderRadius={3}
         sx={{ backgroundColor: 'white' }}
       >
-        <CardActionArea
-          onClick={handleClick}
-        >
+        <CardActionArea onClick={handleClick}>
           <Box py={6} px={2.5}>
             <Typography sx={{ flex: 1 }}>{slate.file.name}</Typography>
           </Box>
         </CardActionArea>
         <CardActions>
-          {slate.status !== 'recognized' ? (
-            <ConversionStatusIndicator status={slate.status} />
-          ) : (
-            <MoreActionButton id={'1'} />
-          )}
+          {/* {slate.status !== 'recognized' ? ( */}
+          {/* <ConversionStatusIndicator status={slate.status} /> */}
+          {/* } ) : ( */}
+          <MoreActionButton id={slate.id} />
         </CardActions>
       </Box>
     </Card>

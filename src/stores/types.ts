@@ -13,6 +13,7 @@ export type EmailRole = 'can edit' | 'admin';
 
 // Each individual slate's state
 export interface SlateState {
+  id: string;
   type: SlateType;
   file: File | null;
   base64: string;

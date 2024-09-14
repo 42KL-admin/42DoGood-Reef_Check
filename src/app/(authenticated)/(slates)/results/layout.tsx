@@ -21,7 +21,7 @@ interface ExportDialogProps {
   setOpen: (newOpen: boolean) => void;
 }
 
-function ExportDialog(props: ExportDialogProps) {
+export function ExportDialog(props: ExportDialogProps) {
   const { open, setOpen } = props;
   const handleClose = () => {
     setOpen(false);

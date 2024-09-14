@@ -16,6 +16,7 @@ type FileRowSet = {
 type FileRowActions = {
   addRow: () => void;
   removeRow: (id: string) => void;
+  removeSlate: (slateId: string) => void;
   setSlateFile: (id: string, type: SlateType, file: File | null) => void;
   setSlateExcelFile: (
     id: string,
@@ -33,6 +34,7 @@ type FileRowActions = {
 // Create slate
 const createSlate = (type: SlateType): SlateState => {
   return {
+    id: uuidv4(),
     type,
     file: null,
     base64: '',
@@ -50,6 +52,16 @@ const createFileRow = (): FileRow => {
   };
 };
 
+const removeSlateFromRow = (row: FileRow, slateId: string): FileRow => {
+  const result = {
+    ...row,
+    substrate: row.substrate.id === slateId ? createSlate('substrate') : row.substrate,
+    fishInverts: row.fishInverts.id === slateId ? createSlate('fishInverts') : row.fishInverts,
+  };
+  console.log(result);
+  return result;
+}
+
 export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
   // start with one row
   rows: [createFileRow()],
@@ -61,6 +73,16 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
   removeRow: (id: string) =>
     set((state) => ({
       rows: state.rows.filter((row) => row.id !== id),
+    })),
+  
+  // remove a specific slate by its id
+  removeSlate: (slateId: string) =>
+    set((state) => ({
+      rows: state.rows.map((row) => 
+        row.substrate.id === slateId || row.fishInverts.id === slateId
+          ? removeSlateFromRow(row, slateId)
+          : row
+      ),
     })),
 
   // set a slate's file
