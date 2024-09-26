@@ -5,22 +5,34 @@ import MoreVert from '@mui/icons-material/MoreVert';
 import IconButton from '@mui/material/IconButton';
 import { StyledMenu } from './DropdownMenu';
 import { MenuItem } from '@mui/material';
-import { ExportDialog } from '@/app/(authenticated)/(slates)/results/layout';
 import { useFileRowStore } from '@/stores/fileRowStore';
+import { ExportDialog } from './ExportDialog';
+import { RenameDialog } from './RenameDialog';
+import { SlateState } from '@/stores/types';
 
-export default function MoreActionButton({ id }: { id: string }) {
+export default function MoreActionButton({ slate }: { slate: SlateState }) {
+  const { id } = slate;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const openContextMenu = Boolean(anchorEl);
+  const handleOpenContextMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
+  const handleCloseContextMenu = () => {
     setAnchorEl(null);
   };
-  const [modalOpen, setModalOpen] = React.useState<boolean>(false);
-  const handleOpenModal = (state: boolean) => {
-    setModalOpen(state);
+
+  const [openExportDialog, setOpenExportDialog] =
+    React.useState<boolean>(false);
+  const handleExportDialog = (state: boolean) => {
+    setOpenExportDialog(state);
   };
+
+  const [openRenameDialog, setOpenRenameDialog] =
+    React.useState<boolean>(false);
+  const handleRenameDialog = (state: boolean) => {
+    setOpenRenameDialog(state);
+  };
+
   const removeSlate = useFileRowStore((state) => state.removeSlate);
 
   return (
@@ -28,11 +40,11 @@ export default function MoreActionButton({ id }: { id: string }) {
       <div>
         <IconButton
           id={`moreaction-icon-${id}`}
-          aria-controls={open ? `moreaction-menu-${id}` : undefined}
+          aria-controls={openContextMenu ? `moreaction-menu-${id}` : undefined}
           aria-haspopup="true"
-          aria-expanded={open ? 'true' : undefined}
+          aria-expanded={openContextMenu ? 'true' : undefined}
           sx={{ mr: 2 }}
-          onClick={handleClick}
+          onClick={handleOpenContextMenu}
         >
           <MoreVert sx={{ color: 'black' }} />
         </IconButton>
@@ -42,15 +54,21 @@ export default function MoreActionButton({ id }: { id: string }) {
             'aria-labelledby': `moreaction-icon-${id}`,
           }}
           anchorEl={anchorEl}
-          open={open}
-          onClose={handleClose}
+          open={openContextMenu}
+          onClose={handleCloseContextMenu}
         >
-          <MenuItem>Rename</MenuItem>
-          <MenuItem onClick={() => handleOpenModal(true)}>Export</MenuItem>
+          <MenuItem onClick={() => handleRenameDialog(true)}>Rename</MenuItem>
+          <MenuItem onClick={() => handleExportDialog(true)}>Export</MenuItem>
           <MenuItem onClick={() => removeSlate(id)}>Delete</MenuItem>
         </StyledMenu>
       </div>
-      <ExportDialog open={modalOpen} setOpen={handleOpenModal} />
+      <ExportDialog open={openExportDialog} setOpen={handleExportDialog} />
+      <RenameDialog
+        open={openRenameDialog}
+        setOpen={handleRenameDialog}
+        slate={slate}
+        closeAnchor={handleCloseContextMenu}
+      />
     </>
   );
 }

@@ -41,6 +41,7 @@ const createSlate = (type: SlateType): SlateState => {
     base64: '',
     status: 'not processed',
     excelFile: null,
+    exportName: '',
   };
 };
 
@@ -66,16 +67,26 @@ const removeSlateFromRow = (row: FileRow, slateId: string): FileRow => {
   return result;
 };
 
-const renameSlateInRow = (row: FileRow, slateId: string, newName: string): FileRow => {
+const renameSlateInRow = (
+  row: FileRow,
+  slateId: string,
+  newName: string,
+): FileRow => {
   return {
     ...row,
     substrate:
       row.substrate.id === slateId
-        ? { ...row.substrate, type: newName } as SlateState
+        ? ({
+            ...row.substrate,
+            exportName: newName,
+          } as SlateState)
         : row.substrate,
     fishInverts:
       row.fishInverts.id === slateId
-        ? { ...row.fishInverts, type: newName } as SlateState
+        ? ({
+            ...row.fishInverts,
+            exportName: newName,
+          } as SlateState)
         : row.fishInverts,
   };
 };
@@ -122,6 +133,7 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
             [type]: {
               ...row[type],
               file: file,
+              exportName: file ? file.name : `${type}_${new Date()}`,
             },
           };
           return updatedRow;

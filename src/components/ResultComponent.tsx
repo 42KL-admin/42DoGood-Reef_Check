@@ -36,14 +36,14 @@ export default function ResultComponent({ slate }: { slate: SlateState }) {
       >
         <CardActionArea onClick={handleClick}>
           <Box py={6} px={2.5}>
-            <Typography sx={{ flex: 1 }}>{slate.file.name}</Typography>
+            <Typography sx={{ flex: 1 }}>{slate.exportName}</Typography>
           </Box>
         </CardActionArea>
         <CardActions>
           {/* {slate.status !== 'recognized' ? ( */}
           {/* <ConversionStatusIndicator status={slate.status} /> */}
           {/* } ) : ( */}
-          <MoreActionButton id={slate.id} />
+          <MoreActionButton slate={slate} />
         </CardActions>
       </Box>
     </Card>

@@ -19,6 +19,7 @@ export interface SlateState {
   base64: string;
   status: SlateRecognitionStatus;
   excelFile: File | null;
+  exportName: string;
 }
 
 // Each individual row

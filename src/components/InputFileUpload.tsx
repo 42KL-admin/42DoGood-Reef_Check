@@ -157,7 +157,7 @@ export default function InputFileUpload(props: InputFileUploadProps) {
             whiteSpace: 'nowrap',
           }}
         >
-          {slate.file !== null ? slate.file.name : 'Add files here...'}
+          {slate.file !== null ? slate.exportName : 'Add files here...'}
         </Typography>
         <ConversionStatusIndicator status={slate.status} />
       </Box>
