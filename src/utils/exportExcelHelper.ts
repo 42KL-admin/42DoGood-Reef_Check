@@ -217,32 +217,18 @@ export const getExcelTemplateFiles = async (
   }
 };
 
-// export function extractApiDataFromWorksheet(
-//   workbook: Workbook,
-//   config: SlateConfig.SlateConfig,
-// ): { extractedData: (string | number)[][]; styles: any } {
-//   const worksheet = workbook.worksheets[0]; // Assuming the first sheet
-//   const jsonData: (string | number)[][] = [];
-//   const styles: any = {};
+export async function parseBlobData(
+  blob: Blob,
+  templateConfig: SlateConfig.SlateConfig,
+) {
+  const arrayBuffer = await readBlobAsArrayBuffer(blob);
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(arrayBuffer);
 
-//   worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-//     if (rowNumber >= config.rowNumberFrom && rowNumber <= config.rowNumberTo) {
-//       if (config.ignoredRows.includes(rowNumber)) {
-//         jsonData.push(Array(config.numberOfColumns).fill(null)); // Placeholder for ignored rows
-//       } else {
-//         const rowValues = row.values as (string | number)[];
-//         rowValues.shift(); // Remove the first element which is usually the row number itself
+  const { extractedData, styles } = extractApiDataFromWorksheet(
+    workbook,
+    templateConfig,
+  );
 
-//         // Capture styles (LOGIC HERE PROBABLY WRONG, THE DISPLAY IN THE EXCEL REALLY NEED A FIX)
-//         row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-//           if (!styles[rowNumber - 1]) styles[rowNumber - 1] = {};
-//           styles[rowNumber - 1][colNumber - 1] = cell.style;
-//         });
-
-//         jsonData.push(rowValues.slice(0, config.numberOfColumns));
-//       }
-//     }
-//   });
-
-//   return { extractedData: jsonData, styles };
-// }
+  return { extractedData: extractedData, styles };
+}

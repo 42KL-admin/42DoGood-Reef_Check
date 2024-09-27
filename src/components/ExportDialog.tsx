@@ -9,7 +9,14 @@ import { RoundedButton } from './RoundedButton';
 import { SlateState } from '@/stores/types';
 import React from 'react';
 import { useFileRowStore } from '@/stores/fileRowStore';
-import { getSlateConfig, handleUpdateExcel } from '@/utils/exportExcelHelper';
+import {
+  extractApiDataFromWorksheet,
+  getExcelTemplateFiles,
+  getSlateConfig,
+  handleUpdateExcel,
+  parseBlobData,
+  readBlobAsArrayBuffer,
+} from '@/utils/exportExcelHelper';
 import useSnackbarStore from '@/stores/snackbarStore';
 
 export interface DialogProps {
@@ -23,6 +30,11 @@ export interface DialogProps {
 export function ExportDialog(props: DialogProps) {
   const { open, setOpen, slate, closeAnchor, shouldExport } = props;
   const [fileName, setFileName] = React.useState('');
+  const [exportFileData, setExportFileData] = React.useState<
+    (string | number)[][]
+  >([]);
+  const [blobData, setBlobData] = React.useState<Blob | null>(null);
+  const [cellStyles, setCellStyles] = React.useState<any>({});
   const renameSlate = useFileRowStore((state) => state.renameSlate);
   const handleClose = () => {
     setOpen(false);
@@ -36,8 +48,8 @@ export function ExportDialog(props: DialogProps) {
     }
 
     const templateConfig: SlateConfig.SlateConfig = getSlateConfig(slate.type);
-
-    handleUpdateExcel(slate.excelFile, templateConfig);
+    console.log("hello");
+    handleUpdateExcel(blobData, templateConfig, cellStyles, exportFileData);
   };
 
   const handleConfirm = () => {
@@ -46,11 +58,57 @@ export function ExportDialog(props: DialogProps) {
     }
 
     if (shouldExport) {
-      alert('export');
+      exportAsExcel();
     }
 
     handleClose();
     closeAnchor && closeAnchor();
+  };
+
+  async function handleParseBlobData(blob: Blob) {
+    if (!slate) {
+      addMessage('No slate was selected!', 'error');
+      return;
+    }
+
+    try {
+      const templateConfig: SlateConfig.SlateConfig = getSlateConfig(
+        slate.type,
+      );
+      const { extractedData, styles } = await parseBlobData(
+        blob,
+        templateConfig,
+      );
+
+      // console.log('|BLob Data obtained| !! : ', extractedData);
+      setExportFileData(extractedData);
+      // console.log('|setExportFileData| !! : ', exportFileData);
+      setCellStyles(styles);
+    } catch (error) {
+      addMessage('Error processing Excel file: ${error}', 'error');
+    }
+  }
+
+  const fetchExcelTemplateFiles = async () => {
+    if (!slate) {
+      return;
+    }
+
+    try {
+      const templateConfig: SlateConfig.SlateConfig = getSlateConfig(
+        slate.type,
+      );
+      const updatedBlob = await getExcelTemplateFiles(slate, templateConfig);
+
+      if (updatedBlob) {
+        setBlobData(updatedBlob);
+        handleParseBlobData(updatedBlob);
+      } else {
+        setBlobData(null);
+      }
+    } catch (error: any) {
+      addMessage(error.message, 'error');
+    }
   };
 
   React.useEffect(() => {
@@ -59,6 +117,10 @@ export function ExportDialog(props: DialogProps) {
         ? slate.file.name
         : `${slate.type}_${new Date()}`;
       setFileName(fileName);
+    }
+
+    if (shouldExport) {
+      fetchExcelTemplateFiles();
     }
   }, [slate]);
 

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { HotTable } from '@handsontable/react';
 import 'handsontable/dist/handsontable.full.min.css';
-import ExcelJS from 'exceljs';
 import {
   CheckboxCellType,
   NumericCellType,
@@ -20,13 +19,12 @@ import {
 } from 'handsontable/plugins';
 import useSnackbarStore from '@/stores/snackbarStore';
 import {
-  extractApiDataFromWorksheet,
   getExcelTemplateFiles,
   getSlateConfig,
-  handleUpdateExcel,
-  readBlobAsArrayBuffer,
+  parseBlobData,
 } from '@/utils/exportExcelHelper';
 import { SlateState } from '@/stores/types';
+import { Box } from '@mui/material';
 
 registerCellType(CheckboxCellType);
 registerCellType(NumericCellType);
@@ -49,31 +47,26 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
   const [exportFileData, setExportFileData] = useState<(string | number)[][]>(
     [],
   );
-  const [blobData, setBlobData] = useState<Blob | null>(null);
-  // const fileInputRef = useRef<HTMLInputElement>(null);
-  const [cellStyles, setCellStyles] = useState<any>({});
   const addMessage = useSnackbarStore((state) => state.addMessage);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const templateConfig: SlateConfig.SlateConfig = getSlateConfig(slate.type);
 
   // PARSE data to be used in the handsontable
-  async function parseBlobData(blob: Blob) {
+  async function handleParseBlobData(blob: Blob) {
     try {
-      const arrayBuffer = await readBlobAsArrayBuffer(blob);
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(arrayBuffer);
-
-      const { extractedData, styles } = extractApiDataFromWorksheet(
-        workbook,
+      const { extractedData, styles } = await parseBlobData(
+        blob,
         templateConfig,
       );
 
       // console.log('|BLob Data obtained| !! : ', extractedData);
       setExportFileData(extractedData);
+      setIsLoading(false);
+      // TODO: have a store to hide export button
       // console.log('|setExportFileData| !! : ', exportFileData);
-      setCellStyles(styles);
     } catch (error) {
-      console.error('Error processing Excel file:', error);
+      addMessage('Error processing Excel file: ${error}', 'error');
     }
   }
 
@@ -86,10 +79,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
         );
 
         if (updatedBlob) {
-          setBlobData(updatedBlob);
-          parseBlobData(updatedBlob);
-        } else {
-          setBlobData(null);
+          handleParseBlobData(updatedBlob);
         }
       } catch (error: any) {
         addMessage(error.message, 'error');
@@ -101,29 +91,28 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
 
   return (
     <div>
-      {/* <input type="file" ref={fileInputRef} onChange={handleFileUpload} /> */}
-      {exportFileData.length > 0 && (
-        <div>
-          <HotTable
-            data={exportFileData}
-            rowHeaders={true}
-            width="100%"
-            height="auto"
-            licenseKey="non-commercial-and-evaluation"
-          />
-          <button
-            onClick={() =>
-              handleUpdateExcel(
-                blobData,
-                templateConfig,
-                cellStyles,
-                exportFileData,
-              )
-            }
-          >
-            Update Excel File
-          </button>
-        </div>
+      {!isLoading ? (
+        exportFileData.length > 0 && (
+          <div>
+            <HotTable
+              data={exportFileData}
+              rowHeaders={true}
+              width="100%"
+              height="auto"
+              licenseKey="non-commercial-and-evaluation"
+            />
+          </div>
+        )
+      ) : (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="100vh" // Full screen height
+          color="white"
+        >
+          <div>Loading...</div>
+        </Box>
       )}
     </div>
   );
