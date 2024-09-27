@@ -157,7 +157,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
     try {
       const sasToken = await getExcelTemplateSasTokenCookie();
 
-      console.log('SasToken generated successfully: ', sasToken);
+      // console.log('SasToken generated successfully: ', sasToken);
 
       const blobFromStorage = await fetchTemplateFromBlobStorage(
         sasToken.value,
@@ -165,7 +165,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
       );
 
       if (props.excelBlobData) {
-        console.log('Excel Blob Data: ', props.excelBlobData);
+        // console.log('Excel Blob Data: ', props.excelBlobData);
 
         const apiArrayBuffer = await readBlobAsArrayBuffer(props.excelBlobData);
         const apiWorkbook = new ExcelJS.Workbook();
@@ -202,36 +202,6 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
     }
   };
 
-  async function updateExportFileData(
-    blobData: Blob | File | null,
-  ): Promise<Blob | void> {
-    if (!blobData)
-      return console.log('updateExportFileData: currently no file selected.');
-
-    const arrayBuffer = await readBlobAsArrayBuffer(blobData);
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(arrayBuffer);
-
-    const worksheet = workbook.worksheets[0];
-
-    const updatedExcelConfig = templateConfig;
-    const updatedCellStyles = cellStyles;
-
-    // Update the worksheet with data and preserve styles
-    updateWorksheet(
-      worksheet,
-      exportFileData,
-      updatedExcelConfig,
-      updatedCellStyles,
-    );
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const updatedBlob = new Blob([buffer], {
-      type: 'application/octet-stream',
-    });
-    return updatedBlob;
-  }
-
   // Helper function to convert readable stream to buffer
   async function readBlobAsArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
     return new Promise<ArrayBuffer>((resolve, reject) => {
@@ -246,26 +216,6 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
       };
       reader.readAsArrayBuffer(blob);
     });
-  }
-
-  // I MIGHT NOT NEED IT ANYMORE
-  async function parseOcrData(blob: Blob) {
-    try {
-      // getting Excel Data
-      const arrayBuffer = await readBlobAsArrayBuffer(blob);
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(arrayBuffer);
-
-      const { extractedData, styles } = extractApiDataFromWorksheet(
-        workbook,
-        templateConfig,
-      );
-      console.log('|OCR Data obtained| !! : ', extractedData);
-      // setOcrData(extractedData);
-      // console.log('|setOcrData| !! : ', ocrData);
-    } catch (error) {
-      console.error('Error processing Excel file:', error);
-    }
   }
 
   // PARSE data to be used in the handsontable

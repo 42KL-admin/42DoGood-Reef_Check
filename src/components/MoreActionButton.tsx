@@ -13,6 +13,7 @@ import { SlateState } from '@/stores/types';
 export default function MoreActionButton({ slate }: { slate: SlateState }) {
   const { id } = slate;
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [shouldExport, setShouldExport] = React.useState<boolean>(true);
   const openContextMenu = Boolean(anchorEl);
   const handleOpenContextMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -23,14 +24,9 @@ export default function MoreActionButton({ slate }: { slate: SlateState }) {
 
   const [openExportDialog, setOpenExportDialog] =
     React.useState<boolean>(false);
-  const handleExportDialog = (state: boolean) => {
+  const handleExportDialog = (state: boolean, shouldExport: boolean = true) => {
     setOpenExportDialog(state);
-  };
-
-  const [openRenameDialog, setOpenRenameDialog] =
-    React.useState<boolean>(false);
-  const handleRenameDialog = (state: boolean) => {
-    setOpenRenameDialog(state);
+    setShouldExport(shouldExport);
   };
 
   const removeSlate = useFileRowStore((state) => state.removeSlate);
@@ -57,17 +53,20 @@ export default function MoreActionButton({ slate }: { slate: SlateState }) {
           open={openContextMenu}
           onClose={handleCloseContextMenu}
         >
-          <MenuItem onClick={() => handleRenameDialog(true)}>Rename</MenuItem>
+          <MenuItem onClick={() => handleExportDialog(true, false)}>
+            Rename
+          </MenuItem>
           <MenuItem onClick={() => handleExportDialog(true)}>Export</MenuItem>
           <MenuItem onClick={() => removeSlate(id)}>Delete</MenuItem>
         </StyledMenu>
       </div>
-      <ExportDialog open={openExportDialog} setOpen={handleExportDialog} />
-      <RenameDialog
-        open={openRenameDialog}
-        setOpen={handleRenameDialog}
+      {/* Both ExportDialog and RenameDialog should be the same thing, just pass a flag into the component to toggle export functionality */}
+      <ExportDialog
+        open={openExportDialog}
+        setOpen={handleExportDialog}
         slate={slate}
         closeAnchor={handleCloseContextMenu}
+        shouldExport={shouldExport}
       />
     </>
   );

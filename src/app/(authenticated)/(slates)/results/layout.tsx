@@ -73,7 +73,7 @@ export default function ResultListLayout({
         )}
       </Box>
       {children}
-      <ExportDialog open={open} setOpen={setOpen} />
+      <ExportDialog open={open} setOpen={setOpen} slate={slate} />
     </Box>
   );
 }

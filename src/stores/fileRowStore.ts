@@ -149,7 +149,6 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
   ) =>
     set((state) => ({
       rows: state.rows.map((row) => {
-        console.log('setting status');
         if (row.id === id) {
           const updatedRow = {
             ...row,
