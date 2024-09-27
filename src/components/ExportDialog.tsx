@@ -9,6 +9,8 @@ import { RoundedButton } from './RoundedButton';
 import { SlateState } from '@/stores/types';
 import React from 'react';
 import { useFileRowStore } from '@/stores/fileRowStore';
+import { getSlateConfig, handleUpdateExcel } from '@/utils/exportExcelHelper';
+import useSnackbarStore from '@/stores/snackbarStore';
 
 export interface DialogProps {
   open: boolean;
@@ -25,6 +27,19 @@ export function ExportDialog(props: DialogProps) {
   const handleClose = () => {
     setOpen(false);
   };
+  const addMessage = useSnackbarStore((state) => state.addMessage);
+
+  const exportAsExcel = () => {
+    if (!slate) {
+      addMessage('No slate was selected!', 'error');
+      return;
+    }
+
+    const templateConfig: SlateConfig.SlateConfig = getSlateConfig(slate.type);
+
+    handleUpdateExcel(slate.excelFile, templateConfig);
+  };
+
   const handleConfirm = () => {
     if (slate) {
       renameSlate(slate.id, fileName);

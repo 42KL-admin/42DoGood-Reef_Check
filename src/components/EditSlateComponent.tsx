@@ -122,10 +122,7 @@ function EditSlateLargerScreen() {
         <EditImagePreview />
       </Box>
       <Box width={'50%'} sx={{ backgroundColor: 'teal', flex: 1 }}>
-        <SubstrateAndInvertEditor
-          type={slate.type}
-          excelBlobData={slate.excelFile}
-        />
+        <SubstrateAndInvertEditor slate={slate} />
       </Box>
     </Box>
   ) : (
@@ -151,11 +148,9 @@ function EditSlateSmallerScreen() {
       </TabPanel>
 
       <TabPanel tag={'excelSheet'} value={selectedTab as string}>
-        <Box
-          width={'100%'}
-          height={'100%'}
-          sx={{ backgroundColor: 'teal' }}
-        ></Box>
+        <Box width={'100%'} height={'100%'} sx={{ backgroundColor: 'teal' }}>
+          <SubstrateAndInvertEditor slate={slate} />
+        </Box>
       </TabPanel>
     </Box>
   ) : (
