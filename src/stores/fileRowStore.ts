@@ -16,6 +16,8 @@ type FileRowSet = {
 type FileRowActions = {
   addRow: () => void;
   removeRow: (id: string) => void;
+  removeSlate: (slateId: string) => void;
+  renameSlate: (slateId: string, newName: string) => void;
   setSlateFile: (id: string, type: SlateType, file: File | null) => void;
   setSlateExcelFile: (
     id: string,
@@ -33,11 +35,13 @@ type FileRowActions = {
 // Create slate
 const createSlate = (type: SlateType): SlateState => {
   return {
+    id: uuidv4(),
     type,
     file: null,
     base64: '',
     status: 'not processed',
     excelFile: null,
+    exportName: '',
   };
 };
 
@@ -47,6 +51,43 @@ const createFileRow = (): FileRow => {
     id: uuidv4(),
     substrate: createSlate('substrate'),
     fishInverts: createSlate('fishInverts'),
+  };
+};
+
+const removeSlateFromRow = (row: FileRow, slateId: string): FileRow => {
+  const result = {
+    ...row,
+    substrate:
+      row.substrate.id === slateId ? createSlate('substrate') : row.substrate,
+    fishInverts:
+      row.fishInverts.id === slateId
+        ? createSlate('fishInverts')
+        : row.fishInverts,
+  };
+  return result;
+};
+
+const renameSlateInRow = (
+  row: FileRow,
+  slateId: string,
+  newName: string,
+): FileRow => {
+  return {
+    ...row,
+    substrate:
+      row.substrate.id === slateId
+        ? ({
+            ...row.substrate,
+            exportName: newName,
+          } as SlateState)
+        : row.substrate,
+    fishInverts:
+      row.fishInverts.id === slateId
+        ? ({
+            ...row.fishInverts,
+            exportName: newName,
+          } as SlateState)
+        : row.fishInverts,
   };
 };
 
@@ -63,6 +104,25 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
       rows: state.rows.filter((row) => row.id !== id),
     })),
 
+  // remove a specific slate by its id
+  removeSlate: (slateId: string) =>
+    set((state) => ({
+      rows: state.rows.map((row) =>
+        row.substrate.id === slateId || row.fishInverts.id === slateId
+          ? removeSlateFromRow(row, slateId)
+          : row,
+      ),
+    })),
+
+  renameSlate: (slateId: string, newName: string) =>
+    set((state) => ({
+      rows: state.rows.map((row) =>
+        row.substrate.id === slateId || row.fishInverts.id === slateId
+          ? renameSlateInRow(row, slateId, newName)
+          : row,
+      ),
+    })),
+
   // set a slate's file
   setSlateFile: (id: string, type: SlateType, file: File | null) =>
     set((state) => ({
@@ -73,6 +133,7 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
             [type]: {
               ...row[type],
               file: file,
+              exportName: file ? file.name : `${type}_${new Date()}`,
             },
           };
           return updatedRow;
@@ -88,7 +149,6 @@ export const useFileRowStore = create<FileRowSet & FileRowActions>()((set) => ({
   ) =>
     set((state) => ({
       rows: state.rows.map((row) => {
-        console.log('setting status');
         if (row.id === id) {
           const updatedRow = {
             ...row,
