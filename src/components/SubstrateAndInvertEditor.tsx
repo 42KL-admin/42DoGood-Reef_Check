@@ -25,6 +25,7 @@ import {
 } from '@/utils/exportExcelHelper';
 import { SlateState } from '@/stores/types';
 import { Box } from '@mui/material';
+import { useUiStore } from '@/stores/uiStore';
 
 registerCellType(CheckboxCellType);
 registerCellType(NumericCellType);
@@ -49,6 +50,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
   );
   const addMessage = useSnackbarStore((state) => state.addMessage);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const setReadyToExport = useUiStore((state) => state.setReadyToExport);
 
   const templateConfig: SlateConfig.SlateConfig = getSlateConfig(slate.type);
 
@@ -63,6 +65,7 @@ export default function SubstrateAndInvertEditor(props: ExportEditorProps) {
       // console.log('|BLob Data obtained| !! : ', extractedData);
       setExportFileData(extractedData);
       setIsLoading(false);
+      setReadyToExport(true);
       // TODO: have a store to hide export button
       // console.log('|setExportFileData| !! : ', exportFileData);
     } catch (error) {

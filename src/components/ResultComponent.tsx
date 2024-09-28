@@ -16,11 +16,11 @@ export default function ResultComponent({ slate }: { slate: SlateState }) {
   const addMessage = useSnackbarStore((state) => state.addMessage);
 
   const handleClick = () => {
-    // if (slate.status === 'recognized') {
-    setSelectedSlate(slate);
-    // } else {
-    // addMessage('This file is still being processed :)', 'warning');
-    // }
+    if (slate.status === 'recognized') {
+      setSelectedSlate(slate);
+    } else {
+      addMessage('This file is still being processed :)', 'warning');
+    }
   };
 
   return slate.file === null ? (
@@ -40,10 +40,11 @@ export default function ResultComponent({ slate }: { slate: SlateState }) {
           </Box>
         </CardActionArea>
         <CardActions>
-          {/* {slate.status !== 'recognized' ? ( */}
-          {/* <ConversionStatusIndicator status={slate.status} /> */}
-          {/* } ) : ( */}
-          <MoreActionButton slate={slate} />
+          {slate.status !== 'recognized' ? (
+            <ConversionStatusIndicator status={slate.status} />
+          ) : (
+            <MoreActionButton slate={slate} />
+          )}
         </CardActions>
       </Box>
     </Card>

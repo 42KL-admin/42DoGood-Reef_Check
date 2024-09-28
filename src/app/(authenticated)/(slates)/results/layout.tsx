@@ -9,6 +9,7 @@ import { useSelectedSlateStore } from '@/stores/slateStore';
 import theme from '@/theme';
 import NavBar from '@/components/mobile/NavBar';
 import { ExportDialog } from '@/components/ExportDialog';
+import { useUiStore } from '@/stores/uiStore';
 
 export default function ResultListLayout({
   children,
@@ -24,6 +25,7 @@ export default function ResultListLayout({
   const handleClickOpen = () => {
     setOpen(true);
   };
+  const readyToExport = useUiStore((state) => state.readyToExport);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -40,12 +42,16 @@ export default function ResultListLayout({
           <ResultListNavBar
             backToPath={!slate ? '/upload' : '/results'}
             backAction={!slate ? () => {} : () => setSelectedSlate(null)}
-            title={slate ? slate.file!.name : 'My reef slates'}
+            title={slate ? slate.exportName : 'My reef slates'}
             ctaButton={
               !slate ? (
                 <></>
               ) : (
-                <RoundedButton variant="contained" onClick={handleClickOpen}>
+                <RoundedButton
+                  variant="contained"
+                  onClick={handleClickOpen}
+                  disabled={!readyToExport}
+                >
                   Export
                 </RoundedButton>
               )
@@ -62,7 +68,11 @@ export default function ResultListLayout({
               !slate ? (
                 <></>
               ) : (
-                <RoundedButton variant="contained" onClick={handleClickOpen}>
+                <RoundedButton
+                  variant="contained"
+                  onClick={handleClickOpen}
+                  disabled={!readyToExport}
+                >
                   Export
                 </RoundedButton>
               )

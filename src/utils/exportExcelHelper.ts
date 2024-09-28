@@ -96,6 +96,7 @@ export const handleUpdateExcel = async (
   templateConfig: SlateConfig.SlateConfig,
   cellStyles: any = {},
   exportFileData: (string | number)[][] = [],
+  fileName: string,
 ) => {
   if (!blobData) {
     console.log('Currently no file selected.');
@@ -131,7 +132,7 @@ export const handleUpdateExcel = async (
   const url = window.URL.createObjectURL(updatedBlob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'updated_file.xlsx';
+  a.download = `${fileName.split(' ').filter(Boolean).join('_')}.xlsx`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

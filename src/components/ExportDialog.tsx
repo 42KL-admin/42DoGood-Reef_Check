@@ -48,8 +48,14 @@ export function ExportDialog(props: DialogProps) {
     }
 
     const templateConfig: SlateConfig.SlateConfig = getSlateConfig(slate.type);
-    console.log("hello");
-    handleUpdateExcel(blobData, templateConfig, cellStyles, exportFileData);
+    console.log('hello');
+    handleUpdateExcel(
+      blobData,
+      templateConfig,
+      cellStyles,
+      exportFileData,
+      fileName,
+    );
   };
 
   const handleConfirm = () => {
@@ -114,7 +120,7 @@ export function ExportDialog(props: DialogProps) {
   React.useEffect(() => {
     if (slate) {
       const fileName = slate.file
-        ? slate.file.name
+        ? slate.exportName
         : `${slate.type}_${new Date()}`;
       setFileName(fileName);
     }

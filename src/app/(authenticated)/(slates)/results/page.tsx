@@ -1,17 +1,18 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import ResultComponent from "@/components/ResultComponent";
-import { Fragment } from "react";
-import { Typography } from "@mui/material";
-import { RoundedButton } from "@/components/RoundedButton";
-import { useRouter } from "next/navigation";
-import EditSlateComponent from "@/components/EditSlateComponent";
-import { useFileRowStore } from "@/stores/fileRowStore";
-import { useSelectedSlateStore } from "@/stores/slateStore";
-import { SlateState } from "@/stores/types";
+import React, { useEffect, useState } from 'react';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import ResultComponent from '@/components/ResultComponent';
+import { Fragment } from 'react';
+import { Typography } from '@mui/material';
+import { RoundedButton } from '@/components/RoundedButton';
+import { useRouter } from 'next/navigation';
+import EditSlateComponent from '@/components/EditSlateComponent';
+import { useFileRowStore } from '@/stores/fileRowStore';
+import { useSelectedSlateStore } from '@/stores/slateStore';
+import { SlateState } from '@/stores/types';
+import { useUiStore } from '@/stores/uiStore';
 
 function ResultListEmptyState() {
   const router = useRouter();
@@ -22,7 +23,7 @@ function ResultListEmptyState() {
       flexDirection="column"
       justifyItems="center"
       alignItems="center"
-      margin={"auto 0"}
+      margin={'auto 0'}
       rowGap={8}
     >
       <Box display="grid" gap={2} justifyItems="center">
@@ -43,8 +44,8 @@ function ResultListEmptyState() {
       </Box>
       <RoundedButton
         variant="contained"
-        sx={{ width: { sx: "200px", md: "272px" } }}
-        onClick={() => router.push("/upload")}
+        sx={{ width: { sx: '200px', md: '272px' } }}
+        onClick={() => router.push('/upload')}
       >
         Go
       </RoundedButton>
@@ -56,23 +57,30 @@ export default function ResultList() {
   const rows = useFileRowStore((state) => state.rows);
   const slate = useSelectedSlateStore((state) => state.slate);
   const [filteredSlates, setFilteredSlates] = useState<SlateState[]>([]);
+  const setReadyToExport = useUiStore((state) => state.setReadyToExport);
 
   useEffect(() => {
     const filtered = rows
       .flatMap((row) => [row.substrate, row.fishInverts])
-      .filter((slate) => slate.file !== null);
+      .filter((slate) => slate.file !== null && slate.status === 'recognized');
     setFilteredSlates(filtered);
   }, [rows]);
+
+  useEffect(() => {
+    if (!slate) {
+      setReadyToExport(false);
+    }
+  }, [slate]);
 
   return (
     <Fragment>
       {!slate ? (
         <Box
-          sx={{ overflow: "auto", flex: 1, mt: { xs: 22, md: 0 } }}
+          sx={{ overflow: 'auto', flex: 1, mt: { xs: 22, md: 0 } }}
           display="grid"
         >
           {filteredSlates.length !== 0 ? (
-            <Container maxWidth="xl" sx={{ height: "100%" }}>
+            <Container maxWidth="xl" sx={{ height: '100%' }}>
               <Box
                 py={8}
                 display="grid"
