@@ -1,6 +1,13 @@
 'use client';
 
-import { Button, Typography, Container, Box, TextField } from '@mui/material';
+import {
+  Button,
+  Typography,
+  Container,
+  Box,
+  TextField,
+  CircularProgress,
+} from '@mui/material';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -9,9 +16,12 @@ import { LoginResponse, login } from '@/services/loginApi';
 import { sendOTP } from '@/services/otpApi';
 import useSnackbarStore from '@/stores/snackbarStore';
 import LogoImage from '@/../public/images/logo.png';
+import { useUiStore } from '@/stores/uiStore';
+import { UserRole } from '@/stores/types';
 
 export default function Login() {
   const [email, setEmail] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const router = useRouter();
   const setLoggedUserState = useLoggedUserStateStore(
     (state) => state.setLoggedUserState,
@@ -20,13 +30,24 @@ export default function Login() {
   const queryParams = useSearchParams();
   const loginStatus = queryParams.get('status');
 
-  const handleSendOTP = async (adminEmail: string) => {
+  const handleSendOTP = async (user: {
+    _id: string;
+    email: string;
+    role: string;
+  }) => {
+    setIsLoggingIn(true);
+
     try {
-      const _ = await sendOTP(adminEmail);
-      addMessage(`OTP sent to ${adminEmail}! Please check your email!`, 'success');
+      const _ = await sendOTP(user.email);
+      addMessage(
+        `OTP sent to ${user.email}! Please check your email!`,
+        'success',
+      );
       router.push('/admin_2FA');
     } catch (e: any) {
       addMessage(e, 'error');
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -34,6 +55,8 @@ export default function Login() {
     e.preventDefault();
 
     if (!email) return;
+
+    setIsLoggingIn(true);
 
     try {
       const response: LoginResponse = await login(email);
@@ -45,13 +68,13 @@ export default function Login() {
         role,
         isOTPVerified: false,
       });
-
       if (role === 'admin') {
         addMessage(`Sending login OTP to ${loggedEmail}...`, 'info');
-        handleSendOTP(loggedEmail);
+        handleSendOTP(user);
       } else {
         addMessage(`Welcome back. Logging as ${loggedEmail}`, 'success');
         router.push('/upload');
+        setIsLoggingIn(false);
       }
     } catch (e: any) {
       addMessage(e.message, 'error');
@@ -118,18 +141,22 @@ export default function Login() {
           >
             eg. example@gmail.com
           </Typography>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{
-              borderRadius: '100px',
-              '&:hover': { backgroundColor: '#107888' },
-            }}
-          >
-            Next
-          </Button>
+          {isLoggingIn ? (
+            <CircularProgress size={20} />
+          ) : (
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{
+                borderRadius: '100px',
+                '&:hover': { backgroundColor: '#107888' },
+              }}
+            >
+              Next
+            </Button>
+          )}
         </Box>
       </Box>
     </Container>
