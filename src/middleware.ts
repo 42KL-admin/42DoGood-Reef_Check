@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { NextRequest } from 'next/server';
+import { LoggedUser } from './stores/types';
 
 const adminApi = ['/api/admin/Dashboard'];
 
@@ -9,6 +10,8 @@ const adminPaths = [
   '/admin_dashboard',
   '/api/admin/Dashboard',
 ];
+
+const authPaths = ['/', '/admin_2FA'];
 
 const userPaths = [];
 
@@ -32,6 +35,20 @@ async function isSessionValid(request: NextRequest, sessionID: string) {
     },
   );
   return sessionValid.status === 200;
+}
+
+function parseCookie(userCookie: string | undefined) {
+  let parsed: LoggedUser | null = null;
+
+  if (userCookie === undefined) return null;
+
+  try {
+    parsed = JSON.parse(userCookie) as LoggedUser;
+  } catch (error) {
+    return null;
+  }
+
+  return parsed;
 }
 
 async function validateAdminSession(request: NextRequest) {
@@ -71,25 +88,41 @@ export async function middleware(request: NextRequest) {
   try {
     const path = request.nextUrl.pathname;
     const userCookie = request.cookies.get('RCUserCookie')?.value;
+    const parsedCookie = parseCookie(userCookie);
+
+    // proceed API routes
+    if (path.startsWith('/api/')) {
+      return NextResponse.next();
+    }
+
+    if (
+      !parsedCookie ||
+      (parsedCookie.role === 'admin' &&
+        !parsedCookie.isOTPVerified &&
+        !authPaths.includes(path))
+    ) {
+      removeUser(request);
+
+      if (path !== '/') {
+        const url = new URL('/', request.url);
+        url.searchParams.set('status', '401');
+        return NextResponse.redirect(url);
+      }
+    }
 
     // redirect user to upload page if logged in or has cookie
-    if (userCookie && path === '/') {
+    if (userCookie && parsedCookie?.role === 'user' && path === '/') {
       return NextResponse.redirect(new URL('/upload', request.url));
     }
 
-		// proceed API routes
-		if (path.startsWith('/api/')) {
-			return NextResponse.next();
-		}
+    // for all the user, if there's no cookie, redirect to login
+    if (!userCookie && path !== '/') {
+      const url = new URL('/', request.url);
+      url.searchParams.set('status', '401');
+      return NextResponse.redirect(url);
+    }
 
-		// for all the user, if there's no cookie, redirect to login
-		if (!userCookie && path !== '/') {
-			const url = new URL('/', request.url);
-			url.searchParams.set('status', '401');
-			return NextResponse.redirect(url);
-		}
-
-		// begin admin routes validation
+    // begin admin routes validation
     if (adminPaths.includes(path)) {
       const validationResult = await validateAdminSession(request);
       return validationResult;

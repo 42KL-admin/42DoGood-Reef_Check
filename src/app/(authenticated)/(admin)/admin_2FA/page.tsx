@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Container, Box, TextField, Typography } from '@mui/material';
+import {
+  Button,
+  Container,
+  Box,
+  TextField,
+  Typography,
+  CircularProgress,
+} from '@mui/material';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLoggedUserStateStore } from '@/stores/loggedUserStore';
@@ -12,10 +19,14 @@ import useSnackbarStore from '@/stores/snackbarStore';
 export default function Admin_2FA() {
   const [token, setToken] = useState('');
   const [isResendDisabled, setIsResendDisabled] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [resendTimeoutId, setResendTimeoutId] = useState<NodeJS.Timeout | null>(
     null,
   );
   const user = useLoggedUserStateStore((state) => state.user);
+  const setLoggedUserState = useLoggedUserStateStore(
+    (state) => state.setLoggedUserState,
+  );
   const addMessage = useSnackbarStore((state) => state.addMessage);
   const router = useRouter();
 
@@ -66,15 +77,23 @@ export default function Admin_2FA() {
       return;
     }
 
+    setIsLoggingIn(true);
+
     try {
       const _ = await verifyOTP({
         adminEmail: user.email,
         otp: token,
       });
       handleCreateSession(user.email);
+      setLoggedUserState({
+        ...user,
+        isOTPVerified: true,
+      });
       addMessage(`Welcome back, ${user.email}.`, 'success');
     } catch (error: any) {
       addMessage(error.message, 'error');
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -113,41 +132,47 @@ export default function Admin_2FA() {
             }}
           />
           <Box display="flex" justifyContent="flex-start">
-            <Typography
-              variant="body2"
-              sx={{
-                opacity: isResendDisabled ? 0.5 : 1,
-                marginTop: '4px',
-                marginBottom: '16px',
-                color: 'primary.main',
-              }}
-            >
-              Didn&apos;t receive code?{' '}
+            {!isLoggingIn && (
               <Typography
-                component="span"
+                variant="body2"
                 sx={{
-                  textDecoration: 'underline',
-                  cursor: isResendDisabled ? 'not-allowed' : 'pointer',
+                  opacity: isResendDisabled ? 0.5 : 1,
+                  marginTop: '4px',
+                  marginBottom: '16px',
                   color: 'primary.main',
                 }}
-                onClick={!isResendDisabled ? resendOTP : undefined}
               >
-                Send again
+                Didn&apos;t receive code?{' '}
+                <Typography
+                  component="span"
+                  sx={{
+                    textDecoration: 'underline',
+                    cursor: isResendDisabled ? 'not-allowed' : 'pointer',
+                    color: 'primary.main',
+                  }}
+                  onClick={!isResendDisabled ? resendOTP : undefined}
+                >
+                  Send again
+                </Typography>
               </Typography>
-            </Typography>
+            )}
           </Box>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{
-              borderRadius: '100px',
-              '&:hover': { backgroundColor: '#107888' },
-            }}
-          >
-            Next
-          </Button>
+          {isLoggingIn ? (
+            <CircularProgress size={20} />
+          ) : (
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{
+                borderRadius: '100px',
+                '&:hover': { backgroundColor: '#107888' },
+              }}
+            >
+              Next
+            </Button>
+          )}
         </Box>
       </Box>
     </Container>
